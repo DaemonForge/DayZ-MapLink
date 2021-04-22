@@ -129,6 +129,7 @@ modded class MissionServer extends MissionBase
 			SyncGlobalLighting(player);
 			PlayerDataStore.Cast(playerdata).SetupPlayer(player, pos);
 			Print("[UAPI] m_PlayerDBQue - Remove");
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(player.SavePlayerToUApi, 100);
 			m_PlayerDBQue.Remove(identity.GetId());
 			return true;
 		}
