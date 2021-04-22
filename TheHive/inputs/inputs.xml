@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<modded_inputs>
+    <inputs>
+        <actions>
+            <input name="THive_ToggleDebug" loc="Debug Toggle" />
+        </actions>
+    </inputs>
+    <preset>
+        <input name="THive_ToggleDebug">
+            <btn name="kHome" />
+        </input>
+    </preset>
+</modded_inputs>
