@@ -8,6 +8,11 @@ class PlayerDataStore extends Managed{
 	float m_Shock;
 	float m_Water;
 	float m_Food;
+	float m_TimeSurvivedValue;
+	float m_PlayersKilledValue;
+	float m_InfectedKilledValue;
+	float m_DistanceTraveledValue;
+	float m_LongRangeShotValue;
 	vector m_Position;
 	vector m_Orientaion;
 	string m_Map;
@@ -38,7 +43,7 @@ class PlayerDataStore extends Managed{
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Modifiers;
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Agents;
 
-	autoptr array<autoptr EntityStore> m_Attachments;
+	autoptr array<autoptr UApiEntityStore> m_Attachments;
 	
 	autoptr array<autoptr UApiMetaData> m_MetaData;
 	
@@ -96,9 +101,9 @@ class PlayerDataStore extends Managed{
 		if (items && items.Count() > 0){
 			for (i = 0; i < items.Count(); i++){
 				EntityAI attachment_item = EntityAI.Cast(items.Get(i));
-				if (!m_Attachments){m_Attachments = new array<autoptr EntityStore>;}
+				if (!m_Attachments){m_Attachments = new array<autoptr UApiEntityStore>;}
 				if (attachment_item && (player.GetInventory().HasAttachment(attachment_item) || attachment_item == player.GetItemInHands())){
-					EntityStore att_itemstore = new EntityStore(attachment_item);
+					UApiEntityStore att_itemstore = new UApiEntityStore(attachment_item);
 					m_Attachments.Insert(att_itemstore);
 				} else {
 					break;
@@ -154,16 +159,7 @@ class PlayerDataStore extends Managed{
 				}
 			}
 		}
-		
 		player.OnUApiLoad(this);
-		
-		player.GetStatWet().Set(m_Stat_Wet);
-		player.GetStatSpecialty().Set(m_Stat_Specialty);
-		player.GetStatHeatBuffer().Set(m_Stat_HeatBuffer);
-		player.GetStatStamina().Set(m_Stat_Stamina);
-		player.GetStatToxicity().Set(m_Stat_Toxicity);
-		player.GetStatWater().Set(m_Stat_Water);
-		player.GetStatEnergy().Set(m_Stat_Energy);
 	}
 	
 	string ToJson(){
@@ -196,6 +192,12 @@ class PlayerDataStore extends Managed{
 		m_MetaData.Insert(new UApiMetaData(mod, var, data.ToString()));
 		return true;
 	}
+	bool WriteFloat(string mod, string var, float data){
+		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		m_MetaData.Insert(new UApiMetaData(mod, var, data.ToString()));
+		return true;
+	}
+	
 	bool Read(string mod, string var, out string data){
 		for(int i = 0; i < m_MetaData.Count(); i++){
 			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
@@ -203,9 +205,27 @@ class PlayerDataStore extends Managed{
 				return true;
 			}
 		}
-		data = "";
 		return false;
 	}
+	bool ReadInt(string mod, string var, out int data){
+		for(int i = 0; i < m_MetaData.Count(); i++){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
+				data = m_MetaData.Get(i).ReadInt();
+				return true;
+			}
+		}
+		return false;
+	}
+	bool ReadFloat(string mod, string var, out float data){
+		for(int i = 0; i < m_MetaData.Count(); i++){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
+				data = m_MetaData.Get(i).ReadFloat();
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	int GetInt(string mod, string var){
 		for(int i = 0; i < m_MetaData.Count(); i++){
 			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){return m_MetaData.Get(i).ReadInt();}

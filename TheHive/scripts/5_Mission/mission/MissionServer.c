@@ -32,7 +32,7 @@ modded class MissionServer extends MissionBase
 	}
 	
 	void LoadPlayerFromUApiDB(int cid, int status, string oid, string data){	
-      	if (status == UAPI_SUCCESS && data != "" && data != "{}" && data != "{ }"){  //If its a success
+      	if (status == UAPI_SUCCESS){  //If its a success
 			Print("[UAPI] LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
 			PlayerDataStore dataload;
 			if (UApiJSONHandler<PlayerDataStore>.FromString(data, dataload)){
@@ -45,7 +45,9 @@ modded class MissionServer extends MissionBase
 					m_PlayerDBQue.Remove(oid);
 				}
 			}
-      	} else { //could do else if to catch different kinds of errors
+      	} else if(status == UAPI_EMPTY){
+			Print("[UAPI] LoadPlayerFromDB - Empty Response ID:" + cid + " - GUID: " + oid );
+		} else { //could do else if to catch different kinds of errors
          	Print("[UAPI] api call failed");
       	}
 	}
@@ -88,8 +90,11 @@ modded class MissionServer extends MissionBase
 			ClientNewEventParams newParams;
 			Class.CastTo(newParams, params);
 			if (m_PlayerDBQue.Contains(PlayerIdentity.Cast(newParams.param1).GetId()) && m_PlayerDBQue.Get(PlayerIdentity.Cast(newParams.param1).GetId()).IsValid()){
-				UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3);
-				return;
+				//If the player was created, end if not spawn a new fresh spawn so it the player can be kicked correctly
+				if (UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3)){ 
+					Print("[UAPI] Player Was Created from API");
+					return;
+				}
 			}
 		}
 		super.OnEvent(eventTypeId, params);
@@ -113,12 +118,15 @@ modded class MissionServer extends MissionBase
 					serverData = new UApiServerData("192.95.50.50", 2602);
 					
 				}
+				NotificationSystem.SimpleNoticiation(" Redirecting to the correct server", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 				GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
+				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
 			} 
 			if (playerdata.m_TransferPoint != ""){
 				pos = GetDayZGame().HiveGetSpawnLocation(m_worldname, playerdata.m_TransferPoint);
 			}
+
 			Print("[UAPI] OnClientNewEvent - CreateWithIdentity - " + identity.GetId());
 			PlayerBase player = PlayerBase.Cast(PlayerDataStore.Cast(playerdata).CreateWithIdentity(PlayerIdentity.Cast(identity), pos));
 			Print("[UAPI] Identity Being Selected: " + identity.GetId());
