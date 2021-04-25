@@ -1,7 +1,5 @@
 class MapLinkConfig extends UApiConfigBase {
 
-	string data;
-	
 	
 	override void SetDefaults(){
 		/*
@@ -10,7 +8,6 @@ class MapLinkConfig extends UApiConfigBase {
 		if it doesn't exsit the API will create the file
 	
 		*/
-		data = "true";
 	}
 
 	override void OnDataReceive(){
@@ -54,3 +51,16 @@ class MapLinkConfig extends UApiConfigBase {
 	};
 }
 
+
+class UApiServerData {
+	
+	string IP;
+	int Port = 2302;
+	string Password = "";
+	
+	void UApiServerData(string ip, int port = 2302, string password = ""){
+		IP = ip;
+		Port = port;
+		Password = password;
+	}
+}
