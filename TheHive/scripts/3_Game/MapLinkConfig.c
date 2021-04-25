@@ -10,6 +10,7 @@ class MapLinkConfig extends UApiConfigBase {
 		if it doesn't exsit the API will create the file
 	
 		*/
+		data = "true";
 	}
 
 	override void OnDataReceive(){
