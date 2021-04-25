@@ -3,33 +3,12 @@ modded class MissionServer extends MissionBase
 	ref map<string, ref PlayerDataStore> m_PlayerDBQue = new map<string, ref PlayerDataStore>;
 	string m_worldname;
 	
-	void MissionServer(){
-		GetRPCManager().AddRPC( "TheHive", "RPCDisableLoadFromApi", this, SingeplayerExecutionType.Both );
-	}
-	
 	override void OnMissionStart(){
 		super.OnMissionStart();
 		GetGame().GetWorldName(m_worldname);
 		Print("[UAPI] On Mission Start " + m_worldname);
 	}
 	
-	void RPCDisableLoadFromApi( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target ) {
-		array<Man> players = new array<Man>;
-		GetGame().GetPlayers(players);
-		if (players){
-			foreach (Man plr : players){
-				PlayerBase player = PlayerBase.Cast(plr);
-				if (player && player.GetIdentity() && player.GetIdentity().GetId() == sender.GetId()){
-					if (player.ToggleDontLoadFromApi()){
-						NotificationSystem.SimpleNoticiation(" Disabling Load from API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, sender);
-					} else {
-						NotificationSystem.SimpleNoticiation(" Enabling Load from API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, sender);
-					}
-					return;
-				}	
-			}
-		}
-	}
 	
 	void LoadPlayerFromUApiDB(int cid, int status, string oid, string data){	
       	if (status == UAPI_SUCCESS){  //If its a success
@@ -92,7 +71,7 @@ modded class MissionServer extends MissionBase
 			if (m_PlayerDBQue.Contains(PlayerIdentity.Cast(newParams.param1).GetId()) && m_PlayerDBQue.Get(PlayerIdentity.Cast(newParams.param1).GetId()).IsValid()){
 				//If the player was created, end if not spawn a new fresh spawn so it the player can be kicked correctly
 				if (UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3)){ 
-					Print("[UAPI] Player Was Created from API");
+					Print("[UAPI] Player " + PlayerIdentity.Cast(newParams.param1).GetId() +" Was Created from API");
 					return;
 				}
 			}
@@ -112,13 +91,15 @@ modded class MissionServer extends MissionBase
 			if (playerdata.m_Map != m_worldname && playerdata.m_TransferPoint == ""){
 				UApiServerData serverData;
 				if (playerdata.m_Map == "enoch"){
-					serverData = new UApiServerData("192.95.50.50", 2632);
+					serverData = new UApiServerData("192.95.50.50", 2632, "daemon");
 				}
 				if (playerdata.m_Map == "chernarusplus"){
-					serverData = new UApiServerData("192.95.50.50", 2602);
-					
+					serverData = new UApiServerData("192.95.50.50", 2602, "");
 				}
-				NotificationSystem.SimpleNoticiation(" Redirecting to the correct server", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
+				if (playerdata.m_Map == "namalsk"){
+					serverData = new UApiServerData("192.95.50.50", 2662, "daemon");
+				}
+				//NotificationSystem.SimpleNoticiation(" Redirecting to the correct server", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 				GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
@@ -142,11 +123,5 @@ modded class MissionServer extends MissionBase
 			return true;
 		}
 		return false;
-	}
-	
-	override void InvokeOnConnect(PlayerBase player, PlayerIdentity identity)
-	{
-		super.InvokeOnConnect(player, identity);
-		Print("[UAPI] InvokeOnConnect - " + identity.GetId());
 	}
 }

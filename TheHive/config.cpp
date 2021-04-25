@@ -32,7 +32,6 @@ class CfgMods
 					"TheHive/scripts/3_Game"
 				};
             };
-			
 			class worldScriptModule
             {
                 value="";

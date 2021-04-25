@@ -6,15 +6,6 @@ modded class PlayerBase extends ManBase{
 		m_TransferPoint = point;
 		return true;
 	}
-
-	
-	bool ToggleDontLoadFromApi(){
-		return false;
-	}
-	
-	bool DontLoadFromApi(){
-		return false;
-	}
 	
 	int GetQuickBarEntityIndex(EntityAI entity){
 		return m_QuickBarBase.FindEntityIndex(entity);
@@ -35,7 +26,7 @@ modded class PlayerBase extends ManBase{
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("TheHive", this.GetIdentity().GetId(), teststore.ToJson());
 			delete teststore;
-			NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
+			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		}
 	}
 	
@@ -51,10 +42,10 @@ modded class PlayerBase extends ManBase{
 		data.m_BloodType = GetStatBloodType().Get();
 		data.m_HasBloodTypeVisible = HasBloodyHands();
 		data.m_HasBloodyHandsVisible = HasBloodTypeVisible();
-		for(i = 0; i < GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count(); i++){
+		/*for(i = 0; i < GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count(); i++){
 			data.AddPlayerStat(GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i));
 			Print("[UAPI] Saving Stat ["+ GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetType() + "] Label: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetLabel() + " Value: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).Get());
-		}
+		}*/
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
             if (mdfr && mdfr.IsActive() && mdfr.IsPersistent()) { 
@@ -73,6 +64,7 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[UAPI] Bleeding Manager is NULL");
 		}
+		
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -98,14 +90,14 @@ modded class PlayerBase extends ManBase{
 		for(i = 0; i < data.m_Agents.Count();i++){
 			m_AgentPool.SetAgentCount(data.m_Agents.Get(i).ID(), data.m_Agents.Get(i).Value());
 		}
-		if (data.m_PlayerStats.Count() == GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count()){
+		/*if (data.m_PlayerStats.Count() == GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count()){
 			for(i = 0; i < GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count(); i++){
 				GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).SetByFloat(data.m_PlayerStats.Get(i));
 				Print("[UAPI] Saved Stat ["+ GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetType() + "] Label: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetLabel() + " Value: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).Get());
 			}
 		} else {
 			Print("[UAPI] [ERROR] Stats didn't match?");
-		}
+		}*/
 		data.m_TransferPoint = "";
 		m_TransferPoint = "";
 		m_BrokenLegState = data.m_BrokenLegState;
@@ -128,7 +120,6 @@ modded class PlayerBase extends ManBase{
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 300);
-		
 	}
 	
 	void SendUApiAfterLoadClient(){
@@ -179,7 +170,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	void UApiAfterLoadClient(){
-		
 		this.UpdateInventoryMenu();
 	}
+	
 }
