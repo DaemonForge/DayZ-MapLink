@@ -6,8 +6,6 @@ class PlayerDataStore extends Managed{
 	float m_Health;
 	float m_Blood;
 	float m_Shock;
-	float m_Water;
-	float m_Food;
 	float m_TimeSurvivedValue;
 	float m_PlayersKilledValue;
 	float m_InfectedKilledValue;
@@ -33,7 +31,6 @@ class PlayerDataStore extends Managed{
 	float m_Stat_Toxicity;
 	float m_Stat_Water;
 	float m_Stat_Energy;
-	autoptr TFloatArray m_PlayerStats;
 	int m_BrokenLegState;
 	float m_RightLeg_Health;
 	float m_LeftLeg_Health;
@@ -55,7 +52,6 @@ class PlayerDataStore extends Managed{
 	
 	void ~PlayerDataStore(){
 		Print("[UAPI] ~PlayerDataStore() - " + GUID);
-		delete m_PlayerStats;
 		delete m_Modifiers;
 		delete m_Agents;
 		delete m_Attachments;
@@ -166,10 +162,6 @@ class PlayerDataStore extends Managed{
 		return UApiJSONHandler<PlayerDataStore>.ToString(this);
 	}
 	
-	void AddPlayerStat(PlayerStatBase stat){
-		if (!m_PlayerStats) {m_PlayerStats = new TFloatArray;}
-		m_PlayerStats.Insert(stat.Get());
-	}
 	
 	void AddModifier(int id, float attachedTime) {
 		if (!m_Modifiers){m_Modifiers = new array<autoptr UApiPlayerIdFloatData>;}

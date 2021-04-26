@@ -78,9 +78,7 @@ modded class MissionServer extends MissionBase
 		}
 		super.OnEvent(eventTypeId, params);
 	}
-	
-	//Engine Wait
-	
+		
 	bool UApiOnClientNewEvent(PlayerIdentity identity, vector pos, ParamsReadContext ctx)
 	{
 		Print("[UAPI] UApiOnClientNewEvent - " + identity.GetId());
@@ -99,7 +97,7 @@ modded class MissionServer extends MissionBase
 				if (playerdata.m_Map == "namalsk"){
 					serverData = new UApiServerData("192.95.50.50", 2662, "daemon");
 				}
-				//NotificationSystem.SimpleNoticiation(" Redirecting to the correct server", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
+				NotificationSystem.Create(new StringLocaliser("Notification"),new StringLocaliser(" Redirecting to the correct server - " + playerdata.m_Map), "Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 				GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 				m_PlayerDBQue.Remove(identity.GetId());
 				return false;

@@ -15,7 +15,6 @@ class ActionHiveMoveToNewServer extends ActionInteractBase
 	
 	override bool ActionCondition( PlayerBase player, ActionTarget target, ItemBase item ){	
 		GetGame().GetWorldName(mapName);
-		
 		if (mapName == "enoch" || mapName ==  "chernarusplus"){
 			return true;
 		}

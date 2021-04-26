@@ -42,10 +42,6 @@ modded class PlayerBase extends ManBase{
 		data.m_BloodType = GetStatBloodType().Get();
 		data.m_HasBloodTypeVisible = HasBloodyHands();
 		data.m_HasBloodyHandsVisible = HasBloodTypeVisible();
-		/*for(i = 0; i < GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count(); i++){
-			data.AddPlayerStat(GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i));
-			Print("[UAPI] Saving Stat ["+ GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetType() + "] Label: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetLabel() + " Value: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).Get());
-		}*/
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
             if (mdfr && mdfr.IsActive() && mdfr.IsPersistent()) { 
@@ -90,14 +86,6 @@ modded class PlayerBase extends ManBase{
 		for(i = 0; i < data.m_Agents.Count();i++){
 			m_AgentPool.SetAgentCount(data.m_Agents.Get(i).ID(), data.m_Agents.Get(i).Value());
 		}
-		/*if (data.m_PlayerStats.Count() == GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count()){
-			for(i = 0; i < GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Count(); i++){
-				GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).SetByFloat(data.m_PlayerStats.Get(i));
-				Print("[UAPI] Saved Stat ["+ GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetType() + "] Label: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).GetLabel() + " Value: " + GetPlayerStats().GetPCO(GetGame().SaveVersion()).Get().Get(i).Get());
-			}
-		} else {
-			Print("[UAPI] [ERROR] Stats didn't match?");
-		}*/
 		data.m_TransferPoint = "";
 		m_TransferPoint = "";
 		m_BrokenLegState = data.m_BrokenLegState;
