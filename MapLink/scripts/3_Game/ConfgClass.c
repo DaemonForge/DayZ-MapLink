@@ -17,6 +17,7 @@ class MapLinkDepaturePoint extends Managed {
 	string DisplayName;
 	string ServerName;
 	int SafeZoneRadius;
+	int SafeZoneCoolDown;
 	string TerminalType;
 	vector Position;
 	vector Orientation;
@@ -29,10 +30,13 @@ class MapLinkDepaturePoint extends Managed {
 		}
 	}
 	 
+	
+	
 }
 
 class MapLinkArrivalPointsRef {
 	string ArrivalPointName;
+	string icon = "";
 	int TransitionWaitTime;
 	int Cost;
 	int AcceptedCurrencyId;
@@ -50,6 +54,11 @@ class MapLinkArrivalPointsRef {
 		}
 		return 0;
 	}
+	
+	MapLinkArrivalPoint Get(){
+		return GetMapLinkConfig().GetArrivalPoint(ArrivalPointName);
+	}
+	
 }
 
 class MapLinkArrivalPoint extends Managed {
@@ -63,18 +72,8 @@ class MapLinkArrivalPoint extends Managed {
 		}
 	}
 	
-	
-	vector GetSpawn(string serverName){
-		for (int i = 0; i < SpawnPoints.Get(i); i++){
-			if (SpawnPoints.Get(i).ServerName == serverName){
-				return SpawnPoints.Get(i).GetSpawnPos();
-			}
-		}
-		return vector.Zero;
-	}
-	
 	int ProtectionTime(string serverName){
-		for (int i = 0; i < SpawnPoints.Get(i); i++){
+		for (int i = 0; i < SpawnPoints.Count(); i++){
 			if (SpawnPoints.Get(i).ServerName == serverName){
 				return SpawnPoints.Get(i).ProtectionTime;
 			}
@@ -82,17 +81,17 @@ class MapLinkArrivalPoint extends Managed {
 		return 0;
 	}
 	
-	MapLinkSpawnPoint Get(string serverName){
-		for (int i = 0; i < SpawnPoints.Get(i); i++){
+	MapLinkSpawnPointPos GetSpawnPos(string serverName){
+		for (int i = 0; i < SpawnPoints.Count(); i++){
 			if (SpawnPoints.Get(i).ServerName == serverName){
-				return SpawnPoints.Get(i);
+				return SpawnPoints.Get(i).GetSpawnPos();
 			}
 		}
 		return NULL;
 	}
 	
 	string FallBackServer(string serverName){
-		for (int i = 0; i < SpawnPoints.Get(i); i++){
+		for (int i = 0; i < SpawnPoints.Count(); i++){
 			if (SpawnPoints.Get(i).ServerName != serverName){
 				return SpawnPoints.Get(i).ServerName;
 			}
@@ -113,9 +112,9 @@ class MapLinkSpawnPoint extends Managed{
 	}
 	
 	
-	vector GetSpawnPos(){
+	MapLinkSpawnPointPos GetSpawnPos(){
 		if ( Positions.Count() == 1){
-			return Positions.Get(0).Get();
+			return Positions.Get(0);
 		}
 		int i = 0;
 		float Max = 0;
@@ -124,10 +123,11 @@ class MapLinkSpawnPoint extends Managed{
 		}
 		float random = Math.RandomFloat(0, Max);
 		i = -1;
-		while (++i < Positions.Count() && Positions.Get(i).Chance < random){
-			//Don't need anything to happen here
+		float chance = Positions.Get(i).Chance;
+		while (++i < Positions.Count() && chance < random){
+			chance = chance + Positions.Get(i).Chance;
 		}
-		return Positions.Get(i).Get();
+		return Positions.Get(i);
 	} 
 }
 
@@ -141,7 +141,7 @@ class MapLinkSpawnPointPos{
 	
 	vector GetPosition(){
 		float y = Y;
-		if (Y < 1){
+		if (Y < 2){
 			y = GetGame().SurfaceY(X,Z);
 		}
 		return Vector(X, y, Z);
@@ -153,18 +153,19 @@ class MapLinkSpawnPointPos{
 	
 	vector Get(){
 	
+		vector pos = GetPosition();
 		if (Radius < 2 ){
 			return GetPosition();
 		}
 		
         vector rndPos = GetRandomPosition();
         int maxCalcs = 25;
-        while ((GetGame().SurfaceIsSea(rndPos[0], rndPos[2]) || GetGame().SurfaceIsPond(rndPos[0],rndPos[2])) && maxCalcs-- > 0)
-        {
+        while ((GetGame().SurfaceIsSea(rndPos[0], rndPos[2]) || GetGame().SurfaceIsPond(rndPos[0],rndPos[2])) && maxCalcs > 0) {
+			maxCalcs--;
             rndPos = GetRandomPosition();
         }
 		if ( maxCalcs > 0 ){
-			return Vector(rndPos[0], GetGame().SurfaceY(rndPos[0],rndPos[2]), rndPos[2]);
+			return rndPos;
 		}
 		return GetPosition();
 	}
@@ -173,9 +174,9 @@ class MapLinkSpawnPointPos{
     {
 		vector pos = Vector(X, 0, Z);
         float rndT = Math.RandomFloat(0,1) * 2 * Math.PI;
-        float rndR = m_randomradius * Math.Sqrt(Math.RandomFloat(0,1)) * 0.90;
-        //Adding 10% of the radius to make so its not in the center feel like this will just seem less random
-        float rndRD = m_randomradius * 0.10;
+        float rndR = Radius * Math.Sqrt(Math.RandomFloat(0,1)) * 0.85;
+        //Adding 15% of the radius to make so its not in the center feel like this will just seem less random
+        float rndRD = Radius * 0.15;
         rndR = rndR + rndRD;
 
         float NewX = pos[0] + rndR * Math.Cos(rndT);
@@ -188,6 +189,7 @@ class MapLinkSpawnPointPos{
 class MapLinkCurrency extends Managed {
 	
 	int ID;
+	string Name;
 	ref array<ref MapLinkMoneyValue> MoneyValues = new array<ref MapLinkMoneyValue>;
 	
 	void MapLinkCurrency(int id = 1){

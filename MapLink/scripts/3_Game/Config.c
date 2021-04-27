@@ -27,12 +27,20 @@ class MapLinkConfig extends UApiConfigBase {
 			Save(); //Resave the upgrade Version Back to the server
 		}
 		*/
+		
 	}
+	
+	void Valiate(){
+		
+		
+	}	
 	
 	
 	override void Load(){
+		if (!m_DataReceived){
+			SetDefaults();
+		}
 		m_DataReceived = false;
-		SetDefaults();
 		//Set the Defaults so that way, when you load if this its the server Requesting the data it will create it based on the defaults
 		UApi().Rest().GlobalsLoad("MapLink", this, this.ToJson());
 	}
@@ -60,7 +68,38 @@ class MapLinkConfig extends UApiConfigBase {
 	}
 	
 	
-	vector
+	MapLinkSpawnPointPos SpawnPointPos(string arrivalPoint){
+		return GetSpawnPointPos(UApiConfig().ServerID, arrivalPoint);
+	}
+	
+	
+	MapLinkSpawnPointPos GetSpawnPointPos(string serverName, string arrivalPoint){
+		for (int i = 0; i< ArrivalPoints.Count(); i++){
+			if(ArrivalPoints.Get(i).Name == arrivalPoint){
+				return MapLinkSpawnPointPos.Cast(ArrivalPoints.Get(i).GetSpawnPos(serverName));
+			}
+		}
+		return NULL;
+	}
+	
+	UApiServerData GetServer(string serverName){
+		for(int i = 0; i < Servers.Count(); i++){
+			if (Servers.Get(i).Name == serverName){
+				return UApiServerData.Cast(Servers.Get(i));
+			}
+		}
+		return NULL;
+	}
+	
+	
+	MapLinkArrivalPoint GetArrivalPoint(string arrivalPoint){
+		for (int i = 0; i< ArrivalPoints.Count(); i++){
+			if(ArrivalPoints.Get(i).Name == arrivalPoint){
+				return MapLinkArrivalPoint.Cast(ArrivalPoints.Get(i));
+			}
+		}
+		return NULL;
+	}
 	
 }
 
