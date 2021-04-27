@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{A1932CB3EE74782D}TheHive/gui/maplink_icons.edds"
+ Author "desktop-tdpoqud"
+ ChangeDate 1632496282
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "maplink_icons.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

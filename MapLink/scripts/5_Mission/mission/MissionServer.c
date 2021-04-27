@@ -21,12 +21,12 @@ modded class MissionServer extends MissionBase
 				if (dataload.IsValid() && dataload.GUID == oid){
 					Print("[UAPI] UApiJSONHandler - IsValid");
 					m_PlayerDBQue.Set(oid, PlayerDataStore.Cast(dataload));
-				} else if (m_PlayerDBQue.Contains(oid)){
+				} else if (m_PlayerDBQue.Contains(oid)) {
 					Print("[UAPI] m_PlayerDBQue - Remove");
 					m_PlayerDBQue.Remove(oid);
 				}
 			}
-      	} else if(status == UAPI_EMPTY){
+      	} else if (status == UAPI_EMPTY){
 			Print("[UAPI] LoadPlayerFromDB - Empty Response ID:" + cid + " - GUID: " + oid );
 		} else { //could do else if to catch different kinds of errors
          	Print("[UAPI] api call failed");
@@ -48,13 +48,9 @@ modded class MissionServer extends MissionBase
 		} else {
 			Print("[UAPI] OnClientPrepareEvent - Identity = NULL");
 		}
-		if (GetHive())
-		{
-			// use character from database
+		if (GetHive()) { // use character from database
 			useDB = true;
-		}
-		else
-		{
+		} else {
 			// use following data without database
 			useDB = false;
 			pos = "1189.3 0.0 5392.48";
@@ -85,33 +81,31 @@ modded class MissionServer extends MissionBase
 		}
 		super.OnEvent(eventTypeId, params);
 	}
-	
-	//Engine Wait
-	
+		
 	bool UApiOnClientNewEvent(PlayerIdentity identity, vector pos, ParamsReadContext ctx)
 	{
 		Print("[UAPI] UApiOnClientNewEvent - " + identity.GetId());
 		PlayerDataStore playerdata;		
-		if (identity && m_PlayerDBQue.Find(identity.GetId(), playerdata) && playerdata.IsValid()){
+		if (identity && m_PlayerDBQue.Find(identity.GetId(), playerdata) && playerdata.IsValid()) {
 			pos = "0 0 0";
 			Print("Spawning player on " + m_worldname);
-			if (playerdata.m_Map != m_worldname && playerdata.m_TransferPoint == ""){
+			if (playerdata.m_Map != m_worldname && playerdata.m_TransferPoint == "") {
 				UApiServerData serverData;
-				if (playerdata.m_Map == "enoch"){
+				if (playerdata.m_Map == "enoch") {
 					serverData = new UApiServerData("192.95.50.50", 2632, "daemon");
 				}
-				if (playerdata.m_Map == "chernarusplus"){
+				if (playerdata.m_Map == "chernarusplus") {
 					serverData = new UApiServerData("192.95.50.50", 2602, "");
 				}
-				if (playerdata.m_Map == "namalsk"){
+				if (playerdata.m_Map == "namalsk") {
 					serverData = new UApiServerData("192.95.50.50", 2662, "daemon");
 				}
-				//NotificationSystem.SimpleNoticiation(" Redirecting to the correct server", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
+				NotificationSystem.Create(new StringLocaliser("Notification"),new StringLocaliser(" Redirecting to the correct server - " + playerdata.m_Map), "Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 				GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
 			} 
-			if (playerdata.m_TransferPoint != ""){
+			if (playerdata.m_TransferPoint != "") {
 				pos = GetDayZGame().HiveGetSpawnLocation(m_worldname, playerdata.m_TransferPoint);
 			}
 
