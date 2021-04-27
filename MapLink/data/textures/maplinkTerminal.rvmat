@@ -8,7 +8,7 @@ PixelShaderID="Super";
 VertexShaderID="Super";
 class Stage1
 {
-	texture = "TheHive\data\textures\Normal.paa";
+	texture = "MapLink\data\textures\Normal.paa";
     uvSource="tex";
     class uvTransform
     {

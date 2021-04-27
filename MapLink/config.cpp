@@ -1,6 +1,6 @@
 class CfgPatches
 {
-	class TheHive
+	class MapLink
 	{
 		requiredVersion=0.1;
 		requiredAddons[]={
@@ -11,17 +11,17 @@ class CfgPatches
 
 class CfgMods
 {
-	class TheHive
+	class MapLink
 	{
-		dir="TheHive";
-        name="TheHive";
+		dir="MapLink";
+        name="MapLink";
         credits="DaemonForge, Iceblade, Dumpgrah";
         author="DaemonForge";
         authorID="0";
         version="0.1";
         extra=0;
         type="mod";
-		inputs = "TheHive/inputs/inputs.xml";
+		inputs = "MapLink/inputs/inputs.xml";
 	    dependencies[]={ "Game", "World", "Mission"};
 	    class defs
 	    {
@@ -37,14 +37,14 @@ class CfgMods
             {
 				value = "";
                 files[]={
-					"TheHive/scripts/3_Game"
+					"MapLink/scripts/3_Game"
 				};
             };
 			class worldScriptModule
             {
                 value="";
                 files[]={ 
-					"TheHive/scripts/4_World" 
+					"MapLink/scripts/4_World" 
 				};
             };
 			
@@ -52,7 +52,7 @@ class CfgMods
             {
                 value="";
                 files[]={
-					"TheHive/scripts/5_Mission" 
+					"MapLink/scripts/5_Mission" 
 				};
             };
         };
@@ -64,6 +64,6 @@ class CfgVehicles
 	class Hive_Terminal : HouseNoDestruct{
 		scope = 1;
 		displayName  = "Hive Terminal";
-		model = "TheHive\data\hive_terminal.p3d";
+		model = "MapLink\data\hive_terminal.p3d";
 	};
 };

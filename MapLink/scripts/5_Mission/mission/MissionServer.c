@@ -2,6 +2,8 @@ modded class MissionServer extends MissionBase
 {
 	ref map<string, ref PlayerDataStore> m_PlayerDBQue = new map<string, ref PlayerDataStore>;
 	string m_worldname;
+	int MapLinkConfigRefreshTimer = 0;
+	const int MAPLINK_CONFIG_REFRESH_TIME = 90000;
 	
 	override void OnMissionStart(){
 		super.OnMissionStart();
@@ -33,7 +35,12 @@ modded class MissionServer extends MissionBase
 
 	override void OnClientPrepareEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout)
 	{
-		if (identity) {
+		int CurrentTime = GetGame().GetTime();
+		if (CurrentTime > MapLinkConfigRefreshTimer){
+			MapLinkConfigRefreshTimer = CurrentTime + MAPLINK_CONFIG_REFRESH_TIME;
+			GetMapLinkConfig().Load();
+		}
+		if (identity){
 			Print("[UAPI] OnClientPrepareEvent  - " + preloadTimeout + " - Identity = " + identity.GetId());
 			int cid = UApi().db(PLAYER_DB).Load("TheHive", identity.GetId(), this, "LoadPlayerFromUApiDB");	
 			Print("[UAPI] db Load - ID:" + cid + " - GUID: " + identity.GetId() );

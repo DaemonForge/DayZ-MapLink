@@ -26,16 +26,3 @@ modded class DayZGame
 	}
 	
 };
-
-class UApiServerData {
-	
-	string IP;
-	int Port = 2302;
-	string Password = "";
-	
-	void UApiServerData(string ip, int port = 2302, string password = ""){
-		IP = ip;
-		Port = port;
-		Password = password;
-	}
-}
