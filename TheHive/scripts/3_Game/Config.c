@@ -1,5 +1,9 @@
 class MapLinkConfig extends UApiConfigBase {
 
+	ref array<ref UApiServerData> Servers = new array<ref UApiServerData>;
+	ref array<ref MapLinkDepaturePoint> DepaturePoints = new array<ref MapLinkDepaturePoint>;
+	ref array<ref MapLinkArrivalPoint> ArrivalPoints = new array<ref MapLinkArrivalPoint>;
+	ref array<ref MapLinkCurrency> Currencies = new array<ref MapLinkCurrency>;
 	
 	override void SetDefaults(){
 		/*
@@ -8,6 +12,10 @@ class MapLinkConfig extends UApiConfigBase {
 		if it doesn't exsit the API will create the file
 	
 		*/
+		Servers.Insert(new UApiServerData(""));
+		DepaturePoints.Insert(new MapLinkDepaturePoint("Demo000"));
+		ArrivalPoints.Insert(new MapLinkArrivalPoint("Demo000"));
+		Currencies.Insert(new MapLinkCurrency(-1));
 	}
 
 	override void OnDataReceive(){
@@ -24,7 +32,8 @@ class MapLinkConfig extends UApiConfigBase {
 	
 	override void Load(){
 		m_DataReceived = false;
-		SetDefaults();//Set the Defaults so that way, when you load if this its the server Requesting the data it will create it based on the defaults
+		SetDefaults();
+		//Set the Defaults so that way, when you load if this its the server Requesting the data it will create it based on the defaults
 		UApi().Rest().GlobalsLoad("MapLink", this, this.ToJson());
 	}
 	
@@ -48,19 +57,19 @@ class MapLinkConfig extends UApiConfigBase {
 		} else {
 			Print("[UAPI] CallBack Failed errorCode: Invalid Data");
 		}
-	};
+	}
+	
+	
+	vector
+	
 }
 
 
-class UApiServerData {
-	
-	string IP;
-	int Port = 2302;
-	string Password = "";
-	
-	void UApiServerData(string ip, int port = 2302, string password = ""){
-		IP = ip;
-		Port = port;
-		Password = password;
+static ref MapLinkConfig m_MapLinkConfig;
+static MapLinkConfig GetMapLinkConfig(){
+	if (!m_MapLinkConfig){
+		m_MapLinkConfig = new MapLinkConfig;
+		m_MapLinkConfig.Load();
 	}
+	return m_MapLinkConfig;
 }
