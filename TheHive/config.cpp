@@ -25,6 +25,14 @@ class CfgMods
 	    dependencies[]={ "Game", "World", "Mission"};
 	    class defs
 	    {
+			
+			class imageSets
+			{
+				files[]=
+				{
+					"TheHive/gui/maplink_icons.imageset"
+				};
+			};
 			class gameScriptModule
             {
 				value = "";

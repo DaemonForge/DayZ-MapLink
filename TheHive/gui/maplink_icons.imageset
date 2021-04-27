@@ -1,0 +1,68 @@
+ImageSetClass {
+ Name "maplink_icons"
+ RefSize 288 288
+ Textures {
+  ImageSetTextureClass {
+   mpix 1
+   path "{A1932CB3EE74782D}TheHive/gui/maplink_icons.edds"
+  }
+ }
+ Images {
+  ImageSetDefClass boat {
+   Name "boat"
+   Pos 0 0
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass car {
+   Name "car"
+   Pos 96 0
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass plane {
+   Name "plane"
+   Pos 192 0
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass train {
+   Name "train"
+   Pos 0 96
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass map {
+   Name "map"
+   Pos 96 96
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass bus {
+   Name "bus"
+   Pos 192 96
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass redirect {
+   Name "redirect"
+   Pos 0 192
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass go {
+   Name "go"
+   Pos 96 192
+   Size 96 96
+   Flags 0
+  }
+  ImageSetDefClass gogo {
+   Name "gogo"
+   Pos 192 192
+   Size 96 96
+   Flags 0
+  }
+ }
+ Groups {
+ }
+}
