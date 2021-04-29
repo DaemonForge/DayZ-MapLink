@@ -1,0 +1,222 @@
+FrameWidgetClass rootFrame {
+ size 900 600
+ halign center_ref
+ valign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ priority 1
+ {
+  PanelWidgetClass TransferMenuBG {
+   ignorepointer 1
+   color 0 0.3922 0.7725 0.8235
+   position 0 0
+   size 1 1
+   halign center_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   priority 3
+   style rover_sim_colorable
+   {
+    PanelWidgetClass TransferMenuFrame {
+     ignorepointer 1
+     color 0.4118 0 0.6784 0.7412
+     position 0 0
+     size 1 1
+     halign center_ref
+     valign center_ref
+     hexactpos 0
+     vexactpos 0
+     hexactsize 0
+     vexactsize 0
+     priority 5
+     style Outline
+     {
+      ContentWidgetClass TransferMenuContent {
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       halign center_ref
+       valign center_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       priority 10
+       {
+        ScrollWidgetClass ArrivalPoints_Scroll {
+         ignorepointer 1
+         position 0 0
+         size 0.9 360
+         halign center_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         style blank
+         "Scrollbar V" 1
+         {
+          FrameWidgetClass ArrivalPoints_Frame {
+           ignorepointer 1
+           size 1 0
+           halign right_ref
+           hexactpos 1
+           vexactpos 1
+           hexactsize 0
+           vexactsize 1
+           scriptclass "SizeToChild"
+           {
+            GridSpacerWidgetClass ArrivalPoints_Grid {
+             ignorepointer 1
+             size 1 0
+             halign center_ref
+             hexactpos 1
+             vexactpos 1
+             hexactsize 0
+             vexactsize 1
+             Padding 4
+             "Size To Content V" 1
+             Columns 1
+             Rows 99
+            }
+           }
+           {
+            ScriptParamsClass {
+             m_ChildName "ArrivalPoints_Grid"
+             m_ResizeVertical 1
+            }
+           }
+          }
+         }
+        }
+        RichTextWidgetClass Heading {
+         ignorepointer 1
+         color 0.9294 0.9059 0.9647 1
+         position 0 0.03
+         size 0.7 56
+         halign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 0
+         vexactsize 1
+         text "DEPARTURE POINT"
+         font "gui/fonts/MetronBlack"
+         "exact text" 1
+         "text halign" center
+         "text valign" center
+        }
+        ButtonWidgetClass Cancel {
+         visible 0
+         position 0 64
+         size 256 64
+         halign center_ref
+         valign bottom_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         {
+          TextWidgetClass Cancel_Label {
+           ignorepointer 1
+           position 0 0
+           size 0.95 0.9
+           halign center_ref
+           valign center_ref
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 0
+           text "Cancel Travel"
+           font "gui/fonts/Metron-Bold"
+           text_proportion 0.9
+           "text halign" center
+           "text valign" center
+          }
+         }
+        }
+        FrameWidgetClass TransferingTimeFrame {
+         visible 1
+         ignorepointer 1
+         position 0 0
+         size 364 156
+         halign center_ref
+         valign center_ref
+         hexactpos 0
+         vexactpos 0
+         hexactsize 1
+         vexactsize 1
+         {
+          PanelWidgetClass TransferTimeFanel {
+           ignorepointer 1
+           color 0.149 0.651 0.6039 1
+           position 0 0
+           size 1 1
+           halign center_ref
+           valign center_ref
+           hexactpos 0
+           vexactpos 0
+           hexactsize 0
+           vexactsize 0
+           style rover_sim_colorable
+           {
+            PanelWidgetClass TransferTimeBorder {
+             ignorepointer 1
+             color 0 0.6745 0.7569 1
+             position 0 0
+             size 1 1
+             halign center_ref
+             valign center_ref
+             hexactpos 0
+             vexactpos 0
+             hexactsize 0
+             vexactsize 0
+             style Outline
+             {
+              TextWidgetClass TranferingCountDown {
+               ignorepointer 1
+               position 0 12
+               size 0.9 56
+               halign center_ref
+               valign bottom_ref
+               hexactpos 0
+               vexactpos 1
+               hexactsize 0
+               vexactsize 1
+               text "10"
+               font "gui/fonts/Metron-Bold"
+               "text halign" center
+               "text valign" center
+              }
+              TextWidgetClass Transfering_text {
+               ignorepointer 1
+               position 0 12
+               size 0.9 64
+               halign center_ref
+               hexactpos 0
+               vexactpos 1
+               hexactsize 0
+               vexactsize 1
+               text "Transfering In"
+               font "gui/fonts/Metron-BoldItalic"
+               "text halign" center
+               "text valign" center
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

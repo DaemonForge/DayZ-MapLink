@@ -1,0 +1,74 @@
+ImageSetClass {
+ Name "NewImageSet0"
+ RefSize 256 256
+ Textures {
+  ImageSetTextureClass {
+   mpix 1
+   path "{EB43884B83C5C92C}MapLink/gui/moneyicons.edds"
+  }
+ }
+ Images {
+  ImageSetDefClass planeticket {
+   Name "planeticket"
+   Pos 0 0
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass coins {
+   Name "coins"
+   Pos 64 0
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass coins2 {
+   Name "coins2"
+   Pos 128 0
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass pound {
+   Name "pound"
+   Pos 192 0
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass starticket {
+   Name "starticket"
+   Pos 0 64
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass rubble {
+   Name "rubble"
+   Pos 64 64
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass yen {
+   Name "yen"
+   Pos 128 64
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass dollar {
+   Name "dollar"
+   Pos 192 64
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass ticket {
+   Name "ticket"
+   Pos 0 128
+   Size 64 64
+   Flags 0
+  }
+  ImageSetDefClass euro {
+   Name "euro"
+   Pos 64 128
+   Size 64 64
+   Flags 0
+  }
+ }
+ Groups {
+ }
+}
