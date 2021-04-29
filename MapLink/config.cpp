@@ -30,7 +30,7 @@ class CfgMods
 			{
 				files[]=
 				{
-					"MapLink/gui/maplink_icons.imageset"
+					"MapLink/gui/maplink_icons.imageset",
 					"MapLink/gui/maplink_money.imageset"
 				};
 			};

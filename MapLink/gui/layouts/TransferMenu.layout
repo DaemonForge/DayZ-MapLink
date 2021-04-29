@@ -111,8 +111,8 @@ FrameWidgetClass rootFrame {
          "text valign" center
         }
         ButtonWidgetClass Cancel {
-         visible 0
-         position 0 64
+         visible 1
+         position 0 32
          size 256 64
          halign center_ref
          valign bottom_ref
@@ -131,7 +131,7 @@ FrameWidgetClass rootFrame {
            vexactpos 0
            hexactsize 0
            vexactsize 0
-           text "Cancel Travel"
+           text "Cancel"
            font "gui/fonts/Metron-Bold"
            text_proportion 0.9
            "text halign" center
@@ -140,7 +140,7 @@ FrameWidgetClass rootFrame {
          }
         }
         FrameWidgetClass TransferingTimeFrame {
-         visible 1
+         visible 0
          ignorepointer 1
          position 0 0
          size 364 156
@@ -150,6 +150,8 @@ FrameWidgetClass rootFrame {
          vexactpos 0
          hexactsize 1
          vexactsize 1
+         scaled 1
+         priority 99
          {
           PanelWidgetClass TransferTimeFanel {
            ignorepointer 1
@@ -189,6 +191,7 @@ FrameWidgetClass rootFrame {
                vexactsize 1
                text "10"
                font "gui/fonts/Metron-Bold"
+               "exact text" 0
                "text halign" center
                "text valign" center
               }
@@ -203,6 +206,8 @@ FrameWidgetClass rootFrame {
                vexactsize 1
                text "Transfering In"
                font "gui/fonts/Metron-BoldItalic"
+               "exact text" 0
+               text_proportion 0.9
                "text halign" center
                "text valign" center
               }

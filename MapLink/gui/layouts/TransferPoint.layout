@@ -107,7 +107,7 @@ FrameWidgetClass rootFrame {
          clipchildren 0
          ignorepointer 1
          position 84 1
-         size 296 28
+         size 264 28
          valign bottom_ref
          hexactpos 1
          vexactpos 1
@@ -131,7 +131,7 @@ FrameWidgetClass rootFrame {
           TextWidgetClass Map_Text {
            ignorepointer 1
            position 32 0
-           size 256 1
+           size 232 1
            valign center_ref
            hexactpos 1
            vexactpos 1
@@ -142,9 +142,9 @@ FrameWidgetClass rootFrame {
          }
         }
         ContentWidgetClass Cost_Frame {
-         visible 0
+         visible 1
          ignorepointer 1
-         position 380 1
+         position 352 1
          size 128 28
          valign bottom_ref
          hexactpos 1
@@ -160,7 +160,7 @@ FrameWidgetClass rootFrame {
            vexactpos 1
            hexactsize 1
            vexactsize 1
-           image0 "set:maplink_icons image:map"
+           image0 "set:maplink_money image:dollar"
            mode blend
            "src alpha" 1
            stretch 1
@@ -195,6 +195,7 @@ FrameWidgetClass rootFrame {
        vexactpos 1
        hexactsize 1
        vexactsize 1
+       image0 "set:maplink_icons image:boat"
        mode blend
        "src alpha" 1
        stretch 1

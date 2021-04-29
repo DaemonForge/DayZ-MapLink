@@ -1,5 +1,5 @@
 ImageSetClass {
- Name "NewImageSet0"
+ Name "maplink_money"
  RefSize 256 256
  Textures {
   ImageSetTextureClass {
