@@ -10,7 +10,7 @@ FrameWidgetClass rootFrame {
  {
   PanelWidgetClass TransferMenuBG {
    ignorepointer 1
-   color 0 0.3922 0.7725 0.8235
+   color 0 0.3922 0.7725 0.6471
    position 0 0
    size 1 1
    halign center_ref
@@ -24,7 +24,7 @@ FrameWidgetClass rootFrame {
    {
     PanelWidgetClass TransferMenuFrame {
      ignorepointer 1
-     color 0.4118 0 0.6784 0.7412
+     color 0.298 0 0.6784 0.5961
      position 0 0
      size 1 1
      halign center_ref
@@ -112,6 +112,7 @@ FrameWidgetClass rootFrame {
         }
         ButtonWidgetClass Cancel {
          visible 1
+         color 0.098 0.098 0.098 1
          position 0 32
          size 256 64
          halign center_ref
@@ -120,9 +121,11 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         style Colorable
          {
           TextWidgetClass Cancel_Label {
            ignorepointer 1
+           color 0.9725 0.8392 0.4314 1
            position 0 0
            size 0.95 0.9
            halign center_ref

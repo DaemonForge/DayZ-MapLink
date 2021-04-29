@@ -31,7 +31,7 @@ FrameWidgetClass rootFrame {
      vexactsize 1
      {
       ButtonWidgetClass Transfer {
-       color 0.1608 0.7137 0.9647 1
+       color 0.9725 0.8392 0.4314 0.702
        position 8 0
        size 186 56
        halign right_ref
@@ -45,7 +45,7 @@ FrameWidgetClass rootFrame {
        {
         ImageWidgetClass TransferImage_Label {
          ignorepointer 1
-         color 0.9608 0.7137 0.8549 1
+         color 0.098 0.098 0.098 1
          position 4 0
          size 44 44
          halign right_ref
@@ -61,7 +61,7 @@ FrameWidgetClass rootFrame {
         }
         TextWidgetClass Transfer_Label {
          ignorepointer 1
-         color 0.9608 0.7137 0.8549 1
+         color 0.098 0.098 0.098 1
          position 4 0
          size 128 48
          valign center_ref
