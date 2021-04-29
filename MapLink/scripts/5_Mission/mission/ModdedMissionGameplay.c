@@ -3,7 +3,7 @@ modded class MissionGameplay
 
 	void MissionGameplay()
     {   
-		GetRPCManager().AddRPC( "TheHive", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
+		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 
 

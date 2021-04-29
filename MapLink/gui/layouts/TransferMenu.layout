@@ -171,7 +171,6 @@ FrameWidgetClass rootFrame {
            {
             PanelWidgetClass TransferTimeBorder {
              ignorepointer 1
-             color 0 0.6745 0.7569 1
              position 0 0
              size 1 1
              halign center_ref

@@ -142,7 +142,7 @@ FrameWidgetClass rootFrame {
          }
         }
         ContentWidgetClass Cost_Frame {
-         visible 1
+         visible 0
          ignorepointer 1
          position 352 1
          size 128 28

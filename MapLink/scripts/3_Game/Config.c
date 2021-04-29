@@ -144,7 +144,7 @@ class MapLinkConfig extends UApiConfigBase {
 				return "Esseker";
 		}
 		string FirstLeter = worldName.Substring(0,1);
-		FirstLetter.ToUpper();
+		FirstLeter.ToUpper();
 		worldName.Set(0, FirstLeter);
 		return worldName;
 	}

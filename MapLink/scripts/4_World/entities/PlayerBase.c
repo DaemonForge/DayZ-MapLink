@@ -142,17 +142,45 @@ modded class PlayerBase extends ManBase{
 		SetHealth("","", 0);
 	}
 	
+	void UApiRequestTravel(string arrivalPoint, string serverName ){
+		if (GetGame().IsClient()){
+			RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
+		}
+		if (GetGame().IsServer()){
+			UApiDoTravel(arrivalPoint, serverName);
+		}
+	}
+	
+	protected void UApiDoTravel(string arrivalPoint, string serverName){
+		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
+		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
+		
+		if (dpoint && serverData && dpoint.HasArrivalPoint(arrivalPoint)){
+			this.UApiSaveTransferPoint(arrivalPoint);
+			this.SavePlayerToUApi();
+			
+			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 400, false);
+		}
+	} 
 	
 	override void OnRPC(PlayerIdentity sender, int rpc_type, ParamsReadContext ctx)
 	{
 		super.OnRPC(sender, rpc_type, ctx);
-		Param1<bool> data;
 		
-		if (rpc_type == 155494151 && GetGame().IsClient()) {
-			if (ctx.Read(data))	{
-				if (data.param1){
+		if (rpc_type == MAPLINK_AFTERLOADCLIENT && GetGame().IsClient()) {
+			Param1<bool> alcdata;
+			if (ctx.Read(alcdata))	{
+				if (alcdata.param1){
 					UApiAfterLoadClient();
 				}
+			}
+		}
+		
+		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && GetGame().IsServer() ){
+			Param2<string, string> rtdata;
+			if (ctx.Read(alcdata) && GetIdentity().GetId() == sender.GetId())	{
+				UApiDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}
 	}

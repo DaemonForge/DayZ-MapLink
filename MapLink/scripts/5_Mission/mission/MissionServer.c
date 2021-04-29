@@ -41,7 +41,7 @@ modded class MissionServer extends MissionBase
 			GetMapLinkConfig().Load();
 		}
 		if (identity){
-			int cid = UApi().db(PLAYER_DB).Load("TheHive", identity.GetId(), this, "LoadPlayerFromUApiDB");	
+			int cid = UApi().db(PLAYER_DB).Load("MapLink", identity.GetId(), this, "LoadPlayerFromUApiDB");	
 			Print("[UAPI] DB Load - ID:" + cid + " - GUID: " + identity.GetId() );
 			//NotificationSystem.SimpleNoticiation(" Requesting you're login player Data From the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 		}
@@ -74,7 +74,7 @@ modded class MissionServer extends MissionBase
 			if (playerdata.m_Server != UApiConfig().ServerID && playerdata.m_TransferPoint == "") {
 				serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(playerdata.m_Server));
 				NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Redirecting to the correct server - " + playerdata.m_Server), "set:maplink_icons image:redirect", -16843010, 16, identity);
-				GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
+				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 				Print("[UAPI] Player " + identity.GetId() + " Redirected to correct server " +  playerdata.m_Server);
 				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
@@ -84,7 +84,7 @@ modded class MissionServer extends MissionBase
 				if (!Class.CastTo(pointPos, GetMapLinkConfig().SpawnPointPos(playerdata.m_TransferPoint))){
 					serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(playerdata.m_Server));
 					NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Error On Connect This server isn't set up correctly sending you back to your orginal server - " + playerdata.m_Server), "set:maplink_icons image:redirect", -16843010, 16, identity);
-					GetRPCManager().SendRPC("TheHive", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
+					GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					m_PlayerDBQue.Remove(identity.GetId());
 					Print("[UAPI] Error Server isn't set up to receive this arrival point Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
 					return false;

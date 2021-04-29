@@ -31,7 +31,14 @@ class MapLinkDepaturePoint extends Managed {
 		}
 	}
 	 
-	
+	bool HasArrivalPoint(string arrivalPoint){
+		for (int i = 0; i < ArrivalPoints.Count(); i++){
+			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }
 
