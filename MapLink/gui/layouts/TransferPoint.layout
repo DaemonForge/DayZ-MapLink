@@ -1,0 +1,184 @@
+PanelWidgetClass rootFrame {
+ color 0.1961 0.1961 0.1961 0.2745
+ position 0 0
+ size 1 84
+ halign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 0
+ vexactsize 1
+ priority 99
+ style ToolbarWidget
+ {
+  ButtonWidgetClass Transfer {
+   color 0.9725 0.8392 0.4314 0.702
+   position 8 0
+   size 186 56
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   priority 30
+   style Colorable
+   {
+    ImageWidgetClass TransferImage_Label {
+     ignorepointer 1
+     color 0.098 0.098 0.098 1
+     position 4 0
+     size 44 44
+     halign right_ref
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     image0 "set:maplink_icons image:go"
+     mode blend
+     "src alpha" 1
+     stretch 1
+    }
+    TextWidgetClass Transfer_Label {
+     ignorepointer 1
+     color 0.098 0.098 0.098 1
+     position 4 0
+     size 128 48
+     valign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Travel"
+     font "gui/fonts/Metron-BoldItalic"
+     "text color" 0.9608 0.7137 0.8549 1
+     "exact text" 0
+     text_proportion 0.9
+     "size to text h" 0
+     "size to text v" 0
+     "text halign" center
+     "text valign" center
+    }
+   }
+  }
+  ContentWidgetClass ArrivalPointInfo {
+   ignorepointer 1
+   position 0 0
+   size 0.75 0.95
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   {
+    TextWidgetClass ArrivalPoint_Name {
+     ignorepointer 1
+     color 0.8902 0.949 0.9922 1
+     position 84 1
+     size 0.7 48
+     hexactpos 1
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "Port Kemenka"
+     font "gui/fonts/Metron"
+    }
+    ContentWidgetClass Map_Frame {
+     clipchildren 0
+     ignorepointer 1
+     position 84 1
+     size 264 28
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scriptclass ""
+     {
+      ImageWidgetClass Map_Image {
+       ignorepointer 1
+       size 28 28
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       image0 "set:maplink_icons image:map"
+       mode blend
+       "src alpha" 1
+       stretch 1
+      }
+      TextWidgetClass Map_Text {
+       ignorepointer 1
+       position 32 0
+       size 232 1
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 0
+       text "Chenarus"
+      }
+     }
+    }
+    ContentWidgetClass Cost_Frame {
+     visible 0
+     ignorepointer 1
+     position 352 1
+     size 128 28
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     {
+      ImageWidgetClass Cost_image {
+       ignorepointer 1
+       position 0 0
+       size 28 28
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       image0 "set:maplink_money image:dollar"
+       mode blend
+       "src alpha" 1
+       stretch 1
+      }
+      TextWidgetClass Cost_Text {
+       ignorepointer 1
+       position 30 0
+       size 64 28
+       valign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       text "100.00"
+       font "gui/fonts/AmorSerifPro-Bold"
+       "exact text" 0
+       text_proportion 0.8
+       "size to text h" 1
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+  ImageWidgetClass TransferImage {
+   ignorepointer 1
+   position 8 0
+   size 68 68
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   image0 "set:maplink_icons image:boat"
+   mode blend
+   "src alpha" 1
+   stretch 1
+  }
+ }
+}

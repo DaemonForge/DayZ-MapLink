@@ -3,7 +3,7 @@ modded class MissionGameplay
 
 	void MissionGameplay()
     {   
-		GetRPCManager().AddRPC( "TheHive", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
+		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 
 
@@ -11,12 +11,13 @@ modded class MissionGameplay
 		
 		Param1< UApiServerData > data; 
 		if ( !ctx.Read( data ) ) return;
-		Print("[UPAI] Kicked from Game");
+		Print("[MAPLINK] Kicked from Game");
 		UApiServerData serverData = UApiServerData.Cast(data.param1);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(GetGame().DisconnectSessionForce, 50);
 		if (serverData){
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(GetGame().DisconnectSessionForce, 50);
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(GetDayZGame().HiveReconnectTo, 500, false, serverData);
 		}
 	}
+	
 	
 }

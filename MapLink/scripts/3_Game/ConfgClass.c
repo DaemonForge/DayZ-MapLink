@@ -4,6 +4,7 @@ class UApiServerData extends Managed {
 	string Map;
 	string IP;
 	int Port = 2302;
+	int QueryPort = 27016;
 	string Password = "";
 	
 	void UApiServerData(string ip, int port = 2302, string password = ""){
@@ -30,13 +31,21 @@ class MapLinkDepaturePoint extends Managed {
 		}
 	}
 	 
-	
+	bool HasArrivalPoint(string arrivalPoint){
+		for (int i = 0; i < ArrivalPoints.Count(); i++){
+			Print(ArrivalPoints.Get(i).ArrivalPointName + " == " + arrivalPoint );
+			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }
 
 class MapLinkArrivalPointsRef {
 	string ArrivalPointName;
-	string icon = "";
+	string Icon = "";
 	int TransitionWaitTime;
 	int Cost;
 	int AcceptedCurrencyId;
@@ -59,6 +68,12 @@ class MapLinkArrivalPointsRef {
 		return GetMapLinkConfig().GetArrivalPoint(ArrivalPointName);
 	}
 	
+	string GetIcon(){
+		if (Icon.Contains(".paa") || Icon.Contains("set:") || Icon.Contains(".edds") ){
+			return Icon;
+		}
+		return "set:maplink_icons image:"+Icon;
+	}
 }
 
 class MapLinkArrivalPoint extends Managed {
@@ -103,7 +118,7 @@ class MapLinkArrivalPoint extends Managed {
 
 class MapLinkSpawnPoint extends Managed{
 	string ServerName;
-	string EntryPointDisplayName;
+	string DisplayName;
 	int ProtectionTime;
 	ref array<ref MapLinkSpawnPointPos> Positions = new array<ref MapLinkSpawnPointPos>;
 	
@@ -190,6 +205,7 @@ class MapLinkCurrency extends Managed {
 	
 	int ID;
 	string Name;
+	string Icon;
 	ref array<ref MapLinkMoneyValue> MoneyValues = new array<ref MapLinkMoneyValue>;
 	
 	void MapLinkCurrency(int id = 1){

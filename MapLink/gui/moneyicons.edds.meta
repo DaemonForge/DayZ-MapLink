@@ -1,10 +1,10 @@
 MetaFileClass {
- Name "{A1932CB3EE74782D}MapLink/gui/maplink_icons.edds"
+ Name "{EB43884B83C5C92C}MapLink/gui/moneyicons.edds"
  Author "desktop-tdpoqud"
- ChangeDate 1632496282
+ ChangeDate -1468208484
  Configurations {
   TGAResourceClass PC {
-   SourceFile "maplink_icons.tga"
+   SourceFile "moneyicons.tga"
   }
   TGAResourceClass XBOX_ONE : PC {
   }

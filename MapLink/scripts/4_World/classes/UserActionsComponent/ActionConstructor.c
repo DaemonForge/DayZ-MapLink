@@ -4,7 +4,6 @@ modded class ActionConstructor
 	{
 		super.RegisterActions( actions );	
 		actions.Insert( ActionHiveMoveToNewServer );
-		actions.Insert( ActionHiveMoveToNewServerNamalsk );
 
 	}
 };

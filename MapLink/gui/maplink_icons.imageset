@@ -4,7 +4,7 @@ ImageSetClass {
  Textures {
   ImageSetTextureClass {
    mpix 1
-   path "{A1932CB3EE74782D}TheHive/gui/maplink_icons.edds"
+   path "{A1932CB3EE74782D}MapLink/gui/maplink_icons.edds"
   }
  }
  Images {

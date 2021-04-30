@@ -5,6 +5,8 @@ class MapLinkConfig extends UApiConfigBase {
 	ref array<ref MapLinkArrivalPoint> ArrivalPoints = new array<ref MapLinkArrivalPoint>;
 	ref array<ref MapLinkCurrency> Currencies = new array<ref MapLinkCurrency>;
 	
+	static float MAX_DEPATUREPOINT_DISTANCE = 50;
+	
 	override void SetDefaults(){
 		/*
 	
@@ -53,7 +55,6 @@ class MapLinkConfig extends UApiConfigBase {
 	}
 	
 	
-	
 	override string ToJson(){
 		return UApiJSONHandler<MapLinkConfig>.ToString(this);
 	}
@@ -65,6 +66,23 @@ class MapLinkConfig extends UApiConfigBase {
 		} else {
 			Print("[UAPI] CallBack Failed errorCode: Invalid Data");
 		}
+	}
+	
+	MapLinkDepaturePoint GetDepaturePoint(vector Pos){
+		float closestPointDistance = MAX_DEPATUREPOINT_DISTANCE;
+		int closestPointIndex = -1;
+		for (int i = 0; i < DepaturePoints.Count(); i++){
+			float curPointDistance = vector.Distance( DepaturePoints.Get(i).Position, Pos);
+			if (curPointDistance < closestPointDistance){
+				closestPointIndex = i;
+				closestPointDistance = curPointDistance;
+			}
+		}
+		if (closestPointIndex >= 0){
+			return MapLinkDepaturePoint.Cast(DepaturePoints.Get(closestPointIndex));
+		}
+		Error("[MAPLINK] COULD NOT FIND A MAP LINK DEPATURE POINT");
+		return NULL;
 	}
 	
 	
@@ -99,6 +117,49 @@ class MapLinkConfig extends UApiConfigBase {
 			}
 		}
 		return NULL;
+	}
+	
+	
+	string GetNiceMapName(string worldName){
+		string LowerWorldName = worldName;
+		LowerWorldName.ToLower();
+		switch (LowerWorldName){
+			case "enoch":
+				return "Liviona";
+			case "enochgloom":
+				return "Liviona";
+			case "chernarusplus":
+				return "Chernarus";
+			case "chernarusplusgloom":
+				return "Chernarus";
+			case "deerisle":
+				return "Deer Isle";
+			case "chiemsee":
+				return "Chiemsee";
+			case "rostow":
+				return "Rostow";
+			case "namalsk":
+				return "Namalsk";
+			case "esseker":
+				return "Esseker";
+		}
+		string FirstLeter = worldName.Substring(0,1);
+		FirstLeter.ToUpper();
+		worldName.Set(0, FirstLeter);
+		return worldName;
+	}
+	
+	string GetCostIcon(int id){
+		for (int i = 0; i < Currencies.Count(); i++){
+			if (Currencies.Get(i).ID == id){
+				string icon = Currencies.Get(i).Icon;
+				if (icon.Contains(".paa") || icon.Contains("set:") || icon.Contains(".edds") ){
+					return icon;
+				}
+				return "set:maplink_money image:"+icon;
+			}
+		}
+		return "set:maplink_money image:dollar";
 	}
 	
 }

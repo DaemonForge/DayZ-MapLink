@@ -30,7 +30,8 @@ class CfgMods
 			{
 				files[]=
 				{
-					"TheHive/gui/maplink_icons.imageset"
+					"MapLink/gui/maplink_icons.imageset",
+					"MapLink/gui/maplink_money.imageset"
 				};
 			};
 			class gameScriptModule
