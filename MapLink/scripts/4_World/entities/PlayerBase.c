@@ -1,5 +1,8 @@
 modded class PlayerBase extends ManBase{
 	
+	protected bool m_UnderProtection = false;
+	protected bool m_UnderProtectionTimeRemaining = -1;
+	
 	protected string m_TransferPoint = "";
 	
 	bool UApiSaveTransferPoint(string point = ""){
@@ -11,7 +14,46 @@ modded class PlayerBase extends ManBase{
 		return m_QuickBarBase.FindEntityIndex(entity);
 	}
 	
+	void UpdateMapLinkProtection(int time = -1){
+		if (m_UnderProtection && time == -1){
+			m_UnderProtectionTimeRemaining = -1;
+			m_UnderProtection = false;
+			SetSynchDirty();
+			return;
+		}
+		
+	}
 
+	void RemoveGodModSafe(){
+		bool PlayerHasGodMode = false;
+		#ifdef JM_COT
+			if ( GetGame().IsServer() && m_JMHasGodMode ){
+				Print("RemoveGodModSafe COT ADMIN TOOLS ACTIVE");
+				PlayerHasGodMode = true;
+			}
+		#endif
+		#ifdef VPPADMINTOOLS
+			if ( GetGame().IsServer() && hasGodmode ){
+				Print("RemoveGodModSafe VPP ADMIN TOOLS ACTIVE");
+				PlayerHasGodMode = true;
+			}
+		#endif
+		#ifdef ZOMBERRY_AT
+			if ( GetGame().IsServer() && ZBGodMode ){
+				Print("RemoveGodModSafe ZOMBERRY ADMIN TOOLS ACTIVE");
+				PlayerHasGodMode = true;
+			}
+		#endif
+		#ifdef TRADER 
+			if (GetGame().IsServer() && m_Trader_IsInSafezone){
+				Print("RemoveGodModSafe Is In Safe Zone");
+				PlayerHasGodMode = true;
+			}
+		#endif
+		
+	}
+	
+	
     override void OnStoreSave(ParamsWriteContext ctx)
     {
         super.OnStoreSave(ctx);
@@ -24,7 +66,7 @@ modded class PlayerBase extends ManBase{
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
-			UApi().db(PLAYER_DB).Save("TheHive", this.GetIdentity().GetId(), teststore.ToJson());
+			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
 			delete teststore;
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		}
@@ -58,7 +100,7 @@ modded class PlayerBase extends ManBase{
 		if (GetBleedingManagerServer()){
 			GetBleedingManagerServer().OnUApiSave(data);
 		} else {
-			Print("[UAPI] Bleeding Manager is NULL");
+			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
 		
 	}
@@ -93,7 +135,7 @@ modded class PlayerBase extends ManBase{
 		if (GetBleedingManagerServer()){	
 			GetBleedingManagerServer().OnUApiLoad(data);
 		} else {
-			Print("[UAPI] Bleeding Manager is NULL");
+			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
 		GetStatWet().Set(data.m_Stat_Wet);
 		GetStatSpecialty().Set(data.m_Stat_Specialty);
@@ -111,7 +153,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	void SendUApiAfterLoadClient(){
-		RPCSingleParam(155494151, new Param1<bool>( true ), true, GetIdentity());
+		RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param1<bool>( true ), true, GetIdentity());
 	}
 	
 	override void OnDisconnect(){
@@ -144,7 +186,7 @@ modded class PlayerBase extends ManBase{
 	
 	void UApiRequestTravel(string arrivalPoint, string serverName ){
 		if (GetGame().IsClient()){
-			RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
+			RPCSingleParam(MAPLINK_REQUESTTRAVEL, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
 		}
 		if (GetGame().IsServer()){
 			UApiDoTravel(arrivalPoint, serverName);
@@ -154,14 +196,17 @@ modded class PlayerBase extends ManBase{
 	protected void UApiDoTravel(string arrivalPoint, string serverName){
 		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
-		
 		if (dpoint && serverData && dpoint.HasArrivalPoint(arrivalPoint)){
 			this.UApiSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToUApi();
+			Print("[MAPLINK] UApi Do Travel Verified - " + arrivalPoint + " - " + serverName );
 			
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 400, false);
+		} else {
+			Error("[MAPLINK] User Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
+			
 	} 
 	
 	override void OnRPC(PlayerIdentity sender, int rpc_type, ParamsReadContext ctx)
@@ -179,7 +224,7 @@ modded class PlayerBase extends ManBase{
 		
 		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && GetGame().IsServer() ){
 			Param2<string, string> rtdata;
-			if (ctx.Read(alcdata) && GetIdentity().GetId() == sender.GetId())	{
+			if (ctx.Read(rtdata) && GetIdentity().GetId() == sender.GetId())	{
 				UApiDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}

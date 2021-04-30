@@ -33,6 +33,7 @@ class MapLinkDepaturePoint extends Managed {
 	 
 	bool HasArrivalPoint(string arrivalPoint){
 		for (int i = 0; i < ArrivalPoints.Count(); i++){
+			Print(ArrivalPoints.Get(i).ArrivalPointName + " == " + arrivalPoint );
 			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
 				return true;
 			}
@@ -117,7 +118,7 @@ class MapLinkArrivalPoint extends Managed {
 
 class MapLinkSpawnPoint extends Managed{
 	string ServerName;
-	string EntryPointDisplayName;
+	string DisplayName;
 	int ProtectionTime;
 	ref array<ref MapLinkSpawnPointPos> Positions = new array<ref MapLinkSpawnPointPos>;
 	
