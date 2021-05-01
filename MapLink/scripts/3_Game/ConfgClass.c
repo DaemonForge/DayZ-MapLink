@@ -93,7 +93,8 @@ class MapLinkArrivalPoint extends Managed {
 				return SpawnPoints.Get(i).ProtectionTime;
 			}
 		}
-		return 0;
+		Print("MapLinkArrivalPoint - Failed to Get Protection Time for " + serverName);
+		return -1;
 	}
 	
 	MapLinkSpawnPointPos GetSpawnPos(string serverName){

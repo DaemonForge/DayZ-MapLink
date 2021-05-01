@@ -90,13 +90,24 @@ class MapLinkConfig extends UApiConfigBase {
 		return GetSpawnPointPos(UApiConfig().ServerID, arrivalPoint);
 	}
 	
+	int GetProtectionTime(string arrivalPoint){
+		for (int i = 0; i < ArrivalPoints.Count(); i++){
+			//Print("GetProtectionTime - Is: " + arrivalPoint + " -> " + ArrivalPoints.Get(i).Name);
+			if (ArrivalPoints.Get(i).Name == arrivalPoint){
+				return ArrivalPoints.Get(i).ProtectionTime(UApiConfig().ServerID));
+			}
+		}
+		Print("GetProtectionTime - Failed to Get Protection Time for " + arrivalPoint);
+		return -1;
+	}
 	
 	MapLinkSpawnPointPos GetSpawnPointPos(string serverName, string arrivalPoint){
 		for (int i = 0; i< ArrivalPoints.Count(); i++){
-			if(ArrivalPoints.Get(i).Name == arrivalPoint){
+			if (ArrivalPoints.Get(i).Name == arrivalPoint){
 				return MapLinkSpawnPointPos.Cast(ArrivalPoints.Get(i).GetSpawnPos(serverName));
 			}
 		}
+		Print("GetSpawnPointPos - Failed to Get SpawnPoint for " + arrivalPoint + " on " + serverName);
 		return NULL;
 	}
 	
