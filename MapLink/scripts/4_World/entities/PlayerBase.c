@@ -1,56 +1,105 @@
 modded class PlayerBase extends ManBase{
 	
-	protected bool m_UnderProtection = false;
-	protected bool m_UnderProtectionTimeRemaining = -1;
+	protected bool m_MapLink_UnderProtection = false;
 	
 	protected string m_TransferPoint = "";
+	protected ref Timer m_MapLink_UnderProtectionTimer;
+	
+	
+	override void Init()
+	{
+		super.Init();
+		RegisterNetSyncVariableBool("m_MapLink_UnderProtection");
+	}
+	
+	bool IsUnderMapLinkProtection(){
+		return (m_MapLink_UnderProtection);
+	}
+	
 	
 	bool UApiSaveTransferPoint(string point = ""){
 		m_TransferPoint = point;
 		return true;
 	}
 	
-	int GetQuickBarEntityIndex(EntityAI entity){
-		return m_QuickBarBase.FindEntityIndex(entity);
+	
+	protected void UpdateMapLinkProtectionClient(int time){
+		Print("[MAPLINK] UpdateMapLinkProtectionClient" + time);
+		if (time > 0){
+			GetDayZGame().MapLinkStartCountDown(time);		
+			GetInputController().OverrideRaise(true, false);
+			GetInputController().OverrideMeleeEvade(true, false);
+		}
+		if (time <= 0){
+			GetDayZGame().MapLinkStopCountDown();		
+			GetInputController().OverrideMeleeEvade(false, false);
+			GetInputController().OverrideRaise(false, false);
+		}
 	}
 	
+	
 	void UpdateMapLinkProtection(int time = -1){
-		if (m_UnderProtection && time == -1){
-			m_UnderProtectionTimeRemaining = -1;
-			m_UnderProtection = false;
-			SetSynchDirty();
+		Print("[MAPLINK] UpdateMapLinkProtection" + time);
+		if (!GetGame().IsServer()){return;}
+		RPCSingleParam(MAPLINK_UNDERPROTECTION, new Param1<int>(time), true, GetIdentity());
+		if (m_MapLink_UnderProtection && time < 0){
+			GetInputController().OverrideMeleeEvade(false, false);
+			GetInputController().OverrideRaise(false, false);
+			if (m_MapLink_UnderProtectionTimer){
+				if (m_MapLink_UnderProtectionTimer.IsRunning()){
+					m_MapLink_UnderProtectionTimer.Stop();
+				}
+			}
+			RemoveProtectionSafe();
 			return;
 		}
+		SetAllowDamage(false);
+		m_MapLink_UnderProtection = true;
+		GetInputController().OverrideMeleeEvade(true, false);
+		GetInputController().OverrideRaise(true, false);
 		
+		SetSynchDirty();
+		
+		if (!m_MapLink_UnderProtectionTimer){
+			m_MapLink_UnderProtectionTimer = new Timer;
+		}
+		if (m_MapLink_UnderProtectionTimer.IsRunning()){
+			m_MapLink_UnderProtectionTimer.Stop();
+		}
+		m_MapLink_UnderProtectionTimer.Run(time, this, "UpdateMapLinkProtection", new Param1<int>(-1), false);
 	}
 
-	void RemoveGodModSafe(){
+	protected void RemoveProtectionSafe(){
 		bool PlayerHasGodMode = false;
 		#ifdef JM_COT
 			if ( GetGame().IsServer() && m_JMHasGodMode ){
-				Print("RemoveGodModSafe COT ADMIN TOOLS ACTIVE");
+				Print("RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef VPPADMINTOOLS
 			if ( GetGame().IsServer() && hasGodmode ){
-				Print("RemoveGodModSafe VPP ADMIN TOOLS ACTIVE");
+				Print("RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef ZOMBERRY_AT
 			if ( GetGame().IsServer() && ZBGodMode ){
-				Print("RemoveGodModSafe ZOMBERRY ADMIN TOOLS ACTIVE");
+				Print("RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADER 
 			if (GetGame().IsServer() && m_Trader_IsInSafezone){
-				Print("RemoveGodModSafe Is In Safe Zone");
+				Print("RemoveProtectionSafe Player Is In Safe Zone");
 				PlayerHasGodMode = true;
 			}
 		#endif
-		
+		if (!PlayerHasGodMode){
+			SetAllowDamage(true);
+		}
+		m_MapLink_UnderProtection = false;
+		SetSynchDirty();
 	}
 	
 	
@@ -181,6 +230,7 @@ modded class PlayerBase extends ManBase{
 
 	
 	void UApiKillAndDeletePlayer(){
+		SetAllowDamage(true);
 		SetHealth("","", 0);
 	}
 	
@@ -221,6 +271,12 @@ modded class PlayerBase extends ManBase{
 				}
 			}
 		}
+		if (rpc_type == MAPLINK_UNDERPROTECTION && GetGame().IsClient()) {
+			Param1<int> updata;
+			if (ctx.Read(updata))	{
+				UpdateMapLinkProtectionClient(updata.param1);
+			}
+		}
 		
 		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && GetGame().IsServer() ){
 			Param2<string, string> rtdata;
@@ -234,4 +290,42 @@ modded class PlayerBase extends ManBase{
 		this.UpdateInventoryMenu();
 	}
 	
+	
+	
+	override void SetSuicide(bool state)
+	{
+		super.SetSuicide(state);
+
+		if (state && IsUnderMapLinkProtection() && GetGame().IsServer()){
+			SetAllowDamage(true);
+		}
+	}
+	
+}
+
+modded class DayZPlayerMeleeFightLogic_LightHeavy
+{
+    override bool HandleFightLogic(int pCurrentCommandID, HumanInputController pInputs, EntityAI pEntityInHands, HumanMovementState pMovementState, out bool pContinueAttack)
+	{
+        PlayerBase player = PlayerBase.Cast(m_DZPlayer);
+        
+        if (player)
+        {
+            if (player.IsUnderMapLinkProtection())
+            return false;
+        }
+
+        return super.HandleFightLogic(pCurrentCommandID, pInputs, pEntityInHands, pMovementState, pContinueAttack);
+    }
+}
+
+modded class ActionUnpin extends ActionSingleUseBase
+{
+    override bool ActionCondition( PlayerBase player, ActionTarget target, ItemBase item )
+	{
+        if (player.IsUnderMapLinkProtection())
+            	return false;
+
+		return super.ActionCondition(player, target, item);
+	}
 }

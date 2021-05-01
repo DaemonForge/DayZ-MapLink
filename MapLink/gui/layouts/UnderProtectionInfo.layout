@@ -1,0 +1,62 @@
+PanelWidgetClass rootFrame {
+ visible 1
+ color 0.6863 0.6863 0.6863 0.7843
+ position 56 -184
+ size 300 120
+ halign right_ref
+ valign center_ref
+ hexactpos 1
+ vexactpos 1
+ hexactsize 1
+ vexactsize 1
+ priority 999
+ style Outline
+ {
+  PanelWidgetClass rootBG {
+   ignorepointer 1
+   color 0.5882 0.5882 0.5882 0.5882
+   position 0 0
+   size 1 1
+   halign center_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 0
+   style ToolbarWidget
+   {
+    TextWidgetClass Text {
+     ignorepointer 1
+     position 0 8
+     size 296 48
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "Under Travel Protection"
+     font "gui/fonts/MetronBlack22"
+     "exact text" 0
+     text_proportion 0.3
+     "text halign" center
+     "text valign" center
+    }
+    TextWidgetClass Timer {
+     ignorepointer 1
+     position 0 4
+     size 128 64
+     halign center_ref
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "15"
+     font "gui/fonts/MetronBlack-Italic48"
+     "text halign" center
+     "text valign" center
+    }
+   }
+  }
+ }
+}
