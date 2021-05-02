@@ -206,8 +206,8 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	override void OnDisconnect(){
-		//If the player has played less than 1 1/2 minutes just kill them so their data doesn't save to the local database
-		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 90){ 
+		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
+		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60){ 
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
@@ -216,12 +216,12 @@ modded class PlayerBase extends ManBase{
 	
 	override void EEKilled( Object killer )
 	{
-		//Only save dead people who've been on the server for more than 1 1/2 minutes and who arn't tranfering
-		if (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 90){
+		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
+		if (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60){
 			this.SavePlayerToUApi();
 		}
 		//If they are transfering delete or a fresh spawn just delete the body
-		if (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 90){
+		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60 ) && ( !killer || killer == this )){
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 300,false);
 		}
 		
