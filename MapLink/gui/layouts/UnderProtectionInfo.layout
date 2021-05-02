@@ -1,62 +1,94 @@
 PanelWidgetClass rootFrame {
  visible 1
- color 0.6863 0.6863 0.6863 0.7843
+ ignorepointer 1
+ color 0.6863 0.6863 0.6863 0.5882
  position 56 -184
- size 300 120
+ size 320 104
  halign right_ref
  valign center_ref
  hexactpos 1
  vexactpos 1
  hexactsize 1
  vexactsize 1
+ scaled 1
+ fixaspect inside
  priority 999
- style Outline
+ style ToolbarWidget
  {
-  PanelWidgetClass rootBG {
+  TextWidgetClass Text {
    ignorepointer 1
-   color 0.5882 0.5882 0.5882 0.5882
+   position 0 4
+   size 296 48
+   halign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "Under Travel Protection"
+   font "gui/fonts/MetronBlack"
+   "exact text" 0
+   text_proportion 0.8
+   "size to text h" 1
+   "text halign" center
+   "text valign" center
+  }
+  TextWidgetClass Timer {
+   ignorepointer 1
+   position 0 6
+   size 128 48
+   halign center_ref
+   valign bottom_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   text "15"
+   font "gui/fonts/MetronBlack-Italic48"
+   "text halign" center
+   "text valign" center
+  }
+  PanelWidgetClass left_ {
+   ignorepointer 1
    position 0 0
    size 1 1
-   halign center_ref
    valign center_ref
    hexactpos 0
    vexactpos 0
-   hexactsize 0
+   hexactsize 1
    vexactsize 0
-   style ToolbarWidget
-   {
-    TextWidgetClass Text {
-     ignorepointer 1
-     position 0 8
-     size 296 48
-     halign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     text "Under Travel Protection"
-     font "gui/fonts/MetronBlack22"
-     "exact text" 0
-     text_proportion 0.3
-     "text halign" center
-     "text valign" center
-    }
-    TextWidgetClass Timer {
-     ignorepointer 1
-     position 0 4
-     size 128 64
-     halign center_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 1
-     text "15"
-     font "gui/fonts/MetronBlack-Italic48"
-     "text halign" center
-     "text valign" center
-    }
-   }
+   style rover_sim_colorable
+  }
+  PanelWidgetClass right_ {
+   ignorepointer 1
+   size 1 1
+   halign right_ref
+   valign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   style rover_sim_colorable
+  }
+  PanelWidgetClass top_ {
+   ignorepointer 1
+   size 1 1
+   halign center_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
+   style rover_sim_colorable
+  }
+  PanelWidgetClass bottom_ {
+   ignorepointer 1
+   size 1 1
+   halign center_ref
+   valign bottom_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
+   style rover_sim_colorable
   }
  }
 }
