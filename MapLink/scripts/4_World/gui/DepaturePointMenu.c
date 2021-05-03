@@ -62,6 +62,7 @@ class DeparturePointMenu extends UIScriptedMenu
 	
 	void SetDeparturePoint(MapLinkDepaturePoint dPoint){
 		m_MapLinkDepaturePoint = MapLinkDepaturePoint.Cast(dPoint);
+		m_Heading.SetText(m_MapLinkDepaturePoint.DisplayName);
 		MLLockControls();
 	}
 	
