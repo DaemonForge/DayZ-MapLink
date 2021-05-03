@@ -3,6 +3,7 @@ modded class DayZGame
 	
 	ref MapLinkCountTimerWidget m_MapLinkCountTimerWidget;
 	
+	autoptr UApiServerData ConnectTo;
 	
 	void DayZGame() {
 	}
@@ -11,9 +12,22 @@ modded class DayZGame
 		super.DeferredInit();
 	}
 	
-	void HiveReconnectTo(UApiServerData data){
-		GetGame().Connect(NULL, data.IP, data.Port, data.Password);
+	void HiveSetReconnectTo(UApiServerData data){
+		Print("HiveSetReconnectTo");
+		ConnectTo = UApiServerData.Cast(data);
+		Print(ConnectTo);
 	}	
+	
+	
+	void HiveDoReconnect(UIScriptedMenu menu){
+		Print("HiveDoReconnect");
+		Print(ConnectTo);
+		if (ConnectTo){
+			GetGame().Connect(menu, ConnectTo.IP, ConnectTo.Port, ConnectTo.Password);
+			ConnectTo = NULL;
+		}
+	}
+	
 	
 	void MapLinkStartCountDown(int time){
 		Print("[MAPLINK] MapLinkStartCountDown " + time);
@@ -23,7 +37,6 @@ modded class DayZGame
 		}
 		m_MapLinkCountTimerWidget.Start(time);
 	}
-	
 	void MapLinkStopCountDown(){
 		Print("[MAPLINK] MapLinkStopCountDown");
 		if(!GetGame().IsClient()){return;}
