@@ -157,7 +157,7 @@ class MapLinkSpawnPointPos{
 	
 	vector GetPosition(){
 		float y = Y;
-		if (Y < 2){
+		if (Y <= 0){
 			y = GetGame().SurfaceY(X,Z);
 		}
 		return Vector(X, y, Z);
