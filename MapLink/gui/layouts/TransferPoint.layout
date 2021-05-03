@@ -1,4 +1,5 @@
 PanelWidgetClass rootFrame {
+ visible 1
  color 0 0 0 0.8824
  position 0 0
  size 1 100
@@ -12,6 +13,7 @@ PanelWidgetClass rootFrame {
  style ToolbarWidget
  {
   ButtonWidgetClass Transfer {
+   disabled 0
    color 0 0 0 0.8824
    position 8 0
    size 200 64
@@ -113,7 +115,7 @@ PanelWidgetClass rootFrame {
   }
   ContentWidgetClass ArrivalPointInfo {
    ignorepointer 1
-   position 0 0
+   position 0.022 0
    size 0.75 0.95
    valign center_ref
    hexactpos 0
@@ -123,113 +125,307 @@ PanelWidgetClass rootFrame {
    {
     TextWidgetClass ArrivalPoint_Name {
      ignorepointer 1
-     position 0.08 0.1
-     size 0.9 48
-     hexactpos 0
+     position 48 0.12
+     size 0.9 52
+     hexactpos 1
      vexactpos 0
      hexactsize 0
      vexactsize 1
      text "PORT KEMENKA"
      font "gui/fonts/metronbook"
      "exact text" 0
+     "text valign" center
     }
-    GridSpacerWidgetClass Map_Frame {
-     clipchildren 0
+    GridSpacerWidgetClass ServerInfo {
      ignorepointer 1
-     position 0.08 0.15
-     size 200 28
+     position 48 0.1
+     size 0.9 32
      valign bottom_ref
-     hexactpos 0
+     hexactpos 1
      vexactpos 0
-     hexactsize 1
+     hexactsize 0
      vexactsize 1
-     scriptclass ""
-     Padding 10
+     Padding 0
      Margin 0
      "Size To Content H" 1
-     Columns 2
+     Columns 6
      Rows 1
      {
-      ImageWidgetClass Map_Image {
+      WrapSpacerWidgetClass Spacer {
        ignorepointer 1
-       position 0 0
-       size 28 28
-       valign center_ref
+       position 10 10
+       size 8 0
        hexactpos 1
        vexactpos 1
        hexactsize 1
        vexactsize 1
-       image0 "set:maplink_icons image:map"
-       mode blend
-       "src alpha" 1
-       stretch 1
       }
-      TextWidgetClass Map_Text {
+      GridSpacerWidgetClass Map_Frame {
+       clipchildren 0
+       ignorepointer 1
+       position 0.08 0.15
+       size 1 1
+       valign bottom_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       scriptclass ""
+       Padding 10
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Map_Image {
+         ignorepointer 1
+         position 0 0
+         size 28 28
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:map"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Map_Text {
+         ignorepointer 1
+         position 0 0
+         size 1 28
+         halign right_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         text "Chenarus"
+         font "gui/fonts/metronbook"
+         "exact text" 1
+         "size to text h" 1
+         "size to text v" 0
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass map_spacer {
+         ignorepointer 1
+         position 10 10
+         size 12 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass Cost_Frame {
+       visible 0
+       ignorepointer 1
+       position 0.2 0.15
+       size 1 1
+       valign bottom_ref
+       hexactpos 0
+       vexactpos 0
+       hexactsize 0
+       vexactsize 0
+       scaled 1
+       Padding 8
+       Margin 0
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Cost_Image {
+         ignorepointer 1
+         size 28 28
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_money image:dollar"
+         mode blend
+         "src alpha" 1
+         "no wrap" 0
+         stretch 1
+        }
+        TextWidgetClass Cost_Text {
+         ignorepointer 1
+         size 0.7 18
+         halign right_ref
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 0
+         vexactsize 1
+         text "1.000.000"
+         font "gui/fonts/metronbook"
+         "exact text" 1
+         "size to text h" 1
+         "size to text v" 0
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass cost_spacer {
+         ignorepointer 1
+         position 10 10
+         size 16 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass Status_Frame {
        ignorepointer 1
        position 0 0
-       size 0.8 28
-       halign right_ref
-       valign center_ref
+       size 1 1
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 1
-       text "Chenarus"
-       font "gui/fonts/metronbook"
-       "exact text" 1
-       "size to text h" 0
-       "size to text v" 0
-       "text valign" center
+       vexactsize 0
+       Padding 8
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Status_Image {
+         ignorepointer 1
+         color 0.7647 0.7255 0.6 1
+         position 0 0
+         size 28 28
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:status"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Status_Text {
+         ignorepointer 1
+         color 0.7647 0.7255 0.6 1
+         position 10 10
+         size 48 48
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "Querying"
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass status_spacer {
+         ignorepointer 1
+         position 10 10
+         size 10 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
       }
-     }
-    }
-    GridSpacerWidgetClass Cost_Frame {
-     visible 0
-     ignorepointer 1
-     position 0.2 0.15
-     size 130 28
-     valign bottom_ref
-     hexactpos 0
-     vexactpos 0
-     hexactsize 1
-     vexactsize 1
-     scaled 1
-     Padding 10
-     Margin 0
-     "Size To Content H" 1
-     Columns 2
-     Rows 1
-     {
-      ImageWidgetClass Cost_image {
+      GridSpacerWidgetClass PlayerCount_Frame {
+       visible 0
        ignorepointer 1
-       size 28 28
-       valign center_ref
-       hexactpos 1
-       vexactpos 1
-       hexactsize 1
-       vexactsize 1
-       image0 "set:maplink_money image:dollar"
-       mode blend
-       "src alpha" 1
-       "no wrap" 0
-       stretch 1
-      }
-      TextWidgetClass Cost_Text {
-       ignorepointer 1
-       size 0.7 18
-       halign right_ref
-       valign center_ref
+       position 0 0
+       size 1 1
        hexactpos 1
        vexactpos 1
        hexactsize 0
-       vexactsize 1
-       text "1.000.000"
-       font "gui/fonts/metronbook"
-       "exact text" 1
-       "size to text h" 1
-       "size to text v" 0
-       "text halign" center
-       "text valign" center
+       vexactsize 0
+       Padding 8
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass PlayerCount_Image {
+         ignorepointer 1
+         position 0 0
+         size 28 28
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:players"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass PlayerCount_Text {
+         ignorepointer 1
+         position 10 10
+         size 48 48
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "10/16"
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass PlayerCount_spacer {
+         ignorepointer 1
+         position 10 10
+         size 8 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass Queue_Frame {
+       visible 0
+       ignorepointer 1
+       position 0 0
+       size 1 1
+       hexactpos 1
+       vexactpos 1
+       hexactsize 0
+       vexactsize 0
+       Padding 8
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Queue_Image {
+         ignorepointer 1
+         position 0 0
+         size 28 28
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:queue"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Queue_Text {
+         ignorepointer 1
+         position 10 10
+         size 48 48
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "5"
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass Queue_spacer {
+         ignorepointer 1
+         position 10 10
+         size 8 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
       }
      }
     }
