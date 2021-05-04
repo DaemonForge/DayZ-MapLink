@@ -118,6 +118,7 @@ modded class PlayerBase extends ManBase{
 	
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
+			GetGame().AdminLog("[MAPLINK] Saving Player Data to API: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
 			delete teststore;
@@ -221,12 +222,13 @@ modded class PlayerBase extends ManBase{
 	override void EEKilled( Object killer )
 	{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
-		if (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60){
+		if ( (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60) || ( killer && killer != this )){
 			this.SavePlayerToUApi();
 		}
 		//If they are transfering delete or a fresh spawn just delete the body
 		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60 ) && ( !killer || killer == this )){
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 300,false);
+			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 200, false);
 		}
 		
 		super.EEKilled( killer );
@@ -234,6 +236,9 @@ modded class PlayerBase extends ManBase{
 
 	
 	void UApiKillAndDeletePlayer(){
+		if (GetIdentity()){
+			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+		}
 		SetAllowDamage(true);
 		SetHealth("","", 0);
 	}
