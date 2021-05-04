@@ -23,6 +23,10 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	
+	bool IsBeingTransfered(){
+		return (m_TransferPoint != "");
+	}
+	
 	protected void UpdateMapLinkProtectionClient(int time){
 		Print("[MAPLINK] UpdateMapLinkProtectionClient" + time);
 		if (time > 0){
@@ -73,25 +77,25 @@ modded class PlayerBase extends ManBase{
 		bool PlayerHasGodMode = false;
 		#ifdef JM_COT
 			if ( GetGame().IsServer() && m_JMHasGodMode ){
-				Print("RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
+				Print("[MAPLINK] RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef VPPADMINTOOLS
 			if ( GetGame().IsServer() && hasGodmode ){
-				Print("RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
+				Print("[MAPLINK] RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef ZOMBERRY_AT
 			if ( GetGame().IsServer() && ZBGodMode ){
-				Print("RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
+				Print("[MAPLINK] RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADER 
 			if (GetGame().IsServer() && m_Trader_IsInSafezone){
-				Print("RemoveProtectionSafe Player Is In Safe Zone");
+				Print("[MAPLINK] RemoveProtectionSafe Player Is In Safe Zone");
 				PlayerHasGodMode = true;
 			}
 		#endif
@@ -114,6 +118,7 @@ modded class PlayerBase extends ManBase{
 	
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
+			GetGame().AdminLog("[MAPLINK] Saving Player Data to API: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
 			delete teststore;
@@ -217,12 +222,13 @@ modded class PlayerBase extends ManBase{
 	override void EEKilled( Object killer )
 	{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
-		if (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60){
+		if ( (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60) || ( killer && killer != this )){
 			this.SavePlayerToUApi();
 		}
 		//If they are transfering delete or a fresh spawn just delete the body
 		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60 ) && ( !killer || killer == this )){
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 300,false);
+			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 200, false);
 		}
 		
 		super.EEKilled( killer );
@@ -230,6 +236,9 @@ modded class PlayerBase extends ManBase{
 
 	
 	void UApiKillAndDeletePlayer(){
+		if (GetIdentity()){
+			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+		}
 		SetAllowDamage(true);
 		SetHealth("","", 0);
 	}
@@ -246,15 +255,19 @@ modded class PlayerBase extends ManBase{
 	protected void UApiDoTravel(string arrivalPoint, string serverName){
 		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
-		if (dpoint && serverData && dpoint.HasArrivalPoint(arrivalPoint)){
+		if (dpoint && serverData && dpoint.HasArrivalPoint(arrivalPoint) && GetIdentity()){
 			this.UApiSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToUApi();
-			Print("[MAPLINK] UApi Do Travel Verified - " + arrivalPoint + " - " + serverName );
-			
+			Print("[MAPLINK] Do Travel Verified for " + GetIdentity().GetId() +  " Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
+			GetGame().AdminLog("[MAPLINK]  Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 400, false);
 		} else {
-			Error("[MAPLINK] User Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
+			string id = "NULL";
+			if (GetIdentity()){
+				id = GetIdentity().GetId();
+			}
+			Error("[MAPLINK] User " + id + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
 			
 	} 
