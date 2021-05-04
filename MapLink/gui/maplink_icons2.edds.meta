@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{00DDA8DB9D8CA0CB}MapLink/gui/maplink_icons2.tga"
+ Author "desktop-tdpoqud"
+ ChangeDate -783045982
+ Configurations {
+  TGAResourceClass PC {
+   SourceFile "maplink_icons2.tga"
+  }
+  TGAResourceClass XBOX_ONE : PC {
+  }
+  TGAResourceClass PS4 : PC {
+  }
+  TGAResourceClass LINUX : PC {
+  }
+ }
+}

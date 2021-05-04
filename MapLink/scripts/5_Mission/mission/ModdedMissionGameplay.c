@@ -13,11 +13,22 @@ modded class MissionGameplay
 		if ( !ctx.Read( data ) ) return;
 		Print("[MAPLINK] Kicked from Game");
 		UApiServerData serverData = UApiServerData.Cast(data.param1);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(GetGame().DisconnectSessionForce, 50);
-		if (serverData){
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(GetDayZGame().HiveReconnectTo, 500, false, serverData);
-		}
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetGame().DisconnectSessionForce);
+		GetDayZGame().HiveSetReconnectTo(serverData);
 	}
 	
+	
+}
+modded class MissionMainMenu{
+	
+	override void OnMissionStart(){
+		super.OnMissionStart();
+		Print("MissionMainMenu - OnMissionStart");
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.DoReconnect, 10);
+	}
+
+	void DoReconnect() {
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetDayZGame().HiveDoReconnect, m_mainmenu);
+	}
 	
 }

@@ -31,13 +31,13 @@ class MapLinkCountTimerWidget  extends ScriptedWidgetEventHandler {
 	}
 	
 	void Start(int time){
-		if (!m_Root){
+		if (!m_Root) {
 			CreateWidget();
 		}
-		if (!m_Timer){
+		if (!m_Timer) {
 			m_Timer = new Timer();
 		}
-		if (m_Timer.IsRunning()){
+		if (m_Timer.IsRunning()) {
 			m_Timer.Stop();
 		}
 		m_CurrentTime = time;

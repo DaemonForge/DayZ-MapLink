@@ -1,0 +1,16 @@
+MetaFileClass {
+ Name "{B2339B5821C5B380}MapLink/gui/data/go.edds"
+ Author "desktop-m1abk2b"
+ ChangeDate -729273694
+ Configurations {
+  PNGResourceClass PC {
+   SourceFile "go.png"
+  }
+  PNGResourceClass XBOX_ONE : PC {
+  }
+  PNGResourceClass PS4 : PC {
+  }
+  PNGResourceClass LINUX : PC {
+  }
+ }
+}
