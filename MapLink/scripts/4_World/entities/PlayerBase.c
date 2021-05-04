@@ -23,6 +23,10 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	
+	bool IsBeingTransfered(){
+		return (m_TransferPoint != "");
+	}
+	
 	protected void UpdateMapLinkProtectionClient(int time){
 		Print("[MAPLINK] UpdateMapLinkProtectionClient" + time);
 		if (time > 0){
