@@ -20,12 +20,9 @@ modded class MissionGameplay
 	
 }
 modded class MissionMainMenu {
-	
-	protected bool m_oldValue_NoCutscene;
-	
+		
 	override void OnInit() {
 		if ( GetDayZGame().IsToTransfer() ){
-			m_oldValue_NoCutscene = m_NoCutscene;
 			m_NoCutscene = true;
 		}
 		super.OnInit();
@@ -35,20 +32,19 @@ modded class MissionMainMenu {
 	
 	override void OnMissionStart(){
 		super.OnMissionStart();
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.DoReconnect, 10);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.DoReconnect);
 	}
 
 	
 	
 	override void OnMissionFinish(){
 		super.OnMissionFinish();
-		m_NoCutscene = m_oldValue_NoCutscene;
 	}
 	
 	
 
-	void DoReconnect() {
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetDayZGame().HiveDoReconnect, m_mainmenu);
+	void DoReconnect() { 
+		GetDayZGame().HiveDoReconnect(m_mainmenu);
 	}
 	
 }
