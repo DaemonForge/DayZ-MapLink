@@ -318,7 +318,7 @@ modded class PlayerBase extends ManBase{
 	void SetActions(out TInputActionMap InputActionMap) {
 		
 		super.SetActions(InputActionMap);
-		AddAction(MapLinkOpenOnAny, InputActionMap);
+		AddAction(ActionMapLinkOpenOnAny, InputActionMap);
 		
 	}
 	

@@ -1,7 +1,8 @@
-class ActionHiveMoveToNewServer extends ActionInteractBase
+class ActionMapLinkOpenOnTerminal extends ActionInteractBase
 {
 	string mapName = "";
-	void ExpansionActionOpenTraderMenu(){
+	
+	void ActionMapLinkOpenOnTerminal(){
 		m_CommandUID = DayZPlayerConstants.CMD_ACTIONMOD_ATTACHITEM;
 	}
 	
@@ -17,10 +18,6 @@ class ActionHiveMoveToNewServer extends ActionInteractBase
 		return false;
 	}
 	
-	override void OnExecuteServer( ActionData action_data )
-	{
-		super.OnExecuteServer( action_data );
-	}
 
 	override void OnExecuteClient( ActionData action_data ){
 		super.OnExecuteClient( action_data );
