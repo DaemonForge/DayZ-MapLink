@@ -22,7 +22,6 @@ class MapLinkDepaturePoint extends Managed {
 	int SafeZoneCoolDown;
 	string TerminalType;
 	vector Position;
-	vector Orientation;
 	ref array<ref MapLinkArrivalPointsRef> ArrivalPoints = new array<ref MapLinkArrivalPointsRef>;
 	
 	void MapLinkDepaturePoint(string displayName){

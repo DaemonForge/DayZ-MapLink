@@ -7,6 +7,8 @@ class MapLinkConfig extends UApiConfigBase {
 	
 	static float MAX_DEPATUREPOINT_DISTANCE = 50;
 	
+	static float MAX_DEPATUREPOINTANY_DISTANCE = 0.7;
+	
 	override void SetDefaults(){
 		/*
 	
@@ -82,6 +84,27 @@ class MapLinkConfig extends UApiConfigBase {
 			return MapLinkDepaturePoint.Cast(DepaturePoints.Get(closestPointIndex));
 		}
 		Error("[MAPLINK] COULD NOT FIND A MAP LINK DEPATURE POINT");
+		return NULL;
+	}
+	
+	
+	bool IsDepaturePoint(string type, vector pos){
+		for (int i = 0; i < DepaturePoints.Count(); i++){
+			if (DepaturePoints.Get(i).TerminalType == type && vector.Distance( DepaturePoints.Get(i).Position, pos) < MAX_DEPATUREPOINTANY_DISTANCE){
+				return true;
+			}
+		}
+		return false;
+	
+	}
+	
+	
+	MapLinkDepaturePoint GetDepaturePointAny(string type, vector pos){
+		for (int i = 0; i < DepaturePoints.Count(); i++){
+			if (DepaturePoints.Get(i).TerminalType == type && vector.Distance( DepaturePoints.Get(i).Position, pos) <= MAX_DEPATUREPOINTANY_DISTANCE){
+				return MapLinkDepaturePoint.Cast(DepaturePoints.Get(i));
+			}
+		}
 		return NULL;
 	}
 	

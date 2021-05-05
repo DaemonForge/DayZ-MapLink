@@ -314,6 +314,19 @@ modded class PlayerBase extends ManBase{
 		}
 	}
 	
+	
+	void SetActions(out TInputActionMap InputActionMap) {
+		
+		super.SetActions(InputActionMap);
+		AddAction(MapLinkOpenOnAny, InputActionMap);
+		
+	}
+	
+	
+	bool CanOpenMapLinkOnAny(EntityAI entity){
+		
+	
+	}
 }
 
 modded class DayZPlayerMeleeFightLogic_LightHeavy
