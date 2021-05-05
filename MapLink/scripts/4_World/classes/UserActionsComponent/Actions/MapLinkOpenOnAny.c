@@ -21,29 +21,41 @@ class ActionMapLinkOpenOnAny: ActionInteractBase
 
 	override bool ActionCondition( PlayerBase player, ActionTarget target, ItemBase item )
 	{
-		if ( !target ) 
+		if ( !target || !player) 
 			return false;
 		
 		EntityAI theTarget;
 		
+		MapLinkDepaturePoint depaturePoint;
 		//Hive_Terminals Use there own action, to be easier for modders to do Might make a moddable array to allow for modders to add there own objects
-		if ( Class.CastTo(theTarget, target.GetObject()) && theTarget.GetType() != "Hive_Terminal" && GetMapLinkConfig().IsDepaturePoint(theTarget.GetType(), theTarget.GetPosition()) ) {
+		if ( Class.CastTo(theTarget, target.GetObject()) && theTarget.GetType() != "Hive_Terminal" && player.FindDepaturePointForEntity(theTarget, depaturePoint) ) {
 			return true;
 		}
 		return false;
 	}
 	
+	override void OnExecuteServer( ActionData action_data ){
+		super.OnExecuteServer( action_data );
+		
+		//Something should go here for better validation server side? Right now it just checks for the nearest depaturePoint to the player within 50 meters
+	}
 	
 	override void OnExecuteClient( ActionData action_data ){
 		super.OnExecuteClient( action_data );
+
+		if ( !action_data )
+			return;
 		
 		EntityAI theTarget;
-		
-		if (GetMapLinkConfig().IsDepaturePoint(theTarget.GetType(), theTarget.GetPosition()) && action_data && action_data.m_Target && Class.CastTo(theTarget, action_data.m_Target.GetObject()) ){
-			if (!m_DeparturePointMenu){
-				m_DeparturePointMenu = DeparturePointMenu.Cast(GetGame().GetUIManager().EnterScriptedMenu(MAPLINK_DEPARTUREPOINTMENU, NULL));
+		PlayerBase thePlayer;
+		if (Class.CastTo(theTarget, action_data.m_Target.GetObject()) && Class.CastTo(thePlayer, action_data.m_Player)){
+			MapLinkDepaturePoint depaturePoint;
+			if (thePlayer.FindDepaturePointForEntity(theTarget, depaturePoint)){
+				if (!m_DeparturePointMenu){
+					m_DeparturePointMenu = DeparturePointMenu.Cast(GetGame().GetUIManager().EnterScriptedMenu(MAPLINK_DEPARTUREPOINTMENU, NULL));
+				}
+				m_DeparturePointMenu.SetDeparturePoint(depaturePoint);
 			}
-			m_DeparturePointMenu.SetDeparturePoint(GetMapLinkConfig().GetDepaturePointAny(theTarget.GetType(), theTarget.GetPosition()));
 		}
 	}
 }

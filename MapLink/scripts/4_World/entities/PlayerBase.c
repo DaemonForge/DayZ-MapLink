@@ -322,10 +322,18 @@ modded class PlayerBase extends ManBase{
 		
 	}
 	
-	
-	bool CanOpenMapLinkOnAny(EntityAI entity){
+	bool FindDepaturePointForEntity(EntityAI entity, out MapLinkDepaturePoint depaturePoint){
+		if (!entity)
+			return false;
 		
-	
+		if (!depaturePoint){ //So you can use super here and if the point is set don't set it.
+			if (GetMapLinkConfig().IsDepaturePoint(entity.GetType(), entity.GetPosition())){
+				depaturePoint = MapLinkDepaturePoint.Cast(GetMapLinkConfig().GetDepaturePointAny(entity.GetType(), entity.GetPosition()));
+				return true;
+			}
+			return false;
+		}
+		return true;
 	}
 }
 
