@@ -59,12 +59,3 @@ class CfgMods
         };
     };
 };
-class CfgVehicles
-{
-	class HouseNoDestruct;
-	class Hive_Terminal : HouseNoDestruct{
-		scope = 1;
-		displayName  = "Hive Terminal";
-		model = "MapLink\data\hive_terminal.p3d";
-	};
-};
