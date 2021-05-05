@@ -6,7 +6,7 @@ class ActionHiveMoveToNewServer extends ActionInteractBase
 	}
 	
 	override string GetText(){
-		return "Open Departure Menu";
+		return "Open Departure Terminal";
 	}
 
 	
