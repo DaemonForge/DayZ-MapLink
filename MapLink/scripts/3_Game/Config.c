@@ -1,8 +1,8 @@
 class MapLinkConfig extends UApiConfigBase {
 
 	ref array<ref UApiServerData> Servers = new array<ref UApiServerData>;
-	ref array<ref MapLinkDepaturePoint> DepaturePoints = new array<ref MapLinkDepaturePoint>;
 	ref array<ref MapLinkArrivalPoint> ArrivalPoints = new array<ref MapLinkArrivalPoint>;
+	ref array<ref MapLinkDepaturePoint> DepaturePoints = new array<ref MapLinkDepaturePoint>;
 	ref array<ref MapLinkCurrency> Currencies = new array<ref MapLinkCurrency>;
 	
 	static float MAX_DEPATUREPOINT_DISTANCE = 50;

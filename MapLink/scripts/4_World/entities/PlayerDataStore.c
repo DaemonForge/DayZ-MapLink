@@ -244,7 +244,11 @@ class PlayerDataStore extends Managed{
 	}
 	
 	bool IsValid(){
-		return (GUID && GUID != "" && m_Type != "" && !m_IsDead && m_Health > 0);
+		return (GUID && GUID != "" && m_Type != "");
+	}
+	
+	bool IsAlive(){
+		return (!m_IsDead && m_Health > 0);
 	}
 }
 
