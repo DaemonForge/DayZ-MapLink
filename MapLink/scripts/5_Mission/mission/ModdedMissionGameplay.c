@@ -21,8 +21,10 @@ modded class MissionGameplay
 }
 modded class MissionMainMenu {
 		
+	static bool MAPLINK_DISABLECUTSCENE_ONTRANSFER = true;
+	
 	override void OnInit() {
-		if ( GetDayZGame().IsToTransfer() ){
+		if ( GetDayZGame().IsToTransfer() && MAPLINK_DISABLECUTSCENE_ONTRANSFER){
 			m_NoCutscene = true;
 		}
 		super.OnInit();
