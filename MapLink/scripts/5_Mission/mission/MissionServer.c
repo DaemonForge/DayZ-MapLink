@@ -19,7 +19,7 @@ modded class MissionServer extends MissionBase
 				Print("[UAPI] LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
 				if (dataload.IsValid() && dataload.GUID == oid){
 					m_PlayerDBQue.Set(oid, PlayerDataStore.Cast(dataload));
-				} else if (m_PlayerDBQue.Contains(oid)) {
+				} else if (m_PlayerDBQue.Contains(oid)) { //This shouldn't be needed any more
 					m_PlayerDBQue.Remove(oid);
 				}
 				return;
@@ -81,6 +81,7 @@ modded class MissionServer extends MissionBase
 						GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					}
 				}
+				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
 			}
 			Print("[UAPI] Spawning player " + identity.GetId() + " on: " + UApiConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
@@ -100,12 +101,14 @@ modded class MissionServer extends MissionBase
 					GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					m_PlayerDBQue.Remove(identity.GetId());
 					Print("[UAPI] Error Server isn't set up to receive this arrival point Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
+					
+					m_PlayerDBQue.Remove(identity.GetId());
 					return false;
 				}
 				pos = pointPos.Get();
 				ori = pointPos.GetOrientation();
 			}
-					PlayerBase player = PlayerBase.Cast(PlayerDataStore.Cast(playerdata).CreateWithIdentity(PlayerIdentity.Cast(identity), pos));
+			PlayerBase player = PlayerBase.Cast(PlayerDataStore.Cast(playerdata).CreateWithIdentity(PlayerIdentity.Cast(identity), pos));
 			GetGame().SelectPlayer(identity, player);
 			InvokeOnConnect(player, identity);
 			SyncEvents.SendPlayerList();
