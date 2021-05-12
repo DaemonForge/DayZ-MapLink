@@ -42,6 +42,8 @@ class PlayerDataStore extends Managed{
 
 	autoptr array<autoptr UApiEntityStore> m_Attachments;
 	
+	autoptr array<autoptr UApiStomachItem> m_Stomach;
+	
 	autoptr array<autoptr UApiMetaData> m_MetaData;
 	
 	void PlayerDataStore(PlayerBase player = NULL){
@@ -250,6 +252,14 @@ class PlayerDataStore extends Managed{
 	bool IsAlive(){
 		return (!m_IsDead && m_Health > 0);
 	}
+	
+	void AddStomachItem(float amount, int foodstage, string className, int agents){
+		if ( !m_Stomach ){
+			m_Stomach = new array<autoptr UApiStomachItem>;
+		}
+		m_Stomach.Insert(new UApiStomachItem(amount, foodstage, className, agents));
+	}
+	
 }
 
 class UApiPlayerIdFloatData extends Managed{
@@ -268,5 +278,19 @@ class UApiPlayerIdFloatData extends Managed{
 	
 	float Value(){
 		return m_Value;
+	}
+}
+
+class UApiStomachItem extends Managed {
+	float m_Amount;
+	int m_FoodStage;
+	string m_ClassName;
+	int m_Agents;
+	
+	void UApiStomachItem(float amount, int foodstage, string className, int agents){
+		m_Amount = amount;
+		m_FoodStage = foodstage;
+		m_ClassName = className;
+		m_Agents = agents;
 	}
 }

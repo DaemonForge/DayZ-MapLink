@@ -156,7 +156,14 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		
+		if (m_PlayerStomach){
+			for (i = 0; i < m_PlayerStomach.m_StomachContents.Count(); i++){
+				StomachItem stomachItem;
+				if (Class.CastTo(stomachItem, m_PlayerStomach.m_StomachContents.Get(i))){
+					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents);
+				}
+			}
+		}	
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -204,6 +211,14 @@ modded class PlayerBase extends ManBase{
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 300);
+		if (m_PlayerStomach && data.m_Stomach){
+			for (i = 0; i < data.m_Stomach.Count(); i++){
+				UApiStomachItem stomachItem;
+				if (Class.CastTo(stomachItem, data.m_Stomach.Get(i))){
+					m_PlayerStomach.AddToStomach(stomachItem.m_ClassName, stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_Agents );
+				}
+			}
+		}	
 	}
 	
 	void SendUApiAfterLoadClient(){
