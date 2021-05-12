@@ -82,6 +82,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 			} else {
 				m_HasEnoughMoney = false;
 				m_Cost_Text.SetColor(ARGB(255, 255, 61, 0));
+				m_Transfer.SetAlpha(0.3);
 			}
 		} else {
 			m_Cost_Frame.Show(false);
@@ -130,6 +131,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 					m_Status_Text.SetText("Offline");
 					m_Status_Text.SetColor(ARGB(255, 255, 61, 0));
 					m_ServerOnline = false;
+					m_Transfer.SetAlpha(0.3);
 				}
 			}
       	}
