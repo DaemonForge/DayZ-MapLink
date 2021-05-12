@@ -19,7 +19,7 @@ modded class MissionServer extends MissionBase
 				Print("[UAPI] LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
 				if (dataload.IsValid() && dataload.GUID == oid){
 					m_PlayerDBQue.Set(oid, PlayerDataStore.Cast(dataload));
-				} else if (m_PlayerDBQue.Contains(oid)) {
+				} else if (m_PlayerDBQue.Contains(oid)) { //This shouldn't be needed any more
 					m_PlayerDBQue.Remove(oid);
 				}
 				return;
@@ -52,12 +52,11 @@ modded class MissionServer extends MissionBase
 		if (eventTypeId == ClientNewEventTypeID) {
 			ClientNewEventParams newParams;
 			Class.CastTo(newParams, params);
-			if (m_PlayerDBQue.Contains(PlayerIdentity.Cast(newParams.param1).GetId()) && m_PlayerDBQue.Get(PlayerIdentity.Cast(newParams.param1).GetId()).IsValid()){
-				//If the player was created, end if not spawn a new fresh spawn so it the player can be kicked correctly
-				if (UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3)){ 
-					Print("[UAPI] Player " + PlayerIdentity.Cast(newParams.param1).GetId() +" Was Created from API");
-					return;
-				}
+			//If the player was created, end if not spawn a new fresh spawn
+			//Also need to spawn fresh spawns to be able to kick them with the redirect or they will get kick with a player not created message instead
+			if (UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3)){ 
+				Print("[UAPI] Player " + PlayerIdentity.Cast(newParams.param1).GetId() +" Was Created from API");
+				return;
 			}
 		}
 		super.OnEvent(eventTypeId, params);
@@ -66,12 +65,25 @@ modded class MissionServer extends MissionBase
 	bool UApiOnClientNewEvent(PlayerIdentity identity, vector pos, ParamsReadContext ctx)
 	{
 		PlayerDataStore playerdata;		
-		if (identity && m_PlayerDBQue.Find(identity.GetId(), playerdata) && playerdata.IsValid()) {
+		if (identity && m_PlayerDBQue.Contains(identity.GetId()) &&  m_PlayerDBQue.Find(identity.GetId(), playerdata) && playerdata.IsValid()) {
 			pos = "0 0 0";
 			vector ori = "0 0 0";
 			UApiServerData serverData;
 			string transferPoint =  playerdata.m_TransferPoint;
 			string FromServerName = playerdata.m_Server;
+			
+			if (!playerdata.IsAlive()){
+				UApiServerData CurServerData = UApiServerData.Cast(GetMapLinkConfig().GetServer(UApiConfig().ServerID));
+				if (CurServerData && CurServerData.RespawnServer && CurServerData.RespawnServer != "" && CurServerData.RespawnServer != UApiConfig().ServerID){
+					serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(CurServerData.RespawnServer));
+					if (serverData){
+						NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Redirecting to the correct server - " + CurServerData.RespawnServer), "set:maplink_icons image:redirect", -16843010, 16, identity);
+						GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
+					}
+				}
+				m_PlayerDBQue.Remove(identity.GetId());
+				return false;
+			}
 			Print("[UAPI] Spawning player " + identity.GetId() + " on: " + UApiConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
 			if (FromServerName != UApiConfig().ServerID && transferPoint == "") {
 				serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(playerdata.m_Server));
@@ -89,12 +101,13 @@ modded class MissionServer extends MissionBase
 					GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					m_PlayerDBQue.Remove(identity.GetId());
 					Print("[UAPI] Error Server isn't set up to receive this arrival point Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
+					
+					m_PlayerDBQue.Remove(identity.GetId());
 					return false;
 				}
 				pos = pointPos.Get();
 				ori = pointPos.GetOrientation();
 			}
-
 			PlayerBase player = PlayerBase.Cast(PlayerDataStore.Cast(playerdata).CreateWithIdentity(PlayerIdentity.Cast(identity), pos));
 			GetGame().SelectPlayer(identity, player);
 			InvokeOnConnect(player, identity);

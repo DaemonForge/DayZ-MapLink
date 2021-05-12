@@ -6,6 +6,7 @@ class UApiServerData extends Managed {
 	int Port = 2302;
 	int QueryPort = 27016;
 	string Password = "";
+	string RespawnServer = "";
 	
 	void UApiServerData(string ip, int port = 2302, string password = ""){
 		IP = ip;
@@ -21,7 +22,6 @@ class MapLinkDepaturePoint extends Managed {
 	int SafeZoneCoolDown;
 	string TerminalType;
 	vector Position;
-	vector Orientation;
 	ref array<ref MapLinkArrivalPointsRef> ArrivalPoints = new array<ref MapLinkArrivalPointsRef>;
 	
 	void MapLinkDepaturePoint(string displayName){

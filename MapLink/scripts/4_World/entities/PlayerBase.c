@@ -111,7 +111,7 @@ modded class PlayerBase extends ManBase{
     {
         super.OnStoreSave(ctx);
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 90 ){ 
+		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME ){ 
 			this.SavePlayerToUApi();
 		}
     }
@@ -156,7 +156,14 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		
+		if (m_PlayerStomach){
+			for (i = 0; i < m_PlayerStomach.m_StomachContents.Count(); i++){
+				StomachItem stomachItem;
+				if (Class.CastTo(stomachItem, m_PlayerStomach.m_StomachContents.Get(i))){
+					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents);
+				}
+			}
+		}	
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -204,6 +211,14 @@ modded class PlayerBase extends ManBase{
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 300);
+		if (m_PlayerStomach && data.m_Stomach){
+			for (i = 0; i < data.m_Stomach.Count(); i++){
+				UApiStomachItem stomachItem;
+				if (Class.CastTo(stomachItem, data.m_Stomach.Get(i))){
+					m_PlayerStomach.AddToStomach(stomachItem.m_ClassName, stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_Agents );
+				}
+			}
+		}	
 	}
 	
 	void SendUApiAfterLoadClient(){
@@ -212,7 +227,7 @@ modded class PlayerBase extends ManBase{
 	
 	override void OnDisconnect(){
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
-		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60){ 
+		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME){ 
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
@@ -222,11 +237,11 @@ modded class PlayerBase extends ManBase{
 	override void EEKilled( Object killer )
 	{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
-		if ( (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > 60) || ( killer && killer != this )){
+		if ( (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME) || ( killer && killer != this )){
 			this.SavePlayerToUApi();
 		}
 		//If they are transfering delete or a fresh spawn just delete the body
-		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= 60 ) && ( !killer || killer == this )){
+		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME ) && ( !killer || killer == this )){
 			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 200, false);
 		}
@@ -314,6 +329,27 @@ modded class PlayerBase extends ManBase{
 		}
 	}
 	
+	
+	void SetActions(out TInputActionMap InputActionMap) {
+		
+		super.SetActions(InputActionMap);
+		AddAction(ActionMapLinkOpenOnAny, InputActionMap);
+		
+	}
+	
+	bool FindDepaturePointForEntity(EntityAI entity, out MapLinkDepaturePoint depaturePoint){
+		if (!entity)
+			return false;
+		
+		if (!depaturePoint){ //So you can use super here and if the point is set don't set it.
+			if (GetMapLinkConfig().IsDepaturePoint(entity.GetType(), entity.GetPosition())){
+				depaturePoint = MapLinkDepaturePoint.Cast(GetMapLinkConfig().GetDepaturePointAny(entity.GetType(), entity.GetPosition()));
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
 }
 
 modded class DayZPlayerMeleeFightLogic_LightHeavy
