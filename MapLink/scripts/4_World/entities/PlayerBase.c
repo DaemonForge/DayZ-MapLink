@@ -111,7 +111,7 @@ modded class PlayerBase extends ManBase{
     {
         super.OnStoreSave(ctx);
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ){ 
+		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME ){ 
 			this.SavePlayerToUApi();
 		}
     }
