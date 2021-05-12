@@ -20,6 +20,7 @@ class MapLinkConfig extends UApiConfigBase {
 		DepaturePoints.Insert(new MapLinkDepaturePoint("Demo000"));
 		ArrivalPoints.Insert(new MapLinkArrivalPoint("Demo000"));
 		Currencies.Insert(new MapLinkCurrency(-1));
+		Currencies.Insert(new MapLinkCurrency(-2));
 	}
 
 	override void OnDataReceive(){
@@ -185,6 +186,7 @@ class MapLinkConfig extends UApiConfigBase {
 	
 	string GetCostIcon(int id){
 		for (int i = 0; i < Currencies.Count(); i++){
+			Print("[MAPLINK] Getting Icon ID:" + id + " is it: " + Currencies.Get(i).ID);
 			if (Currencies.Get(i).ID == id){
 				string icon = Currencies.Get(i).Icon;
 				if (icon.Contains(".paa") || icon.Contains("set:") || icon.Contains(".edds") ){
@@ -196,6 +198,17 @@ class MapLinkConfig extends UApiConfigBase {
 		return "set:maplink_money image:dollar";
 	}
 	
+	
+	MapLinkCurrency GetCurrency(int id){
+		
+		for (int i = 0; i < Currencies.Count(); i++){
+			if (Currencies.Get(i).ID == id){
+				Currencies.Get(i).SortMoney();
+				return Currencies.Get(i);
+			}
+		}
+		return NULL;
+	}
 }
 
 

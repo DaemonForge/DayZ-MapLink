@@ -7,6 +7,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	MapLinkSpawnPoint			m_MapLinkSpawnPoint;
 	int 						m_LookupCid;
 	bool 						m_ServerOnline = true;
+	bool						m_HasEnoughMoney = true;
 	
 	Widget						m_Root;
 	
@@ -70,11 +71,22 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		if (m_ArrivalPoint.Cost > 0){
 			m_Cost_Frame.Show(true);
 			m_Cost_Text.SetText(m_ArrivalPoint.Cost.ToString());
-		
-			m_Cost_Image.LoadImageFile(0, MapLinkConfig().GetCostIcon(m_ArrivalPoint.AcceptedCurrencyId));
+			string costImage = GetMapLinkConfig().GetCurrency(m_ArrivalPoint.AcceptedCurrencyId).GetIcon();
+			//Print("[MAPLINK] Settings Cost Image " + costImage);
+			m_Cost_Image.LoadImageFile(0, costImage);
+			
+			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			if (player && player.MLGetPlayerBalance(m_ArrivalPoint.AcceptedCurrencyId) >= m_ArrivalPoint.Cost){
+				m_Cost_Text.SetColor(ARGB(255, 105, 240, 174));
+				m_HasEnoughMoney = true;
+			} else {
+				m_HasEnoughMoney = false;
+				m_Cost_Text.SetColor(ARGB(255, 255, 61, 0));
+			}
 		} else {
 			m_Cost_Frame.Show(false);
 		}
+		
 		m_Map_Text.SetText(GetMapLinkConfig().GetNiceMapName(serverData.Map));
 		
 		m_Root.SetHandler(this);
@@ -87,7 +99,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	
 	override bool OnClick( Widget w, int x, int y, int button )
 	{		
-		if (w == m_Transfer && m_ServerOnline) {
+		if (w == m_Transfer && m_ServerOnline && m_HasEnoughMoney) {
 			UApi().RequestCallCancel(m_LookupCid);
 			m_Parent.InitTravel(m_ArrivalPoint.ArrivalPointName, m_ArrivalPoint.TransitionWaitTime, m_MapLinkSpawnPoint.ServerName);
 			return true;
