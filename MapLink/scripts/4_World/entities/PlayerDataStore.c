@@ -173,6 +173,10 @@ class PlayerDataStore extends Managed{
 		if (!m_Agents){m_Agents = new array<autoptr UApiPlayerIdFloatData>;}
 		m_Agents.Insert(new UApiPlayerIdFloatData(key, value));
     }
+	void AddStomachItem(float amount, int foodstage, string className, int agents){
+		if ( !m_Stomach ){ m_Stomach = new array<autoptr UApiStomachItem>; }
+		m_Stomach.Insert(new UApiStomachItem(amount, foodstage, className, agents));
+	}
 	
 	
 	
@@ -251,13 +255,6 @@ class PlayerDataStore extends Managed{
 	
 	bool IsAlive(){
 		return (!m_IsDead && m_Health > 0);
-	}
-	
-	void AddStomachItem(float amount, int foodstage, string className, int agents){
-		if ( !m_Stomach ){
-			m_Stomach = new array<autoptr UApiStomachItem>;
-		}
-		m_Stomach.Insert(new UApiStomachItem(amount, foodstage, className, agents));
 	}
 	
 }
