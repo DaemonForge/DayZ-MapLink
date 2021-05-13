@@ -95,11 +95,17 @@ modded class PlayerBase extends ManBase{
 		#endif
 		#ifdef TRADER 
 			if (GetGame().IsServer() && m_Trader_IsInSafezone){
-				Print("[MAPLINK] RemoveProtectionSafe Player Is In Safe Zone");
+				Print("[MAPLINK] RemoveProtectionSafe Player Is In Trader(DrJones) Safe Zone");
 				PlayerHasGodMode = true;
 			}
 		#endif
-		if (!PlayerHasGodMode){
+		#ifdef TRADERPLUS
+			if (GetGame().IsServer() && IsInsideSZ && IsInsideSZ.SZStatut){
+				Print("[MAPLINK] RemoveProtectionSafe Player Is In Trader+ Safe Zone");
+				PlayerHasGodMode = true;
+			}		
+		#endif
+		if (!PlayerHasGodMode && GetGame().IsServer() ){
 			SetAllowDamage(true);
 		}
 		m_MapLink_UnderProtection = false;
@@ -270,7 +276,10 @@ modded class PlayerBase extends ManBase{
 	protected void UApiDoTravel(string arrivalPoint, string serverName){
 		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
-		if (dpoint && serverData && dpoint.HasArrivalPoint(arrivalPoint) && GetIdentity()){
+		int cost;
+		int id;
+		if (dpoint && serverData && dpoint.GetArrivalPointData(arrivalPoint, id, cost) && GetIdentity() && (cost <= 0 || MLGetPlayerBalance(id) >= cost)){
+			MLRemoveMoney(id,cost);
 			this.UApiSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToUApi();
 			Print("[MAPLINK] Do Travel Verified for " + GetIdentity().GetId() +  " Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
@@ -278,11 +287,11 @@ modded class PlayerBase extends ManBase{
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 400, false);
 		} else {
-			string id = "NULL";
+			string pid = "NULL";
 			if (GetIdentity()){
-				id = GetIdentity().GetId();
+				pid = GetIdentity().GetId();
 			}
-			Error("[MAPLINK] User " + id + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
+			Error("[MAPLINK] User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
 			
 	} 
@@ -350,6 +359,330 @@ modded class PlayerBase extends ManBase{
 		}
 		return true;
 	}
+	
+	
+	
+	
+	//Money Handling used from Hived Banking
+	bool MLCanAccept(int ID, ItemBase item){
+		return !item.IsRuined() || GetMapLinkConfig().GetCurrency(ID).CanUseRuinedBills;
+	}
+	
+	
+	int MLGetPlayerBalance(int ID){
+		int PlayerBalance = 0;
+		if (!GetMapLinkConfig().GetCurrency(ID) || GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() < 1){
+			Error("[MAPLINK] Currency ID: " + ID + " is not configured");
+			return 0;
+		}
+		array<EntityAI> inventory = new array<EntityAI>;
+		this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, inventory);
+		
+		ItemBase item;
+		for (int i = 0; i < inventory.Count(); i++){
+			if (Class.CastTo(item, inventory.Get(i))){
+				for (int j = 0; j < GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count(); j++){
+					if (item.GetType() == GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item && MLCanAccept(ID, item)){
+						PlayerBalance += MLCurrentQuantity(item) * GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value;
+					}
+				}
+			}
+		}
+		return PlayerBalance;
+	}
+	
+	
+	int MLAddMoney(int ID, int Amount){
+		if (Amount <= 0){
+			return 2;
+		}
+		int Return = 0;
+		int AmountToAdd = Amount;
+		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
+		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
+		bool NoError = true;
+		int PlayerBalance = MLGetPlayerBalance(ID);
+		int OptimalPlayerBalance = PlayerBalance + AmountToAdd;
+		
+		MapLinkMoneyValue MoneyValue = GetMapLinkConfig().GetCurrency(ID).GetHighestDenomination(AmountToAdd);
+		int MaxLoop = 3000;
+		while (MoneyValue && AmountToAdd >= SmallestCurrency && NoError && MaxLoop > 0){
+			MaxLoop--;
+			int AmountToSpawn = GetMapLinkConfig().GetCurrency(ID).GetAmount(MoneyValue,AmountToAdd);
+			if (AmountToSpawn == 0){
+				NoError = false;
+			}
+			
+			int AmountLeft = MLCreateMoneyInventory(MoneyValue.Item, AmountToSpawn);
+			if (AmountLeft > 0){
+				Return = 1;
+				HBCreateMoneyGround(MoneyValue.Item, AmountLeft);
+			}
+			
+			int AmmountAdded = MoneyValue.Value * AmountToSpawn;
+			
+			AmountToAdd = AmountToAdd - AmmountAdded;
+			
+			MapLinkMoneyValue NewMoneyValue = GetMapLinkConfig().GetCurrency(ID).GetHighestDenomination(AmountToAdd);
+			if (NewMoneyValue && NewMoneyValue != MoneyValue){
+				MoneyValue = NewMoneyValue;
+			} else {
+				NoError = false;
+			}
+		}
+		return Return;
+	}
+	
+	
+	int MLRemoveMoney(int ID, int Amount){
+		if (Amount <= 0){
+			return 2;
+		}
+		int Return = 0;
+		int AmountToRemove = Amount;
+		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
+		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
+		bool NoError = true;
+		for (int i = 0; i < GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count(); i++){
+			AmountToRemove =  MLRemoveMoneyInventory(ID, GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(i), AmountToRemove);
+		}
+		if (AmountToRemove >= SmallestCurrency){ // Now to delete a larger bill and make change
+			for (int j = LastIndex; j >= 0; j--){
+				//Print("[MapLink] Trying to remove " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item);
+				int NewAmountToRemove =  MLRemoveMoneyInventory(ID, GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j), GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value);
+				if (NewAmountToRemove == 0){
+					int AmountToAddBack = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value - AmountToRemove;
+					//Print("[MapLink] A " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item + " removed trying to add back " + AmountToAddBack );
+					Return = MLAddMoney(ID, AmountToAddBack);
+				}
+			}
+		}
+		return Return;
+	}
+	
+	//Return how much left still to remove
+	int MLRemoveMoneyInventory(int ID, MapLinkMoneyValue MoneyValue, float Amount ){
+		int AmountToRemove = GetMapLinkConfig().GetCurrency(ID).GetAmount(MoneyValue, Amount);
+		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
+		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
+		if (AmountToRemove > 0){
+			array<EntityAI> itemsArray = new array<EntityAI>;
+			this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, itemsArray);
+			for (int i = 0; i < itemsArray.Count(); i++){
+				ItemBase item = ItemBase.Cast(itemsArray.Get(i));
+				if (item && MLCanAccept(ID, item)){
+					string ItemType = item.GetType();
+					ItemType.ToLower();
+					string MoneyType = MoneyValue.Item;
+					MoneyType.ToLower();
+					if (ItemType == MoneyType){
+						int CurQuantity = item.GetQuantity();
+						int AmountRemoved = 0;
+						if (AmountToRemove < CurQuantity){
+							AmountRemoved = MoneyValue.Value * AmountToRemove;
+							item.HBSetQuantity(CurQuantity - AmountToRemove);
+							this.UpdateInventoryMenu(); // RPC-Call needed?
+							return Amount - AmountRemoved;
+						} else if (AmountToRemove == CurQuantity){
+							AmountRemoved = MoneyValue.Value * AmountToRemove;
+							GetGame().ObjectDelete(item);
+							this.UpdateInventoryMenu(); // RPC-Call needed?
+							return Amount - AmountRemoved;
+						} else {
+							AmountRemoved = MoneyValue.Value * CurQuantity;
+							AmountToRemove = AmountToRemove - CurQuantity;
+							GetGame().ObjectDelete(item);
+							Amount = Amount - AmountRemoved;
+						}
+						if (AmountToRemove <= 0){
+							this.UpdateInventoryMenu(); // RPC-Call needed?
+							return Amount;
+						}
+					}
+				}
+			}
+		}
+		this.UpdateInventoryMenu(); // RPC-Call needed?
+		return Amount;
+	}
+	
+	//Return How many Items it faild to create in the Inventory
+	int MLCreateMoneyInventory(string itemType, int amount)
+	{
+		array<EntityAI> itemsArray = new array<EntityAI>;
+		this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, itemsArray);
+		string itemTypeLower = itemType;
+		itemTypeLower.ToLower();
+		ItemBase item;
+		Ammunition_Base ammoItem;
+		int currentAmount = amount;
+		bool hasQuantity = ((HBMaxQuantity(itemType) > 0) || MLHasQuantity(itemType));
+		if (hasQuantity){
+			for (int i = 0; i < itemsArray.Count(); i++){
+				if (currentAmount <= 0){
+					this.UpdateInventoryMenu(); // RPC-Call needed?
+					return 0;
+				}
+				Class.CastTo(item, itemsArray.Get(i));
+				string itemPlayerType = "";
+				if (item){
+					if (item.IsRuined()){
+						continue;
+					}
+					itemPlayerType = item.GetType();
+					itemPlayerType.ToLower();
+					if (itemTypeLower == itemPlayerType && !item.IsFullQuantity() && !item.IsMagazine()){
+						currentAmount = item.HBAddQuantity(currentAmount);
+					}
+				}
+
+				Class.CastTo(ammoItem, itemsArray.Get(i));
+				if (ammoItem){
+					if (ammoItem.IsRuined()){	
+						continue;
+					}
+					itemPlayerType = ammoItem.GetType();
+					itemPlayerType.ToLower();
+					if (itemTypeLower == itemPlayerType && ammoItem.IsAmmoPile()){
+						currentAmount = ammoItem.HBAddQuantity(currentAmount);
+					}
+				}
+			}
+		}
+		bool stoploop = false;
+		int MaxLoop = 5000;
+		//any leftover or new stacks
+		while (currentAmount > 0 && !stoploop && MaxLoop > 0){
+			MaxLoop--;
+			ItemBase newItem = ItemBase.Cast(this.GetInventory().CreateInInventory(itemType));
+			if (!newItem){
+				stoploop = true; //To stop the loop from running away since it couldn't create an item
+				for (int j = 0; j < itemsArray.Count(); j++){
+					Class.CastTo(item, itemsArray.Get(j));
+					if (item){ 
+						newItem = ItemBase.Cast(item.GetInventory().CreateInInventory(itemType)); //CreateEntityInCargo	
+						if (newItem){
+							//Print("[MapLink] NewItem Created " + newItem.GetType() + " in " + item.GetType());
+							stoploop = false; //Item was created so we don't need to stop the loop anymore
+							break;
+						}
+					}
+				}
+			}
+			
+			Magazine newMagItem = Magazine.Cast(newItem);
+			Ammunition_Base newammoItem = Ammunition_Base.Cast(newItem);
+			if (newMagItem && !newammoItem)	{	
+				int SetAmount = currentAmount;
+				if (newMagItem.GetQuantityMax() <= currentAmount){
+					SetAmount = currentAmount;
+					currentAmount = 0;
+				} else {
+					SetAmount = newMagItem.GetQuantityMax();
+					currentAmount = currentAmount - SetAmount;
+				}
+				newMagItem.ServerSetAmmoCount(SetAmount);
+			} else if (hasQuantity){
+				if (newammoItem){
+					currentAmount = newammoItem.HBSetQuantity(currentAmount);
+	
+				}	
+				ItemBase newItemBase;
+				if (Class.CastTo(newItemBase, newItem)){
+					currentAmount = newItemBase.HBSetQuantity(currentAmount);
+				}
+			} else { //It created just one of the item
+				currentAmount--;
+			}
+		}
+		return currentAmount;
+	}
+	
+	void MLCreateMoneyGround(string Type, int Amount){
+		int AmountToSpawn = Amount;
+		bool HasQuantity = ((HBMaxQuantity(Type) > 0) || MLHasQuantity(Type));
+		int MaxQuanity = MLMaxQuantity(Type);
+		int StacksRequired = AmountToSpawn;
+		if (MaxQuanity != 0){
+			StacksRequired = Math.Ceil( AmountToSpawn /  MaxQuanity);
+		}
+		for (int i = 0; i <= StacksRequired; i++){
+			if (AmountToSpawn > 0){
+				ItemBase newItem = ItemBase.Cast(GetGame().CreateObjectEx(Type, GetPosition(), ECE_PLACE_ON_SURFACE));
+				if (newItem && HasQuantity){
+					AmountToSpawn = newItem.HBSetQuantity(AmountToSpawn);
+				}
+			}
+		}
+	}
+	
+	int MLCurrentQuantity(ItemBase money){
+		ItemBase moneyItem = ItemBase.Cast(money);
+		if (!moneyItem){
+			return false;
+		}	
+		if (HBMaxQuantity(moneyItem.GetType()) == 0){
+			return 1;
+		}
+		if ( moneyItem.IsMagazine() ){
+			Magazine mag = Magazine.Cast(moneyItem);
+			if (mag){
+				return mag.GetAmmoCount();
+			}
+		}
+		return moneyItem.GetQuantity();
+	}
+	
+	int MLMaxQuantity(string Type)
+	{
+		if ( GetGame().ConfigIsExisting(  CFG_MAGAZINESPATH  + " " + Type + " count" ) ){
+			return GetGame().ConfigGetInt(  CFG_MAGAZINESPATH  + " " + Type + " count" );
+		}
+		if ( GetGame().ConfigIsExisting(  CFG_VEHICLESPATH + " " + Type + " varQuantityMax" ) ){
+			return GetGame().ConfigGetInt( CFG_VEHICLESPATH + " " + Type + " varQuantityMax" ) );
+		}
+		return 0;
+	}
+	
+	bool MLSetMoneyAmount(ItemBase item, int amount)
+	{
+		ItemBase money = ItemBase.Cast(item);
+		if (!money){
+			return false;
+		}
+		if ( money.IsMagazine() ){
+			Magazine mag = Magazine.Cast(money);
+			if (mag){
+				return true;
+				mag.ServerSetAmmoCount(amount);
+			}
+		}
+		else{
+			money.SetQuantity(amount);
+			return true;
+		}
+		return false;
+	}
+	
+	bool MLHasQuantity(string Type)
+	{   
+		
+		string path = CFG_MAGAZINESPATH  + " " + Type + " count";
+	    if (GetGame().ConfigIsExisting(path)){
+	     	if (GetGame().ConfigGetInt(path) > 0){
+				return true;
+			}
+		}
+	    path = CFG_VEHICLESPATH  + " " + Type + " quantityBar";
+	    if (GetGame().ConfigIsExisting(path))   {
+	        return GetGame().ConfigGetInt(path) == 1;
+		}
+	
+	    return false;
+	}
+	
+	
+	
 }
 
 modded class DayZPlayerMeleeFightLogic_LightHeavy

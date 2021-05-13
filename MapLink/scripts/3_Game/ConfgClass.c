@@ -41,6 +41,18 @@ class MapLinkDepaturePoint extends Managed {
 		return false;
 	}
 	
+	bool GetArrivalPointData(string arrivalPoint, out int id, out int value){
+		for (int i = 0; i < ArrivalPoints.Count(); i++){
+			Print(ArrivalPoints.Get(i).ArrivalPointName + " == " + arrivalPoint );
+			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
+				id = ArrivalPoints.Get(i).AcceptedCurrencyId;
+				value = ArrivalPoints.Get(i).Cost;
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
 
 class MapLinkArrivalPointsRef {
@@ -207,11 +219,18 @@ class MapLinkCurrency extends Managed {
 	int ID;
 	string Name;
 	string Icon;
+	bool CanUseRuinedBills = false;
 	ref array<ref MapLinkMoneyValue> MoneyValues = new array<ref MapLinkMoneyValue>;
+	
+	[NonSerialized()]
+	protected bool IsSorted = false;
 	
 	void MapLinkCurrency(int id = 1){
 		if (id == -1){
 			ID = 0;
+			Name = "Rubles";
+			Icon = "dollar";
+			CanUseRuinedBills = true;
 			MoneyValues.Insert(new MapLinkMoneyValue("MoneyRuble100", 100));
 			MoneyValues.Insert(new MapLinkMoneyValue("MoneyRuble50", 50));
 			MoneyValues.Insert(new MapLinkMoneyValue("MoneyRuble25", 25));
@@ -219,9 +238,26 @@ class MapLinkCurrency extends Managed {
 			MoneyValues.Insert(new MapLinkMoneyValue("MoneyRuble5", 5));
 			MoneyValues.Insert(new MapLinkMoneyValue("MoneyRuble1", 1));
 		}
+		if (id == -2){
+			ID = 1;
+			Name = "Tickets";
+			Icon = "ticket";
+			MoneyValues.Insert(new MapLinkMoneyValue("Chernarus_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("Livonia_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("Namalsk_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("Chiemsee_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("DeerIsle_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("Essker_Ticket", 1));
+			MoneyValues.Insert(new MapLinkMoneyValue("Utes_Ticket", 1));
+		}
 	}
 	
 	void SortMoney(){
+		if (IsSorted) {
+			return;
+		}
+		IsSorted = true;
+		Print("[MAPLINK] Sorting Currency ID:" + ID);
 		array<MapLinkMoneyValue> StartingValues =  new array<MapLinkMoneyValue>;
 		for (int h = 0; h < MoneyValues.Count(); h++){
 			StartingValues.Insert(MoneyValues.Get(h));
@@ -243,7 +279,8 @@ class MapLinkCurrency extends Managed {
 		MoneyValues = SortedMoneyValues;
 	}
 	
-	MapLinkMoneyValue GetHighestDenomination(float amount){
+	MapLinkMoneyValue GetHighestDenomination(int amount){
+		SortMoney();
 		int LastIndex = MoneyValues.Count() - 1;
 		for (int i = 0; i < MoneyValues.Count(); i++){
 			if (GetAmount(MoneyValues.Get(i), amount) > 0){
@@ -253,21 +290,27 @@ class MapLinkCurrency extends Managed {
 		return NULL;
 	}
 	
-	int GetAmount(MapLinkMoneyValue MoneyObj, float amount){
+	int GetAmount(MapLinkMoneyValue MoneyObj, int amount){
 		if (MoneyObj){
 			return Math.Floor(amount / MoneyObj.Value);
 		} 
 		return 0;
 	}
 	
+	string GetIcon(){
+		if (Icon.Contains(".paa") || Icon.Contains("set:") || Icon.Contains(".edds") ){
+			return Icon;
+		}
+		return "set:maplink_money image:"+Icon;
+	}
 }
 
 class MapLinkMoneyValue{
 	
 	string Item;
-	float Value
+	int Value
 	
-	void MapLinkMoneyValue(string item, float value ){
+	void MapLinkMoneyValue(string item, int value ){
 		Item = item;
 		Value = value;
 	}
