@@ -180,71 +180,108 @@ class PlayerDataStore extends Managed{
 	
 	
 	
-	bool Write(string mod, string var, string data){
+	bool Write(string var, bool data){
 		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(mod, var, data));
+		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
 		return true;
 	}
-	bool WriteInt(string mod, string var, int data){
+	bool Write(string var, int data){
 		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(mod, var, data.ToString()));
+		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
 		return true;
 	}
-	bool WriteFloat(string mod, string var, float data){
+	bool Write(string var, float data){
 		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(mod, var, data.ToString()));
+		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
 		return true;
 	}
-	
-	bool Read(string mod, string var, out string data){
-		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
-				data = m_MetaData.Get(i).ReadString();
-				return true;
-			}
-		}
+	bool Write(string var, vector data){
+		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
+		return true;
+	}
+	bool Write(string var, string data){
+		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		m_MetaData.Insert(new UApiMetaData(var, data));
+		return true;
+	}
+	bool Write(string var, Class data){
+		Error("[UAPI] Trying to save undefined data class to " + var + " for " + m_Type + " try converting to a string before saving");
 		return false;
 	}
-	bool ReadInt(string mod, string var, out int data){
+	
+	
+	bool Read(string var, out bool data){
 		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){
 				data = m_MetaData.Get(i).ReadInt();
 				return true;
 			}
 		}
 		return false;
 	}
-	bool ReadFloat(string mod, string var, out float data){
+	bool Read(string var, out int data){
 		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){
+				data = m_MetaData.Get(i).ReadInt();
+				return true;
+			}
+		}
+		return false;
+	}
+	bool Read(string var, out string data){
+		for(int i = 0; i < m_MetaData.Count(); i++){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){
+				data = m_MetaData.Get(i).ReadString();
+				return true;
+			}
+		}
+		return false;
+	}
+	bool Read(string var, out float data){
+		for(int i = 0; i < m_MetaData.Count(); i++){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){
 				data = m_MetaData.Get(i).ReadFloat();
 				return true;
 			}
 		}
 		return false;
 	}
+	bool Read(string var, out vector data){
+		for(int i = 0; i < m_MetaData.Count(); i++){
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){
+				data = m_MetaData.Get(i).ReadVector();
+				return true;
+			}
+		}
+		return false;
+	}
+	bool Read(string var, out Class data){
+		Error("[UAPI] Trying to read undefined data class to " + var + " for " + m_Type + " try converting to a string before saving");
+		return false;
+	}
 	
-	int GetInt(string mod, string var){
+	int GetInt(string var){
 		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){return m_MetaData.Get(i).ReadInt();}
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){return m_MetaData.Get(i).ReadInt();}
 		}
 		return 0;
 	}
-	float GetFloat(string mod, string var){
+	float GetFloat(string var){
 		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){ return m_MetaData.Get(i).ReadFloat(); }
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){ return m_MetaData.Get(i).ReadFloat(); }
 		}
 		return 0;
 	}
-	vector GetVector(string mod, string var){
+	vector GetVector(string var){
 		for(int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){ return m_MetaData.Get(i).ReadVector(); }
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){ return m_MetaData.Get(i).ReadVector(); }
 		}
 		return Vector(0,0,0);
 	}
-	string GetString(string mod, string var){
+	string GetString(string var){
 		for (int i = 0; i < m_MetaData.Count(); i++){
-			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(mod, var)){ return m_MetaData.Get(i).ReadString(); }
+			if (m_MetaData.Get(i) && m_MetaData.Get(i).Is(var)){ return m_MetaData.Get(i).ReadString(); }
 		}
 		return "";
 	}
