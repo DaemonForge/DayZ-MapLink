@@ -416,7 +416,7 @@ modded class PlayerBase extends ManBase{
 			int AmountLeft = MLCreateMoneyInventory(MoneyValue.Item, AmountToSpawn);
 			if (AmountLeft > 0){
 				Return = 1;
-				HBCreateMoneyGround(MoneyValue.Item, AmountLeft);
+				MLCreateMoneyGround(MoneyValue.Item, AmountLeft);
 			}
 			
 			int AmmountAdded = MoneyValue.Value * AmountToSpawn;
@@ -480,7 +480,7 @@ modded class PlayerBase extends ManBase{
 						int AmountRemoved = 0;
 						if (AmountToRemove < CurQuantity){
 							AmountRemoved = MoneyValue.Value * AmountToRemove;
-							item.HBSetQuantity(CurQuantity - AmountToRemove);
+							item.MLSetQuantity(CurQuantity - AmountToRemove);
 							this.UpdateInventoryMenu(); // RPC-Call needed?
 							return Amount - AmountRemoved;
 						} else if (AmountToRemove == CurQuantity){
@@ -516,7 +516,7 @@ modded class PlayerBase extends ManBase{
 		ItemBase item;
 		Ammunition_Base ammoItem;
 		int currentAmount = amount;
-		bool hasQuantity = ((HBMaxQuantity(itemType) > 0) || MLHasQuantity(itemType));
+		bool hasQuantity = ((MLMaxQuantity(itemType) > 0) || MLHasQuantity(itemType));
 		if (hasQuantity){
 			for (int i = 0; i < itemsArray.Count(); i++){
 				if (currentAmount <= 0){
@@ -532,7 +532,7 @@ modded class PlayerBase extends ManBase{
 					itemPlayerType = item.GetType();
 					itemPlayerType.ToLower();
 					if (itemTypeLower == itemPlayerType && !item.IsFullQuantity() && !item.IsMagazine()){
-						currentAmount = item.HBAddQuantity(currentAmount);
+						currentAmount = item.MLAddQuantity(currentAmount);
 					}
 				}
 
@@ -544,7 +544,7 @@ modded class PlayerBase extends ManBase{
 					itemPlayerType = ammoItem.GetType();
 					itemPlayerType.ToLower();
 					if (itemTypeLower == itemPlayerType && ammoItem.IsAmmoPile()){
-						currentAmount = ammoItem.HBAddQuantity(currentAmount);
+						currentAmount = ammoItem.MLAddQuantity(currentAmount);
 					}
 				}
 			}
@@ -584,12 +584,12 @@ modded class PlayerBase extends ManBase{
 				newMagItem.ServerSetAmmoCount(SetAmount);
 			} else if (hasQuantity){
 				if (newammoItem){
-					currentAmount = newammoItem.HBSetQuantity(currentAmount);
+					currentAmount = newammoItem.MLSetQuantity(currentAmount);
 	
 				}	
 				ItemBase newItemBase;
 				if (Class.CastTo(newItemBase, newItem)){
-					currentAmount = newItemBase.HBSetQuantity(currentAmount);
+					currentAmount = newItemBase.MLSetQuantity(currentAmount);
 				}
 			} else { //It created just one of the item
 				currentAmount--;
@@ -600,7 +600,7 @@ modded class PlayerBase extends ManBase{
 	
 	void MLCreateMoneyGround(string Type, int Amount){
 		int AmountToSpawn = Amount;
-		bool HasQuantity = ((HBMaxQuantity(Type) > 0) || MLHasQuantity(Type));
+		bool HasQuantity = ((MLMaxQuantity(Type) > 0) || MLHasQuantity(Type));
 		int MaxQuanity = MLMaxQuantity(Type);
 		int StacksRequired = AmountToSpawn;
 		if (MaxQuanity != 0){
@@ -610,7 +610,7 @@ modded class PlayerBase extends ManBase{
 			if (AmountToSpawn > 0){
 				ItemBase newItem = ItemBase.Cast(GetGame().CreateObjectEx(Type, GetPosition(), ECE_PLACE_ON_SURFACE));
 				if (newItem && HasQuantity){
-					AmountToSpawn = newItem.HBSetQuantity(AmountToSpawn);
+					AmountToSpawn = newItem.MLSetQuantity(AmountToSpawn);
 				}
 			}
 		}
@@ -621,7 +621,7 @@ modded class PlayerBase extends ManBase{
 		if (!moneyItem){
 			return false;
 		}	
-		if (HBMaxQuantity(moneyItem.GetType()) == 0){
+		if (MLMaxQuantity(moneyItem.GetType()) == 0){
 			return 1;
 		}
 		if ( moneyItem.IsMagazine() ){
