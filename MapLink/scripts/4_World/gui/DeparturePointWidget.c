@@ -120,11 +120,11 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 					m_Status_Text.SetColor(ARGB(255, 105, 240, 174));
 					m_ServerOnline = true;
 					m_PlayerCount_Frame.Show(true);
-					string playerCount = serverStatus.players.ToString() + "/" + serverStatus.maxPlayers.ToString();
+					string playerCount = serverStatus.Players.ToString() + "/" + serverStatus.MaxPlayers.ToString();
 					m_PlayerCount_Text.SetText(playerCount);
-					if (serverStatus.queue > 0){
+					if (serverStatus.QueuePlayers > 0){
 						m_Queue_Frame.Show(true);
-						m_Queue_Text.SetText(serverStatus.queue.ToString());
+						m_Queue_Text.SetText(serverStatus.QueuePlayers.ToString());
 					}
 				} else {
 					m_Status_Image.SetColor(ARGB(255, 255, 61, 0));
