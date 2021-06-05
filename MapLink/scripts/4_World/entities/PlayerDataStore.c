@@ -127,7 +127,7 @@ class PlayerDataStore extends Managed{
 	}
 	
 	void SetupPlayer(PlayerBase player, vector Pos = vector.Zero, vector Ori =  vector.Zero){
-		if (!player){return;}
+		if (!player){ return; }
 		int i = 0;
 		if (vector.Distance(Pos, vector.Zero) < 1){
 			Pos = m_Position;

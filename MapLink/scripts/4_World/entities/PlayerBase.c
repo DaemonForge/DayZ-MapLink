@@ -243,13 +243,19 @@ modded class PlayerBase extends ManBase{
 	override void EEKilled( Object killer )
 	{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
-		if ( (m_TransferPoint == "" && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME) || ( killer && killer != this )){
+		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
 			this.SavePlayerToUApi();
 		}
-		//If they are transfering delete or a fresh spawn just delete the body
-		if ( (m_TransferPoint != "" || StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME ) && ( !killer || killer == this )){
-			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 200, false);
+		//If they are transfering delete
+		if ( IsBeingTransfered()  && ( !killer || killer == this )){
+			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause of transfer" );
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
+		}
+		
+		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
+		if ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
+			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn" );
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
 		}
 		
 		super.EEKilled( killer );
@@ -359,6 +365,8 @@ modded class PlayerBase extends ManBase{
 		}
 		return true;
 	}
+	
+	
 	
 	
 	
@@ -632,7 +640,7 @@ modded class PlayerBase extends ManBase{
 		}
 		return moneyItem.GetQuantity();
 	}
-	
+
 	int MLMaxQuantity(string Type)
 	{
 		if ( GetGame().ConfigIsExisting(  CFG_MAGAZINESPATH  + " " + Type + " count" ) ){

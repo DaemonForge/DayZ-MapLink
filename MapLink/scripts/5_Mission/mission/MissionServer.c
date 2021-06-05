@@ -82,6 +82,7 @@ modded class MissionServer extends MissionBase
 					}
 				}
 				m_PlayerDBQue.Remove(identity.GetId());
+			    Print("[UAPI] Player " + identity.GetId() +" dead on the API spawning them fresh");
 				return false;
 			}
 			Print("[UAPI] Spawning player " + identity.GetId() + " on: " + UApiConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);

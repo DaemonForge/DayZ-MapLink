@@ -58,4 +58,5 @@ class ActionMapLinkOpenOnAny: ActionInteractBase
 			}
 		}
 	}
+	
 }
