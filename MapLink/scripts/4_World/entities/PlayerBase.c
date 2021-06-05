@@ -233,7 +233,7 @@ modded class PlayerBase extends ManBase{
 	
 	override void OnDisconnect(){
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
-		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME){ 
+		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME || IsBeingTransfered()){ 
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
