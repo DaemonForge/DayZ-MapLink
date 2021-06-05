@@ -216,7 +216,7 @@ modded class PlayerBase extends ManBase{
 		SetBloodType(data.m_BloodType);
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 300);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 200);
 		if (m_PlayerStomach && data.m_Stomach){
 			for (i = 0; i < data.m_Stomach.Count(); i++){
 				UApiStomachItem stomachItem;
@@ -291,7 +291,7 @@ modded class PlayerBase extends ManBase{
 			Print("[MAPLINK] Do Travel Verified for " + GetIdentity().GetId() +  " Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetGame().AdminLog("[MAPLINK]  Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 400, false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
 		} else {
 			string pid = "NULL";
 			if (GetIdentity()){
