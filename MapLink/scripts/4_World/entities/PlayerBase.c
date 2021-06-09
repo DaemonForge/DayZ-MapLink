@@ -327,6 +327,7 @@ modded class PlayerBase extends ManBase{
 				UApiDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}
+
 	}
 	
 	void UApiAfterLoadClient(){
@@ -486,6 +487,9 @@ modded class PlayerBase extends ManBase{
 					if (ItemType == MoneyType){
 						int CurQuantity = item.GetQuantity();
 						int AmountRemoved = 0;
+						if (!item.HasQuantity()){
+							CurQuantity = 1;
+						} 
 						if (AmountToRemove < CurQuantity){
 							AmountRemoved = MoneyValue.Value * AmountToRemove;
 							item.MLSetQuantity(CurQuantity - AmountToRemove);
