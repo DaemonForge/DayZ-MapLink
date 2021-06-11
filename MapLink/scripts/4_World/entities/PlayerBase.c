@@ -116,6 +116,7 @@ modded class PlayerBase extends ManBase{
     override void OnStoreSave(ParamsWriteContext ctx)
     {
         super.OnStoreSave(ctx);
+		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
 		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME ){ 
 			this.SavePlayerToUApi();
@@ -169,12 +170,19 @@ modded class PlayerBase extends ManBase{
 					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents);
 				}
 			}
-		}	
+		}
+		if (GetPlayerStats()){
+			for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
+				PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
+				if (TheStat && TheStat.GetLabel() != ""){
+					data.AddStat(TheStat.GetLabel(), TheStat.Get());
+				}
+			}
+		}
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
 		int i = 0;
-		
 		StatUpdate(AnalyticsManagerServer.STAT_PLAYTIME, data.m_TimeSurvivedValue );
 		StatUpdate(AnalyticsManagerServer.STAT_PLAYERS_KILLED, data.m_PlayersKilledValue);
 		StatUpdate(AnalyticsManagerServer.STAT_INFECTED_KILLED, data.m_InfectedKilledValue);
@@ -183,6 +191,15 @@ modded class PlayerBase extends ManBase{
 		SetLifeSpanStateVisible(data.m_LifeSpanState);
 		SetLastShavedSeconds(data.m_LastShavedSeconds);
 		SetBloodyHands(data.m_HasBloodyHandsVisible);
+		
+		for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
+			PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
+			float statvalue;
+			if (TheStat && data.ReadStat(TheStat.GetLabel(), statvalue)){
+				TheStat.SetByFloat(statvalue);
+			}
+		}
+		
 		for (i = 0; i < data.m_Modifiers.Count(); i++){
 			if (data.m_Modifiers.Get(i)){
 				ModifierBase mdfr = m_ModifiersManager.GetModifier(data.m_Modifiers.Get(i).ID());
@@ -204,14 +221,6 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		GetStatWet().Set(data.m_Stat_Wet);
-		GetStatSpecialty().Set(data.m_Stat_Specialty);
-		GetStatHeatBuffer().Set(data.m_Stat_HeatBuffer);
-		GetStatStamina().Set(data.m_Stat_Stamina);
-		GetStatToxicity().Set(data.m_Stat_Toxicity);
-		GetStatWater().Set(data.m_Stat_Water);
-		GetStatEnergy().Set(data.m_Stat_Energy);
-		GetStatBloodType().Set(data.m_BloodType);
 		
 		SetBloodType(data.m_BloodType);
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
@@ -232,8 +241,10 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	override void OnDisconnect(){
+		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
 		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME || IsBeingTransfered()){ 
+			GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
@@ -243,6 +254,7 @@ modded class PlayerBase extends ManBase{
 	override void EEKilled( Object killer )
 	{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
+		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
 			this.SavePlayerToUApi();
 		}
@@ -254,7 +266,7 @@ modded class PlayerBase extends ManBase{
 		
 		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
 		if ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
-			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn" );
+			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
 		}
 		
@@ -327,6 +339,7 @@ modded class PlayerBase extends ManBase{
 				UApiDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}
+
 	}
 	
 	void UApiAfterLoadClient(){
@@ -486,6 +499,9 @@ modded class PlayerBase extends ManBase{
 					if (ItemType == MoneyType){
 						int CurQuantity = item.GetQuantity();
 						int AmountRemoved = 0;
+						if (!item.HasQuantity()){
+							CurQuantity = 1;
+						} 
 						if (AmountToRemove < CurQuantity){
 							AmountRemoved = MoneyValue.Value * AmountToRemove;
 							item.MLSetQuantity(CurQuantity - AmountToRemove);

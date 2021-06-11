@@ -24,13 +24,6 @@ class PlayerDataStore extends Managed{
 	bool m_HasBloodTypeVisible;
 	bool m_HasBloodyHandsVisible;
 	
-	float m_Stat_Wet;
-	float m_Stat_Specialty;
-	float m_Stat_HeatBuffer;
-	float m_Stat_Stamina;
-	float m_Stat_Toxicity;
-	float m_Stat_Water;
-	float m_Stat_Energy;
 	int m_BrokenLegState;
 	float m_RightLeg_Health;
 	float m_LeftLeg_Health;
@@ -39,6 +32,7 @@ class PlayerDataStore extends Managed{
 	
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Modifiers;
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Agents;
+	autoptr array<autoptr UApiMetaData> m_Stats;
 
 	autoptr array<autoptr UApiEntityStore> m_Attachments;
 	
@@ -79,13 +73,6 @@ class PlayerDataStore extends Managed{
 		m_Position = player.GetPosition();
 		m_Orientaion = player.GetOrientation();
 		
-		m_Stat_Wet = player.GetStatWet().Get();
-		m_Stat_Specialty = player.GetStatSpecialty().Get();
-		m_Stat_HeatBuffer = player.GetStatHeatBuffer().Get();
-		m_Stat_Stamina = player.GetStatStamina().Get();
-		m_Stat_Toxicity = player.GetStatToxicity().Get();
-		m_Stat_Water = player.GetStatWater().Get();
-		m_Stat_Energy = player.GetStatEnergy().Get();
 		
 		
 		m_RightLeg_Health = player.GetHealth("RightLeg","");
@@ -178,6 +165,21 @@ class PlayerDataStore extends Managed{
 		m_Stomach.Insert(new UApiStomachItem(amount, foodstage, className, agents));
 	}
 	
+	bool AddStat(string label, float data){
+		if (!m_Stats) { m_Stats = new array<autoptr UApiMetaData>;}
+		m_Stats.Insert(new UApiMetaData(label, data.ToString()));
+		return true;
+	}
+	
+	bool ReadStat(string label, float data){
+		for(int i = 0; i < m_Stats.Count(); i++){
+			if (m_Stats.Get(i) && m_Stats.Get(i).Is(label)){
+				data = m_Stats.Get(i).ReadFloat();
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	bool Write(string var, bool data){
 		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
