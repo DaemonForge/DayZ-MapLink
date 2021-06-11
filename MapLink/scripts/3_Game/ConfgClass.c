@@ -164,8 +164,8 @@ class MapLinkSpawnPointPos{
 	float Y;
 	float Z;
 	float D;
-	float Radius;
-	float Chance;
+	float Radius = -1;
+	float Chance = 1;
 	
 	vector GetPosition(){
 		float y = Y;
