@@ -170,7 +170,15 @@ modded class PlayerBase extends ManBase{
 					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents);
 				}
 			}
-		}	
+		}
+		if (GetPlayerStats()){
+			for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
+				PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
+				if (TheStat && TheStat.GetLabel() != ""){
+					data.AddStat(TheStat.GetLabel(), TheStat.Get());
+				}
+			}
+		}
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -183,6 +191,15 @@ modded class PlayerBase extends ManBase{
 		SetLifeSpanStateVisible(data.m_LifeSpanState);
 		SetLastShavedSeconds(data.m_LastShavedSeconds);
 		SetBloodyHands(data.m_HasBloodyHandsVisible);
+		
+		for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
+			PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
+			float statvalue;
+			if (TheStat && data.ReadStat(TheStat.GetLabel(), statvalue)){
+				TheStat.SetByFloat(statvalue);
+			}
+		}
+		
 		for (i = 0; i < data.m_Modifiers.Count(); i++){
 			if (data.m_Modifiers.Get(i)){
 				ModifierBase mdfr = m_ModifiersManager.GetModifier(data.m_Modifiers.Get(i).ID());
@@ -204,14 +221,6 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		GetStatWet().Set(data.m_Stat_Wet);
-		GetStatSpecialty().Set(data.m_Stat_Specialty);
-		GetStatHeatBuffer().Set(data.m_Stat_HeatBuffer);
-		GetStatStamina().Set(data.m_Stat_Stamina);
-		GetStatToxicity().Set(data.m_Stat_Toxicity);
-		GetStatWater().Set(data.m_Stat_Water);
-		GetStatEnergy().Set(data.m_Stat_Energy);
-		GetStatBloodType().Set(data.m_BloodType);
 		
 		SetBloodType(data.m_BloodType);
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
