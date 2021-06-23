@@ -25,10 +25,7 @@ class PlayerDataStore extends Managed{
 	bool m_HasBloodyHandsVisible;
 	
 	int m_BrokenLegState;
-	float m_RightLeg_Health;
-	float m_LeftLeg_Health;
-	float m_RightFoot_Health;
-	float m_LeftFoot_Health;
+	autoptr array<autoptr UApiPlayerZoneHealthData> m_HealthZones;
 	
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Modifiers;
 	autoptr array<autoptr UApiPlayerIdFloatData> m_Agents;
@@ -48,6 +45,7 @@ class PlayerDataStore extends Managed{
 	
 	void ~PlayerDataStore(){
 		//Print("[UAPI] ~PlayerDataStore() - " + GUID);
+		delete m_HealthZones;
 		delete m_Modifiers;
 		delete m_Agents;
 		delete m_Stats;
@@ -79,10 +77,13 @@ class PlayerDataStore extends Managed{
 		
 		
 		
-		m_RightLeg_Health = player.GetHealth("RightLeg","");
-		m_LeftLeg_Health = player.GetHealth("LeftLeg","");
-		m_RightFoot_Health = player.GetHealth("RightFoot","");
-		m_LeftFoot_Health = player.GetHealth("LeftFoot","");
+		// Damage System
+		DamageZoneMap zones = new DamageZoneMap;
+		DamageSystem.GetDamageZoneMap(player,zones);
+		for( i = 0; i < zones.Count(); i++ ){
+			string zone = zones.GetKey(i);
+			SaveZoneHealth(zone, player.GetHealth(zone, "Health"), player.GetHealth(zone, "Blood"), player.GetHealth(zone, "Shock"));
+		}
 		
 		array<EntityAI> items = new array<EntityAI>;
 		player.GetInventory().EnumerateInventory(InventoryTraversalType.LEVELORDER, items);
@@ -131,10 +132,19 @@ class PlayerDataStore extends Managed{
 		player.SetHealth("", "Health", m_Health);
 		player.SetHealth("", "Blood", m_Blood);
 		player.SetHealth("GlobalHealth", "Shock", m_Shock);
-		player.SetHealth("RightLeg", "", m_RightLeg_Health);
-		player.SetHealth("LeftLeg", "", m_LeftLeg_Health);
-		player.SetHealth("RightFoot", "", m_RightFoot_Health);
-		player.SetHealth("LeftFoot", "", m_LeftFoot_Health);
+		
+		// Damage System
+		DamageZoneMap zones = new DamageZoneMap;
+		DamageSystem.GetDamageZoneMap(player,zones);
+		for( i = 0; i < zones.Count(); i++ ){
+			string zone = zones.GetKey(i);
+			float health, blood, shock;
+			if (ReadZoneHealth(zone, health, blood, shock)){
+				player.SetHealth(zone, "Health", health);
+				player.SetHealth(zone, "Blood", blood);
+				player.SetHealth(zone, "Shock", shock);
+			}
+		}
 		
 		
 		Print("[UAPI] SetupPlayer at " + Pos);
@@ -377,6 +387,24 @@ class PlayerDataStore extends Managed{
 		return "";
 	}
 	
+	
+	bool SaveZoneHealth(string zone, float health, float blood, float shock){
+		if (!m_HealthZones){m_HealthZones = new array<autoptr UApiPlayerZoneHealthData>}
+		m_HealthZones.Insert(new UApiPlayerZoneHealthData(zone, health, blood, shock));
+		return true;
+	}
+	bool ReadZoneHealth(string zone, out float health, out float blood, out float shock){
+		for (int i = 0; i < m_HealthZones.Count(); i++){
+			if (m_HealthZones.Get(i) && m_HealthZones.Get(i).Is(zone)){ 
+				health = m_HealthZones.Get(i).Health();
+				blood = m_HealthZones.Get(i).Blood();
+				shock = m_HealthZones.Get(i).Shock();
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	bool IsValid(){
 		return (GUID && GUID != "" && m_Type != "");
 	}
@@ -418,4 +446,24 @@ class UApiStomachItem extends Managed {
 		m_ClassName = className;
 		m_Agents = agents;
 	}
+}
+
+class UApiPlayerZoneHealthData extends Managed{
+	string m_Zone;
+	float m_Health;
+	float m_Blood;
+	float m_Shock;
+	
+	void UApiPlayerZoneHealthData(string zone, float health, float blood, float shock) {
+		m_Zone = zone;
+		m_Health = health;
+		m_Blood = blood;
+		m_Shock = shock;
+	}
+	
+	bool Is(string zone){ return (m_Zone == zone); }
+	string Zone(){ return m_Zone; }
+	float Health(){ return m_Health; }
+	float Blood(){ return m_Blood; }
+	float Shock(){ return m_Shock; }
 }
