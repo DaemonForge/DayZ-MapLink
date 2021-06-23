@@ -179,6 +179,7 @@ modded class PlayerBase extends ManBase{
 				}
 			}
 		}
+		
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -221,11 +222,9 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		
+		GetStatBloodType().Set(data.m_BloodType);
 		SetBloodType(data.m_BloodType);
 		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 200);
 		if (m_PlayerStomach && data.m_Stomach){
 			for (i = 0; i < data.m_Stomach.Count(); i++){
 				UApiStomachItem stomachItem;
@@ -234,6 +233,8 @@ modded class PlayerBase extends ManBase{
 				}
 			}
 		}	
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 200);
 	}
 	
 	void SendUApiAfterLoadClient(){
