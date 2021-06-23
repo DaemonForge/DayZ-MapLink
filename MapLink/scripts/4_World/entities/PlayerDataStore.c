@@ -47,15 +47,19 @@ class PlayerDataStore extends Managed{
 	}	
 	
 	void ~PlayerDataStore(){
-		Print("[UAPI] ~PlayerDataStore() - " + GUID);
+		//Print("[UAPI] ~PlayerDataStore() - " + GUID);
 		delete m_Modifiers;
 		delete m_Agents;
+		delete m_Stats;
 		delete m_Attachments;
+		delete m_Stomach;
 		delete m_MetaData;
 	}
 	
 	void SavePlayer(PlayerBase player){
 		if (!player){return;}
+		int i = 0;
+		
 		if (player.GetIdentity()){
 			GUID = player.GetIdentity().GetId();
 			m_Name = player.GetIdentity().GetName();
@@ -81,7 +85,6 @@ class PlayerDataStore extends Managed{
 		m_LeftFoot_Health = player.GetHealth("LeftFoot","");
 		
 		array<EntityAI> items = new array<EntityAI>;
-		int i = 0;
 		player.GetInventory().EnumerateInventory(InventoryTraversalType.LEVELORDER, items);
 		if (items && items.Count() > 0){
 			for (i = 0; i < items.Count(); i++){
@@ -116,6 +119,7 @@ class PlayerDataStore extends Managed{
 	void SetupPlayer(PlayerBase player, vector Pos = vector.Zero, vector Ori =  vector.Zero){
 		if (!player){ return; }
 		int i = 0;
+		
 		if (vector.Distance(Pos, vector.Zero) < 1){
 			Pos = m_Position;
 		}
