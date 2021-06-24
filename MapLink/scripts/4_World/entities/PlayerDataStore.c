@@ -75,6 +75,16 @@ class PlayerDataStore extends Managed{
 		m_Position = player.GetPosition();
 		m_Orientaion = player.GetOrientation();
 		
+		m_TimeSurvivedValue = player.StatGet(AnalyticsManagerServer.STAT_PLAYTIME);
+		m_PlayersKilledValue = player.StatGet(AnalyticsManagerServer.STAT_PLAYERS_KILLED);
+		m_InfectedKilledValue = player.StatGet(AnalyticsManagerServer.STAT_INFECTED_KILLED);
+		m_DistanceTraveledValue = player.StatGet(AnalyticsManagerServer.STAT_DISTANCE);
+		m_LongRangeShotValue = player.StatGet(AnalyticsManagerServer.STAT_LONGEST_SURVIVOR_HIT );
+		m_LifeSpanState = player.GetLifeSpanState();
+		m_LastShavedSeconds = player.GetLastShavedSeconds();
+		m_BloodType = player.GetStatBloodType().Get();
+		m_HasBloodTypeVisible = player.HasBloodTypeVisible();
+		m_HasBloodyHandsVisible = player.HasBloodyHands();
 		
 		
 		// Damage System
@@ -151,6 +161,10 @@ class PlayerDataStore extends Managed{
 		player.SetPosition(Pos);
 		player.SetOrientation(Ori);
 		
+		player.SetBloodType(m_BloodType);
+		player.SetBloodTypeVisible(m_HasBloodTypeVisible);
+		
+		
 		if (m_Attachments && m_Attachments.Count() > 0){
 			for(i = 0; i < m_Attachments.Count(); i++){
 				if (m_Attachments.Get(i)){
@@ -158,7 +172,18 @@ class PlayerDataStore extends Managed{
 				}
 			}
 		}
+		player.StatUpdate(AnalyticsManagerServer.STAT_PLAYTIME, m_TimeSurvivedValue );
+		player.StatUpdate(AnalyticsManagerServer.STAT_PLAYERS_KILLED, m_PlayersKilledValue);
+		player.StatUpdate(AnalyticsManagerServer.STAT_INFECTED_KILLED, m_InfectedKilledValue);
+		player.StatUpdate(AnalyticsManagerServer.STAT_DISTANCE, m_DistanceTraveledValue);
+		player.StatUpdate(AnalyticsManagerServer.STAT_LONGEST_SURVIVOR_HIT, m_LongRangeShotValue );
+		player.SetLifeSpanStateVisible(m_LifeSpanState);
+		player.SetLastShavedSeconds(m_LastShavedSeconds);
+		player.SetBloodyHands(m_HasBloodyHandsVisible);
+		
 		player.OnUApiLoad(this);
+		
+		player.GetStatBloodType().Set(m_BloodType);
 	}
 	
 	string ToJson(){

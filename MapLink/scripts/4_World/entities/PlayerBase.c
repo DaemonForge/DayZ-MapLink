@@ -135,16 +135,6 @@ modded class PlayerBase extends ManBase{
 	
 	void OnUApiSave(ref PlayerDataStore data){
 		int i = 0;
-		data.m_TimeSurvivedValue = StatGet(AnalyticsManagerServer.STAT_PLAYTIME);
-		data.m_PlayersKilledValue = StatGet(AnalyticsManagerServer.STAT_PLAYERS_KILLED);
-		data.m_InfectedKilledValue = StatGet(AnalyticsManagerServer.STAT_INFECTED_KILLED);
-		data.m_DistanceTraveledValue = StatGet(AnalyticsManagerServer.STAT_DISTANCE);
-		data.m_LongRangeShotValue = StatGet(AnalyticsManagerServer.STAT_LONGEST_SURVIVOR_HIT );
-		data.m_LifeSpanState = GetLifeSpanState();
-		data.m_LastShavedSeconds = GetLastShavedSeconds();
-		data.m_BloodType = GetStatBloodType().Get();
-		data.m_HasBloodTypeVisible = HasBloodyHands();
-		data.m_HasBloodyHandsVisible = HasBloodTypeVisible();
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
             if (mdfr && mdfr.IsActive() && mdfr.IsPersistent()) { 
@@ -184,14 +174,6 @@ modded class PlayerBase extends ManBase{
 	
 	void OnUApiLoad(ref PlayerDataStore data){
 		int i = 0;
-		StatUpdate(AnalyticsManagerServer.STAT_PLAYTIME, data.m_TimeSurvivedValue );
-		StatUpdate(AnalyticsManagerServer.STAT_PLAYERS_KILLED, data.m_PlayersKilledValue);
-		StatUpdate(AnalyticsManagerServer.STAT_INFECTED_KILLED, data.m_InfectedKilledValue);
-		StatUpdate(AnalyticsManagerServer.STAT_DISTANCE, data.m_DistanceTraveledValue);
-		StatUpdate(AnalyticsManagerServer.STAT_LONGEST_SURVIVOR_HIT, data.m_LongRangeShotValue );
-		SetLifeSpanStateVisible(data.m_LifeSpanState);
-		SetLastShavedSeconds(data.m_LastShavedSeconds);
-		SetBloodyHands(data.m_HasBloodyHandsVisible);
 		
 		for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
 			PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
@@ -222,9 +204,6 @@ modded class PlayerBase extends ManBase{
 		} else {
 			Print("[MAPLINK] Bleeding Manager is NULL");
 		}
-		GetStatBloodType().Set(data.m_BloodType);
-		SetBloodType(data.m_BloodType);
-		SetBloodTypeVisible(data.m_HasBloodTypeVisible);
 		if (m_PlayerStomach && data.m_Stomach){
 			for (i = 0; i < data.m_Stomach.Count(); i++){
 				UApiStomachItem stomachItem;
