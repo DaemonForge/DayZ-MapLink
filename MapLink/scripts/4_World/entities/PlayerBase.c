@@ -224,7 +224,11 @@ modded class PlayerBase extends ManBase{
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
 		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME || IsBeingTransfered()){ 
-			GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			if (GetIdentity()){
+				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			} else {
+				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL) they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			}
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
@@ -240,13 +244,21 @@ modded class PlayerBase extends ManBase{
 		}
 		//If they are transfering delete
 		if ( IsBeingTransfered()  && ( !killer || killer == this )){
-			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause of transfer" );
+			if (GetIdentity()){
+				GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause of transfer" );
+			} else {
+				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause of transfer" );
+			}
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
 		}
 		
 		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
 		if ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
-			GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			if (GetIdentity()){
+				GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			} else {
+				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			}
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
 		}
 		

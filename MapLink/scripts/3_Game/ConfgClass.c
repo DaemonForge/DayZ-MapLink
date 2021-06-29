@@ -147,13 +147,13 @@ class MapLinkSpawnPoint extends Managed{
 		int i = 0;
 		float Max = 0;
 		for (i = 0; i < Positions.Count(); i++){
-			Max = Max + Positions.Get(i).Chance;
+			Max = Max + Positions.Get(i).GetChance();
 		}
 		float random = Math.RandomFloat(0, Max);
 		i = -1;
-		float chance = Positions.Get(i).Chance;
+		float chance = Positions.Get(i).GetChance();
 		while (++i < Positions.Count() && chance < random){
-			chance = chance + Positions.Get(i).Chance;
+			chance = chance + Positions.Get(i).GetChance();
 		}
 		return Positions.Get(i);
 	} 
@@ -211,6 +211,13 @@ class MapLinkSpawnPointPos{
         float NewY = pos[2] + rndR * Math.Sin(rndT);
         return Vector(NewX, 0, NewY);
     }
+	
+	float GetChance(){
+		if (!Chance || Chance <= 0){
+			return 0.01;
+		}
+		return Chance;
+	}
 
 }
 
