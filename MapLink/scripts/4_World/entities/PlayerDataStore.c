@@ -441,8 +441,8 @@ class PlayerDataStore extends Managed{
 }
 
 class UApiPlayerIdFloatData extends Managed{
-	int m_ID;
 	
+	int m_ID;
 	float m_Value = -1;
 	
 	void UApiPlayerIdFloatData(int id, float value = -1){
@@ -450,16 +450,13 @@ class UApiPlayerIdFloatData extends Managed{
 		m_Value = value;
 	}
 	
-	int ID(){
-		return m_ID;
-	}
+	int ID(){ return m_ID; }
+	float Value(){ return m_Value; }
 	
-	float Value(){
-		return m_Value;
-	}
 }
 
 class UApiStomachItem extends Managed {
+	
 	float m_Amount;
 	int m_FoodStage;
 	string m_ClassName;
@@ -471,9 +468,11 @@ class UApiStomachItem extends Managed {
 		m_ClassName = className;
 		m_Agents = agents;
 	}
+	
 }
 
-class UApiPlayerZoneHealthData extends Managed{
+class UApiPlayerZoneHealthData extends Managed {
+	
 	string m_Zone;
 	float m_Health;
 	float m_Blood;
@@ -491,4 +490,5 @@ class UApiPlayerZoneHealthData extends Managed{
 	float Health(){ return m_Health; }
 	float Blood(){ return m_Blood; }
 	float Shock(){ return m_Shock; }
+	
 }
