@@ -144,4 +144,18 @@ class cfgVehicles
 			"MapLink\data\textures\tickets\Ticket.rvmat"
 		};
 	};
+	class SwansIsland_Ticket: Ticket_base
+	{
+		scope=2;
+		displayName="Swans Island Ticket";
+		descriptionShort="Looks like this ticket was once used to travel??";
+		hiddenSelectionsTextures[]=
+		{
+			"MapLink\data\textures\tickets\SwansIslandTicket_co.paa"
+		};
+		hiddenSelectionsMaterials[]=
+		{
+			"MapLink\data\textures\tickets\Ticket.rvmat"
+		};
+	};
 };
