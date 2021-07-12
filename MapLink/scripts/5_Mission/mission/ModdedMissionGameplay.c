@@ -6,6 +6,10 @@ modded class MissionGameplay
 		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 
+	override void OnMissionStart(){
+		super.OnMissionStart();
+		GetMapLinkConfig().Load();
+	}
 
 	void RPCRedirectedKicked( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target ) {
 		
