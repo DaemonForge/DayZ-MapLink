@@ -23,6 +23,7 @@ class PlayerDataStore extends Managed{
 	int	m_BloodType;
 	bool m_HasBloodTypeVisible;
 	bool m_HasBloodyHandsVisible;
+	bool m_Camera3rdPerson;
 	
 	int m_BrokenLegState;
 	autoptr array<autoptr UApiPlayerZoneHealthData> m_HealthZones;

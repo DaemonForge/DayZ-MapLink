@@ -171,7 +171,7 @@ modded class PlayerBase extends ManBase{
 				}
 			}
 		}
-		
+		data.m_Camera3rdPerson = m_Camera3rdPerson;
 	}
 	
 	void OnUApiLoad(ref PlayerDataStore data){
@@ -218,10 +218,11 @@ modded class PlayerBase extends ManBase{
 		}	
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 200);
+		m_Camera3rdPerson = data.m_Camera3rdPerson && !GetGame().GetWorld().Is3rdPersonDisabled();
 	}
 	
 	void SendUApiAfterLoadClient(){
-		RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param1<bool>( true ), true, GetIdentity());
+		RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param2<bool, bool>( true, m_Camera3rdPerson ), true, GetIdentity());
 	}
 	
 	override void OnDisconnect(){
@@ -287,6 +288,12 @@ modded class PlayerBase extends ManBase{
 		return m_MapLink_ShouldDelete;
 	}
 	
+	void MapLinkUpdateClientSettingsToServer(){
+		if (GetGame().IsClient()){
+			Print("[MapLink] m_Camera3rdPerson: " + m_Camera3rdPerson);
+			RPCSingleParam(MAPLINK_UPDATE3RDPERSON, new Param1<bool>(m_Camera3rdPerson), true, NULL);
+		}
+	}
 	
 	void UApiKillAndDeletePlayer(){
 		if (GetIdentity()){
@@ -336,10 +343,11 @@ modded class PlayerBase extends ManBase{
 		super.OnRPC(sender, rpc_type, ctx);
 		
 		if (rpc_type == MAPLINK_AFTERLOADCLIENT && GetGame().IsClient()) {
-			Param1<bool> alcdata;
+			Param2<bool, bool> alcdata;
 			if (ctx.Read(alcdata))	{
 				if (alcdata.param1){
 					UApiAfterLoadClient();
+					m_Camera3rdPerson = alcdata.param2 && !GetGame().GetWorld().Is3rdPersonDisabled();
 				}
 			}
 		}
@@ -354,6 +362,13 @@ modded class PlayerBase extends ManBase{
 			Param2<string, string> rtdata;
 			if (ctx.Read(rtdata) && GetIdentity().GetId() == sender.GetId())	{
 				UApiDoTravel(rtdata.param1, rtdata.param2);
+			}
+		}
+		
+		if ( rpc_type == MAPLINK_UPDATE3RDPERSON && sender && GetIdentity() && GetGame().IsServer() ) {
+			Param1<bool> trdpdata;
+			if ( ctx.Read(trdpdata) && GetIdentity().GetId() == sender.GetId()) {
+				m_Camera3rdPerson = trdpdata.param1;
 			}
 		}
 
