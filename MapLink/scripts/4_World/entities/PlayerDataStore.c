@@ -56,7 +56,7 @@ class PlayerDataStore extends Managed{
 	}
 	
 	void SavePlayer(PlayerBase player){
-		if (!player){return;}
+		if (!player || !player.GetIdentity()){return;}
 		int i = 0;
 		
 		if (player.GetIdentity()){
