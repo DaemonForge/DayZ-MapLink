@@ -38,14 +38,16 @@ class CfgMods
             {
 				value = "";
                 files[]={
-					"MapLink/scripts/3_Game"
+					"MapLink/scripts/3_Game",
+					"MapLink/scripts/Common"
 				};
             };
 			class worldScriptModule
             {
                 value="";
                 files[]={ 
-					"MapLink/scripts/4_World" 
+					"MapLink/scripts/4_World" ,
+					"MapLink/scripts/Common"
 				};
             };
 			
@@ -53,7 +55,8 @@ class CfgMods
             {
                 value="";
                 files[]={
-					"MapLink/scripts/5_Mission" 
+					"MapLink/scripts/5_Mission" ,
+					"MapLink/scripts/Common"
 				};
             };
         };
