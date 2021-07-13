@@ -5,6 +5,8 @@ modded class PlayerBase extends ManBase{
 	protected string m_TransferPoint = "";
 	protected ref Timer m_MapLink_UnderProtectionTimer;
 	
+	protected bool m_MapLink_ShouldDelete = false;
+	
 	
 	override void Init()
 	{
@@ -225,11 +227,20 @@ modded class PlayerBase extends ManBase{
 	override void OnDisconnect(){
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
-		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME || IsBeingTransfered()){ 
+		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME){ 
 			if (GetIdentity()){
 				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			} else {
 				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL) they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+			}
+			SetHealth("","", 0); 
+		}
+		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
+		if ( IsBeingTransfered()){ 
+			if (GetIdentity()){
+				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Is Transfering");
+			} else {
+				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL)  Is Transfering");
 			}
 			SetHealth("","", 0); 
 		}
@@ -239,6 +250,7 @@ modded class PlayerBase extends ManBase{
 	
 	override void EEKilled( Object killer )
 	{
+		
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
@@ -251,7 +263,9 @@ modded class PlayerBase extends ManBase{
 			} else {
 				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause of transfer" );
 			}
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
+			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
+			SetPosition(vector.Zero);
+			m_MapLink_ShouldDelete = true;
 		}
 		
 		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
@@ -261,16 +275,24 @@ modded class PlayerBase extends ManBase{
 			} else {
 				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 50, false);
+			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
+			SetPosition(vector.Zero);
+			m_MapLink_ShouldDelete = true;
 		}
-		
 		super.EEKilled( killer );
 	}
 
 	
+	bool MapLinkShoudDelete(){
+		return m_MapLink_ShouldDelete;
+	}
+	
+	
 	void UApiKillAndDeletePlayer(){
 		if (GetIdentity()){
 			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+		} else{
+			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: NULL (NULL)" );
 		}
 		SetAllowDamage(true);
 		SetHealth("","", 0);
@@ -297,6 +319,7 @@ modded class PlayerBase extends ManBase{
 			Print("[MAPLINK] Do Travel Verified for " + GetIdentity().GetId() +  " Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetGame().AdminLog("[MAPLINK]  Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+			SetAllowDamage(false);
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
 		} else {
 			string pid = "NULL";

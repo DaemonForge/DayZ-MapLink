@@ -131,4 +131,15 @@ modded class MissionServer extends MissionBase
 		}
 		return false;
 	}
+	
+	override void HandleBody(PlayerBase player)
+	{
+		super.HandleBody(player);
+		if (player && player.MapLinkShoudDelete()) {
+			Print("[MAPLINK] Removing body");
+			GetGame().AdminLog("[MAPLINK] Removing body");
+			// remove the body
+			player.Delete();	
+		}
+	}
 }
