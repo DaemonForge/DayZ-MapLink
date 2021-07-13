@@ -177,11 +177,11 @@ modded class PlayerBase extends ManBase{
 	void OnUApiLoad(ref PlayerDataStore data){
 		int i = 0;
 		
-		for (i = 0; i < GetPlayerStats().GetPCO().m_PlayerStats.Count(); i++){
-			PlayerStatBase TheStat = PlayerStatBase.Cast(GetPlayerStats().GetPCO().m_PlayerStats.Get(i));
+		for (i = 0; i < GetPlayerStats().GetPCO().Get().Count(); i++){
+			PlayerStatBase TheStat;
 			float statvalue;
-			if (TheStat && data.ReadStat(TheStat.GetLabel(), statvalue)){
-				TheStat.SetByFloat(statvalue);
+			if (Class.CastTo(TheStat, GetPlayerStats().GetPCO().Get().Get(i)) && data.ReadStat(TheStat.GetLabel(), statvalue)){
+				TheStat.SetByFloatEx(statvalue);
 			} else if (TheStat) {
 				Error("[MapLink] Failed to set stat for " + TheStat.GetLabel());
 			}
