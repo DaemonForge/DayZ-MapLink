@@ -134,7 +134,10 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 					m_Transfer.SetAlpha(0.3);
 				}
 			}
-      	}
+      	} else {
+			Print("[MAPLINK] Error Returning Status: " + status );
+			m_ServerOnline = true; //For now to ensure if an error happens
+		}
 	}
         
 	

@@ -23,6 +23,7 @@ class PlayerDataStore extends Managed{
 	int	m_BloodType;
 	bool m_HasBloodTypeVisible;
 	bool m_HasBloodyHandsVisible;
+	bool m_Camera3rdPerson;
 	
 	int m_BrokenLegState;
 	autoptr array<autoptr UApiPlayerZoneHealthData> m_HealthZones;
@@ -61,7 +62,7 @@ class PlayerDataStore extends Managed{
 		if (player.GetIdentity()){
 			GUID = player.GetIdentity().GetId();
 			m_Name = player.GetIdentity().GetName();
-			Print("[UAPI] Savinging Player " + m_Name + " ("+ GUID +")");
+			Print("[MAPLINK] Savinging Player " + m_Name + " ("+ GUID +")");
 		}
 		m_Type = player.GetType();
 		m_Health = player.GetHealth("", "Health");
@@ -120,7 +121,7 @@ class PlayerDataStore extends Managed{
 		if (vector.Distance(Pos, vector.Zero) < 1){
 			Pos = m_Position;
 		}
-		Print("[UAPI] CreateWithIdentity at " + Pos);
+		Print("[MAPLINK] CreateWithIdentity at " + Pos);
 		Entity playerEnt = GetGame().CreatePlayer(PlayerIdentity.Cast(identity), m_Type, Pos, 0, "NONE");
 		PlayerBase player;
 		Class.CastTo(player, playerEnt);
@@ -157,7 +158,7 @@ class PlayerDataStore extends Managed{
 		}
 		
 		
-		Print("[UAPI] SetupPlayer at " + Pos);
+		Print("[MAPLINK] SetupPlayer at " + Pos);
 		player.SetPosition(Pos);
 		player.SetOrientation(Ori);
 		
@@ -210,7 +211,7 @@ class PlayerDataStore extends Managed{
 		return true;
 	}
 	
-	bool ReadStat(string label, float data){
+	bool ReadStat(string label, out float data){
 		for(int i = 0; i < m_Stats.Count(); i++){
 			if (m_Stats.Get(i) && m_Stats.Get(i).Is(label)){
 				data = m_Stats.Get(i).ReadFloat();

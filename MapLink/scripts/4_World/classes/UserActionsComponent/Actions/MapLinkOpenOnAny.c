@@ -51,6 +51,7 @@ class ActionMapLinkOpenOnAny: ActionInteractBase
 		if (Class.CastTo(theTarget, action_data.m_Target.GetObject()) && Class.CastTo(thePlayer, action_data.m_Player)){
 			MapLinkDepaturePoint depaturePoint;
 			if (thePlayer.FindDepaturePointForEntity(theTarget, depaturePoint)){
+				thePlayer.MapLinkUpdateClientSettingsToServer();
 				if (!m_DeparturePointMenu){
 					m_DeparturePointMenu = DeparturePointMenu.Cast(GetGame().GetUIManager().EnterScriptedMenu(MAPLINK_DEPARTUREPOINTMENU, NULL));
 				}

@@ -8,7 +8,7 @@ modded class MissionServer extends MissionBase
 	override void OnMissionStart(){
 		super.OnMissionStart();
 		GetGame().GetWorldName(m_worldname);
-		Print("[UAPI] On Mission Start World: " + m_worldname + " Server: " + UApiConfig().ServerID);
+		Print("[MAPLINK] On Mission Start World: " + m_worldname + " Server: " + UApiConfig().ServerID);
 	}
 	
 	
@@ -16,7 +16,7 @@ modded class MissionServer extends MissionBase
       	if (status == UAPI_SUCCESS){  //If its a success
 			PlayerDataStore dataload;
 			if (UApiJSONHandler<PlayerDataStore>.FromString(data, dataload)){
-				Print("[UAPI] LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
+				Print("[MAPLINK] LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
 				if (dataload.IsValid() && dataload.GUID == oid){
 					m_PlayerDBQue.Set(oid, PlayerDataStore.Cast(dataload));
 				} else if (m_PlayerDBQue.Contains(oid)) { //This shouldn't be needed any more
@@ -24,13 +24,13 @@ modded class MissionServer extends MissionBase
 				}
 				return;
 			}
-			Print("[UAPI] LoadPlayerFromDB - Error Loading Data from the API - ID:" + cid + " - GUID: " + oid);
+			Print("[MAPLINK] LoadPlayerFromDB - Error Loading Data from the API - ID:" + cid + " - GUID: " + oid);
       	} 
 		if (status == UAPI_EMPTY){
-			Print("[UAPI] LoadPlayerFromDB - Empty Response - ID:" + cid + " - GUID: " + oid );
+			Print("[MAPLINK] LoadPlayerFromDB - Empty Response - ID:" + cid + " - GUID: " + oid );
 			return;
 		}
-        Error("[UAPI] LoadPlayerFromDB - API CALL FAILED - CHECK OVER YOUR CONFIGS AND ENSURE THAT THE API IS RUNNING");
+        Error("[MAPLINK] LoadPlayerFromDB - API CALL FAILED - CHECK OVER YOUR CONFIGS AND ENSURE THAT THE API IS RUNNING");
 	}
 
 	override void OnClientPrepareEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout)
@@ -42,8 +42,10 @@ modded class MissionServer extends MissionBase
 		}
 		if (identity){
 			int cid = UApi().db(PLAYER_DB).Load("MapLink", identity.GetId(), this, "LoadPlayerFromUApiDB");	
-			Print("[UAPI] DB Load - ID:" + cid + " - GUID: " + identity.GetId() );
+			Print("[MAPLINK] DB Load - ID:" + cid + " - GUID: " + identity.GetId() );
 			//NotificationSystem.SimpleNoticiation(" Requesting you're login player Data From the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
+		} else {
+			Print("[MAPLINK] DB Load - GUID: NULL");
 		}
 		super.OnClientPrepareEvent(identity, useDB, pos, yaw, preloadTimeout);
 	}
@@ -55,7 +57,7 @@ modded class MissionServer extends MissionBase
 			//If the player was created, end if not spawn a new fresh spawn
 			//Also need to spawn fresh spawns to be able to kick them with the redirect or they will get kick with a player not created message instead
 			if (UApiOnClientNewEvent(newParams.param1, newParams.param2, newParams.param3)){ 
-				Print("[UAPI] Player " + PlayerIdentity.Cast(newParams.param1).GetId() +" Was Created from API");
+				Print("[MAPLINK] Player " + PlayerIdentity.Cast(newParams.param1).GetId() +" Was Created from API");
 				return;
 			}
 		}
@@ -82,15 +84,15 @@ modded class MissionServer extends MissionBase
 					}
 				}
 				m_PlayerDBQue.Remove(identity.GetId());
-			    Print("[UAPI] Player " + identity.GetId() +" dead on the API, spawning them fresh");
+			    Print("[MAPLINK] Player " + identity.GetId() +" dead on the API, spawning them fresh");
 				return false;
 			}
-			Print("[UAPI] Spawning player " + identity.GetId() + " on: " + UApiConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
+			Print("[MAPLINK] Spawning player " + identity.GetId() + " on: " + UApiConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
 			if (FromServerName != UApiConfig().ServerID && transferPoint == "") {
 				serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(playerdata.m_Server));
 				NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Redirecting to the correct server - " + FromServerName), "set:maplink_icons image:redirect", -16843010, 16, identity);
 				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
-				Print("[UAPI] Player " + identity.GetId() + " Redirected to correct server " +  FromServerName);
+				Print("[MAPLINK] Player " + identity.GetId() + " Redirected to correct server " +  FromServerName);
 				m_PlayerDBQue.Remove(identity.GetId());
 				return false;
 			}
@@ -101,7 +103,7 @@ modded class MissionServer extends MissionBase
 					NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Error On Connect This server isn't set up correctly sending you back to your orginal server - " + playerdata.m_Server), "set:maplink_icons image:redirect", -16843010, 16, identity);
 					GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					m_PlayerDBQue.Remove(identity.GetId());
-					Print("[UAPI] Error Server isn't set up to receive this arrival point Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
+					Print("[MAPLINK] Error Server isn't set up to receive this arrival point Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
 					
 					m_PlayerDBQue.Remove(identity.GetId());
 					return false;
@@ -128,5 +130,16 @@ modded class MissionServer extends MissionBase
 			return true;
 		}
 		return false;
+	}
+	
+	override void HandleBody(PlayerBase player)
+	{
+		super.HandleBody(player);
+		if (player && player.MapLinkShoudDelete()) {
+			Print("[MAPLINK] Removing body");
+			GetGame().AdminLog("[MAPLINK] Removing body");
+			// remove the body
+			player.Delete();	
+		}
 	}
 }
