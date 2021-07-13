@@ -259,9 +259,9 @@ modded class PlayerBase extends ManBase{
 		//If they are transfering delete
 		if ( IsBeingTransfered()  && ( !killer || killer == this )){
 			if (GetIdentity()){
-				GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause of transfer" );
+				GetGame().AdminLog("[MAPLINK] Marking Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") for delete cause of transfer" );
 			} else {
-				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause of transfer" );
+				GetGame().AdminLog("[MAPLINK] Marking Player: NULL (NULL)  for delete cause of transfer" );
 			}
 			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
@@ -275,7 +275,7 @@ modded class PlayerBase extends ManBase{
 			} else {
 				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
-			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
 			m_MapLink_ShouldDelete = true;
 		}
