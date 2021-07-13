@@ -210,7 +210,7 @@ class PlayerDataStore extends Managed{
 		return true;
 	}
 	
-	bool ReadStat(string label, float data){
+	bool ReadStat(string label, out float data){
 		for(int i = 0; i < m_Stats.Count(); i++){
 			if (m_Stats.Get(i) && m_Stats.Get(i).Is(label)){
 				data = m_Stats.Get(i).ReadFloat();
