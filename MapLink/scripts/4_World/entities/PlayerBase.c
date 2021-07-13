@@ -180,6 +180,8 @@ modded class PlayerBase extends ManBase{
 			float statvalue;
 			if (TheStat && data.ReadStat(TheStat.GetLabel(), statvalue)){
 				TheStat.SetByFloat(statvalue);
+			} else if (TheStat) {
+				Error("[MapLink] Failed to set stat for " + TheStat.GetLabel());
 			}
 		}
 		
