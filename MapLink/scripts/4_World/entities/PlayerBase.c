@@ -120,17 +120,16 @@ modded class PlayerBase extends ManBase{
         super.OnStoreSave(ctx);
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME ){ 
+		if (GetIdentity() && !GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
 			this.SavePlayerToUApi();
 		}
     }
 	
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
-			GetGame().AdminLog("[MAPLINK] Saving Player Data to API: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+			GetGame().AdminLog("[MapLink] Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
-			delete teststore;
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		}
 	}
