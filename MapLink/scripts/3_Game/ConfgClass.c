@@ -150,7 +150,7 @@ class MapLinkSpawnPoint extends Managed{
 			Max = Max + Positions.Get(i).GetChance();
 		}
 		float random = Math.RandomFloat(0, Max);
-		i = -1;
+		i = 0;
 		float chance = Positions.Get(i).GetChance();
 		while (++i < Positions.Count() && chance < random){
 			chance = chance + Positions.Get(i).GetChance();
