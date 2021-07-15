@@ -6,6 +6,7 @@ class PlayerDataStore extends Managed{
 	float m_Health;
 	float m_Blood;
 	float m_Shock;
+	bool m_IsUnconscious;
 	float m_TimeSurvivedValue;
 	float m_PlayersKilledValue;
 	float m_InfectedKilledValue;
@@ -86,7 +87,7 @@ class PlayerDataStore extends Managed{
 		m_BloodType = player.GetStatBloodType().Get();
 		m_HasBloodTypeVisible = player.HasBloodTypeVisible();
 		m_HasBloodyHandsVisible = player.HasBloodyHands();
-		
+		m_IsUnconscious = player.IsUnconscious();
 		
 		// Damage System
 		DamageZoneMap zones = new DamageZoneMap;
@@ -439,6 +440,9 @@ class PlayerDataStore extends Managed{
 		return (!m_IsDead && m_Health > 0);
 	}
 	
+	bool IsUnconscious(){
+		return m_IsUnconscious;
+	}
 }
 
 class UApiPlayerIdFloatData extends Managed{

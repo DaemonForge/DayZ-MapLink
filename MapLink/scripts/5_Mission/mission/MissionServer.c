@@ -79,7 +79,7 @@ modded class MissionServer extends MissionBase
 			string transferPoint =  playerdata.m_TransferPoint;
 			string FromServerName = playerdata.m_Server;
 			
-			if (!playerdata.IsAlive()){
+			if (!playerdata.IsAlive() || playerdata.IsUnconscious()){
 				UApiServerData CurServerData = UApiServerData.Cast(GetMapLinkConfig().GetServer(UApiConfig().ServerID));
 				if (CurServerData && CurServerData.RespawnServer && CurServerData.RespawnServer != "" && CurServerData.RespawnServer != UApiConfig().ServerID){
 					serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(CurServerData.RespawnServer));
@@ -88,7 +88,7 @@ modded class MissionServer extends MissionBase
 						GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					}
 				}
-				GetGame().AdminLog("[MapLink] Player " + identity.GetId() +" dead on the API, spawning them fresh");
+				GetGame().AdminLog("[MapLink] Player " + identity.GetId() +" IsAlive: " + playerdata.IsAlive() + " IsUnconscious: " + playerdata.IsUnconscious() + " on the API, spawning them fresh");
 				GetGame().AdminLog("[MapLink] Removing Player from Queue " + identity.GetId());
 				m_PlayerDBQue.Remove(identity.GetId());
 			    return false;

@@ -282,6 +282,19 @@ modded class PlayerBase extends ManBase{
 		super.EEKilled( killer );
 	}
 
+		
+	override void OnUnconsciousStart()
+	{
+		super.OnUnconsciousStart();
+		SavePlayerToUApi();
+	}
+	
+	override void OnUnconsciousStop(int pCurrentCommandID)
+	{		
+		super.OnUnconsciousStop(pCurrentCommandID);
+		SavePlayerToUApi();
+	}
+	
 	
 	bool MapLinkShoudDelete(){
 		return m_MapLink_ShouldDelete;
