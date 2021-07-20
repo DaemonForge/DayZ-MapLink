@@ -7,7 +7,7 @@ class DeparturePointMenu extends UIScriptedMenu
 	
 	protected MapLinkDepaturePoint m_MapLinkDepaturePoint;
 	
-	protected ref Timer CountDownTimer
+	protected autoptr Timer CountDownTimer
 	protected int CountDownTimeRemaining;
 	
 	protected Widget m_ArrivalPoints;
@@ -20,7 +20,7 @@ class DeparturePointMenu extends UIScriptedMenu
 	protected RichTextWidget m_Heading;
 	
 	protected bool m_ShouldChangeSize = true;
-	protected ref SizeToChild			m_ContentResize;
+	protected autoptr SizeToChild			m_ContentResize;
 	
 	protected autoptr array<autoptr DeparturePointWidget> dPointWidgets;
 	

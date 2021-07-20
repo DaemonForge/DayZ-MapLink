@@ -1,7 +1,7 @@
 modded class DayZGame
 {	
 	
-	ref MapLinkCountTimerWidget m_MapLinkCountTimerWidget;
+	autoptr MapLinkCountTimerWidget m_MapLinkCountTimerWidget;
 	
 	autoptr UApiServerData ConnectTo;
 	bool m_IsToTransfer = false;

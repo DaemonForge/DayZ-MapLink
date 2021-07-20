@@ -3,7 +3,7 @@ modded class PlayerBase extends ManBase{
 	protected bool m_MapLink_UnderProtection = false;
 	
 	protected string m_TransferPoint = "";
-	protected ref Timer m_MapLink_UnderProtectionTimer;
+	protected autoptr Timer m_MapLink_UnderProtectionTimer;
 	
 	protected bool m_MapLink_ShouldDelete = false;
 	

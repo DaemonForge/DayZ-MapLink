@@ -57,8 +57,8 @@ class MLLogFileInstance extends Managed {
 		}
 	}
 	
-	void SetLogLevel(int LogLevel){
-		m_LogLevel = LogLevel;
+	void SetLogLevel(int Loglevel){
+		m_LogLevel = Loglevel;
 	}
 	
 	protected FileHandle CreateFile(string path) {
@@ -132,28 +132,28 @@ class MLLogFileInstance extends Managed {
 	}
 	
 	
-	void DoLog(string text, int loglevel = 1)
+	void DoLog(string text, int level = 1)
 	{	
-		if (m_LogLevel < loglevel){
+		if (m_LogLevel < level){
 			return;
 		}
-		if (loglevel == 2) {
-			GetGame().AdminLog("[MapLink]" + GetTag(loglevel) + text);
+		if (level == 2) {
+			GetGame().AdminLog("[MapLink]" + GetTag(level) + text);
 		}
 		if (m_isInit){
-			//Print("[MapLink] " + GetTag(loglevel) + GetTimeStamp() + " | " + text);
-			string towrite = GetTag(loglevel)  + GetTimeStamp() + " | " + " " + text;
+			//Print("[MapLink] " + GetTag(level) + GetTimeStamp() + " | " + text);
+			string towrite = GetTag(level)  + GetTimeStamp() + " | " + " " + text;
 			FPrintln(m_FileHandle, towrite);
 		} else {
-			Print("[MapLink]" + GetTag(loglevel) + " " + text);
+			Print("[MapLink]" + GetTag(level) + " " + text);
 		}
 		if (m_LogToApi){
-			UApi().Rest().Log(GetJsonObject(text, loglevel));
+			UApi().Rest().Log(GetJsonObject(text, level));
 		}
 	}
 	
-	protected static string GetTag(int loglevel){
-		switch ( loglevel ) {
+	protected static string GetTag(int level){
+		switch ( level ) {
 			case MLERROR:
 				return "[ERROR] ";
 				break;
@@ -173,27 +173,27 @@ class MLLogFileInstance extends Managed {
 		return "[NULL] ";
 	}
 	
-	static string GetJsonObject(string text, int loglevel) {
-		string Level = "INFO";
+	static string GetJsonObject(string text, int level) {
+		string sLevel = "INFO";
 		
-		switch ( loglevel ) {
+		switch ( level ) {
 			case MLERROR:
-				Level = "ERROR";
+				sLevel = "ERROR";
 				break;
 			case MLVERBOSE:
-				Level =  "VERBOSE";
+				sLevel =  "VERBOSE";
 				break;
 			case MLDEBUG:
-				Level =  "DEBUG";
+				sLevel =  "DEBUG";
 				break;
 			case MLINFO:
-				Level =  "INFO";
+				sLevel =  "INFO";
 				break;
 			default:
-				Level =  "INFO";
+				sLevel =  "INFO";
 				break;
 		}
-		autoptr MapLinkLogObject obj = new MapLinkLogObject(text, Level);
+		autoptr MapLinkLogObject obj = new MapLinkLogObject(text, sLevel);
 		return obj.ToJson();
 	}
 }
@@ -204,9 +204,9 @@ class MapLinkLogObject extends UApiObject_Base {
 	string Level;
 	string Server;
 	
-	void MapLinkLogObject(string text, string loglevel){
+	void MapLinkLogObject(string text, string level){
 		Message = text;
-		Level = loglevel;
+		Level = level;
 		Server = UApiConfig().ServerID;
 		
 	}

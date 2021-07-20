@@ -2,11 +2,11 @@ class MapLinkCountTimerWidget  extends ScriptedWidgetEventHandler {
 	
 	static string 				m_LayoutPath = "MapLink/gui/layouts/UnderProtectionInfo.layout";
 		
-	ref Widget					m_Root;
+	autoptr Widget					m_Root;
 	
-	ref TextWidget 				m_Time;
+	autoptr TextWidget 				m_Time;
 	
-	ref Timer 						m_Timer;
+	autoptr Timer 						m_Timer;
 	int 						m_CurrentTime = 0;
 	
 	void MapLinkCountTimerWidget(){

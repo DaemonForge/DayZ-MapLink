@@ -1,6 +1,6 @@
 modded class MissionServer extends MissionBase
 {
-	ref map<string, ref PlayerDataStore> m_PlayerDBQue = new map<string, ref PlayerDataStore>;
+	ref map<string, autoptr PlayerDataStore> m_PlayerDBQue = new map<string, autoptr PlayerDataStore>;
 	string m_worldname;
 	int MapLinkConfigRefreshTimer = 0;
 	static int MAPLINK_CONFIG_REFRESH_TIME = 90000;
