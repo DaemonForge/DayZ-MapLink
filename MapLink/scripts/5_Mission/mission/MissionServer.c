@@ -142,9 +142,15 @@ modded class MissionServer extends MissionBase
 	
 	override void HandleBody(PlayerBase player)
 	{
-		super.HandleBody(player);
-		if (player && player.MapLinkShoudDelete()) {
-			Print("[MapLink] Removing body");
+		if ( player && player.IsBeingTransfered() ){
+			Print("[MapLink] HandleBody IsBeingTransfered Killing Player"); //Fail Safe
+			player.SetAllowDamage(true);
+			player.SetHealth("", "Health", 0);
+			player.SetHealth("", "", 0);
+		}
+		super.HandleBody( player );
+		if (player && ( player.MapLinkShoudDelete() || player.IsBeingTransfered() ) ) {
+			Print("[MapLink]  HandleBody IsBeingTransfered Removing body");
 			GetGame().AdminLog("[MapLink] Removing body");
 			// remove the body
 			player.Delete();	

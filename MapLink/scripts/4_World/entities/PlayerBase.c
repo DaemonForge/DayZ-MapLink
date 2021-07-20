@@ -233,6 +233,7 @@ modded class PlayerBase extends ManBase{
 			} else {
 				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL) they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
+			SetAllowDamage(true);
 			SetHealth("","", 0); 
 		}
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
@@ -242,6 +243,7 @@ modded class PlayerBase extends ManBase{
 			} else {
 				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL)  Is Transfering");
 			}
+			SetAllowDamage(true);
 			SetHealth("","", 0); 
 		}
 		super.OnDisconnect();
