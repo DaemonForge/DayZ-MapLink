@@ -30,7 +30,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	protected void UpdateMapLinkProtectionClient(int time){
-		Print("[MAPLINK] UpdateMapLinkProtectionClient" + time);
+		MLLog.Log("UpdateMapLinkProtectionClient" + time);
 		if (time > 0){
 			GetDayZGame().MapLinkStartCountDown(time);		
 			GetInputController().OverrideRaise(true, false);
@@ -45,7 +45,7 @@ modded class PlayerBase extends ManBase{
 	
 	
 	void UpdateMapLinkProtection(int time = -1){
-		Print("[MAPLINK] UpdateMapLinkProtection" + time);
+		MLLog.Log("UpdateMapLinkProtection" + time);
 		if (!GetGame().IsServer()){return;}
 		RPCSingleParam(MAPLINK_UNDERPROTECTION, new Param1<int>(time), true, GetIdentity());
 		if (m_MapLink_UnderProtection && time < 0){
@@ -79,31 +79,31 @@ modded class PlayerBase extends ManBase{
 		bool PlayerHasGodMode = false;
 		#ifdef JM_COT
 			if ( GetGame().IsServer() && m_JMHasGodMode ){
-				Print("[MAPLINK] RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
+				MLLog.Log("RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef VPPADMINTOOLS
 			if ( GetGame().IsServer() && hasGodmode ){
-				Print("[MAPLINK] RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
+				MLLog.Log("RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef ZOMBERRY_AT
 			if ( GetGame().IsServer() && ZBGodMode ){
-				Print("[MAPLINK] RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
+				MLLog.Log("RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADER 
 			if (GetGame().IsServer() && m_Trader_IsInSafezone){
-				Print("[MAPLINK] RemoveProtectionSafe Player Is In Trader(DrJones) Safe Zone");
+				MLLog.Log("RemoveProtectionSafe Player Is In Trader(DrJones) Safe Zone");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADERPLUS
 			if (GetGame().IsServer() && IsInsideSZ && IsInsideSZ.SZStatut){
-				Print("[MAPLINK] RemoveProtectionSafe Player Is In Trader+ Safe Zone");
+				MLLog.Log("RemoveProtectionSafe Player Is In Trader+ Safe Zone");
 				PlayerHasGodMode = true;
 			}		
 		#endif
@@ -127,7 +127,7 @@ modded class PlayerBase extends ManBase{
 	
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
-			GetGame().AdminLog("[MapLink] Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
+			MLLog.Info("Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
@@ -152,7 +152,7 @@ modded class PlayerBase extends ManBase{
 		if (GetBleedingManagerServer()){
 			GetBleedingManagerServer().OnUApiSave(data);
 		} else {
-			Print("[MAPLINK] Bleeding Manager is NULL");
+			MLLog.Log("Bleeding Manager is NULL");
 		}
 		if (m_PlayerStomach){
 			for (i = 0; i < m_PlayerStomach.m_StomachContents.Count(); i++){
@@ -182,7 +182,7 @@ modded class PlayerBase extends ManBase{
 			if (Class.CastTo(TheStat, GetPlayerStats().GetPCO().Get().Get(i)) && data.ReadStat(TheStat.GetLabel(), statvalue)){
 				TheStat.SetByFloatEx(statvalue);
 			} else if (TheStat) {
-				Error("[MapLink] Failed to set stat for " + TheStat.GetLabel());
+				MLLog.Err("Failed to set stat for " + TheStat.GetLabel());
 			}
 		}
 		
@@ -205,7 +205,7 @@ modded class PlayerBase extends ManBase{
 		if (GetBleedingManagerServer()){	
 			GetBleedingManagerServer().OnUApiLoad(data);
 		} else {
-			Print("[MAPLINK] Bleeding Manager is NULL");
+			MLLog.Log("Bleeding Manager is NULL");
 		}
 		if (m_PlayerStomach && data.m_Stomach){
 			for (i = 0; i < data.m_Stomach.Count(); i++){
@@ -229,9 +229,9 @@ modded class PlayerBase extends ManBase{
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
 		if ( StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME){ 
 			if (GetIdentity()){
-				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+				MLLog.Info("OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			} else {
-				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL) they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+				MLLog.Info("OnDisconnect Player: NULL (NULL) they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
 			SetAllowDamage(true);
 			SetHealth("","", 0); 
@@ -239,9 +239,9 @@ modded class PlayerBase extends ManBase{
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
 		if ( IsBeingTransfered()){ 
 			if (GetIdentity()){
-				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Is Transfering");
+				MLLog.Info("OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Is Transfering");
 			} else {
-				GetGame().AdminLog("[MAPLINK] OnDisconnect Player: NULL (NULL)  Is Transfering");
+				MLLog.Info("OnDisconnect Player: NULL (NULL)  Is Transfering");
 			}
 			SetAllowDamage(true);
 			SetHealth("","", 0); 
@@ -261,9 +261,9 @@ modded class PlayerBase extends ManBase{
 		//If they are transfering delete
 		if ( IsBeingTransfered()  && ( !killer || killer == this )){
 			if (GetIdentity()){
-				GetGame().AdminLog("[MAPLINK] Marking Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") for delete cause of transfer" );
+				MLLog.Info("Marking Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") for delete cause of transfer" );
 			} else {
-				GetGame().AdminLog("[MAPLINK] Marking Player: NULL (NULL)  for delete cause of transfer" );
+				MLLog.Info("Marking Player: NULL (NULL)  for delete cause of transfer" );
 			}
 			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
@@ -273,9 +273,9 @@ modded class PlayerBase extends ManBase{
 		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
 		if ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
 			if (GetIdentity()){
-				GetGame().AdminLog("[MAPLINK] Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+				MLLog.Info("Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			} else {
-				GetGame().AdminLog("[MAPLINK] Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
+				MLLog.Info("Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
@@ -304,16 +304,15 @@ modded class PlayerBase extends ManBase{
 	
 	void MapLinkUpdateClientSettingsToServer(){
 		if (GetGame().IsClient()){
-			Print("[MapLink] m_Camera3rdPerson: " + m_Camera3rdPerson);
 			RPCSingleParam(MAPLINK_UPDATE3RDPERSON, new Param1<bool>(m_Camera3rdPerson), true, NULL);
 		}
 	}
 	
 	void UApiKillAndDeletePlayer(){
 		if (GetIdentity()){
-			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
+			MLLog.Info("Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
 		} else{
-			GetGame().AdminLog("[MAPLINK] Killing for transfering Player: NULL (NULL)" );
+			MLLog.Info("Killing for transfering Player: NULL (NULL)" );
 		}
 		SetAllowDamage(true);
 		SetHealth("","", 0);
@@ -337,8 +336,7 @@ modded class PlayerBase extends ManBase{
 			MLRemoveMoney(id,cost);
 			this.UApiSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToUApi();
-			Print("[MAPLINK] Do Travel Verified for " + GetIdentity().GetId() +  " Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
-			GetGame().AdminLog("[MAPLINK]  Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
+			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
 			SetAllowDamage(false);
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
@@ -347,7 +345,7 @@ modded class PlayerBase extends ManBase{
 			if (GetIdentity()){
 				pid = GetIdentity().GetId();
 			}
-			Error("[MAPLINK] User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
+			MLLog.Err("User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
 			
 	} 
@@ -439,7 +437,7 @@ modded class PlayerBase extends ManBase{
 	int MLGetPlayerBalance(int ID){
 		int PlayerBalance = 0;
 		if (!GetMapLinkConfig().GetCurrency(ID) || GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() < 1){
-			Error("[MAPLINK] Currency ID: " + ID + " is not configured");
+			MLLog.Err("Currency ID: " + ID + " is not configured");
 			return 0;
 		}
 		array<EntityAI> inventory = new array<EntityAI>;
@@ -515,11 +513,11 @@ modded class PlayerBase extends ManBase{
 		}
 		if (AmountToRemove >= SmallestCurrency){ // Now to delete a larger bill and make change
 			for (int j = LastIndex; j >= 0; j--){
-				//Print("[MapLink] Trying to remove " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item);
+				//MLLog.Debug("Trying to remove " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item);
 				int NewAmountToRemove =  MLRemoveMoneyInventory(ID, GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j), GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value);
 				if (NewAmountToRemove == 0){
 					int AmountToAddBack = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value - AmountToRemove;
-					//Print("[MapLink] A " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item + " removed trying to add back " + AmountToAddBack );
+					//MLLog.Debug("A " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item + " removed trying to add back " + AmountToAddBack );
 					Return = MLAddMoney(ID, AmountToAddBack);
 				}
 			}
@@ -632,7 +630,7 @@ modded class PlayerBase extends ManBase{
 					if (item){ 
 						newItem = ItemBase.Cast(item.GetInventory().CreateInInventory(itemType)); //CreateEntityInCargo	
 						if (newItem){
-							//Print("[MapLink] NewItem Created " + newItem.GetType() + " in " + item.GetType());
+							//MLLog.Debug("NewItem Created " + newItem.GetType() + " in " + item.GetType());
 							stoploop = false; //Item was created so we don't need to stop the loop anymore
 							break;
 						}

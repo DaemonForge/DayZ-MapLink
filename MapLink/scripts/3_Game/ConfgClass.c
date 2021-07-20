@@ -33,7 +33,6 @@ class MapLinkDepaturePoint extends Managed {
 	 
 	bool HasArrivalPoint(string arrivalPoint){
 		for (int i = 0; i < ArrivalPoints.Count(); i++){
-			Print(ArrivalPoints.Get(i).ArrivalPointName + " == " + arrivalPoint );
 			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
 				return true;
 			}
@@ -43,7 +42,6 @@ class MapLinkDepaturePoint extends Managed {
 	
 	bool GetArrivalPointData(string arrivalPoint, out int id, out int value){
 		for (int i = 0; i < ArrivalPoints.Count(); i++){
-			Print(ArrivalPoints.Get(i).ArrivalPointName + " == " + arrivalPoint );
 			if( ArrivalPoints.Get(i).ArrivalPointName == arrivalPoint){
 				id = ArrivalPoints.Get(i).AcceptedCurrencyId;
 				value = ArrivalPoints.Get(i).Cost;
@@ -105,7 +103,7 @@ class MapLinkArrivalPoint extends Managed {
 				return SpawnPoints.Get(i).ProtectionTime;
 			}
 		}
-		Print("MapLinkArrivalPoint - Failed to Get Protection Time for " + serverName);
+		MLLog.Err("MapLinkArrivalPoint - Failed to Get Protection Time for " + serverName);
 		return -1;
 	}
 	
@@ -115,6 +113,7 @@ class MapLinkArrivalPoint extends Managed {
 				return SpawnPoints.Get(i).GetSpawnPos();
 			}
 		}
+		MLLog.Err("MapLinkArrivalPoint.GetSpawnPos - Failed to Get SpawnPoint Position from " + Name + " for " + serverName);
 		return NULL;
 	}
 	
@@ -264,7 +263,7 @@ class MapLinkCurrency extends Managed {
 			return;
 		}
 		IsSorted = true;
-		Print("[MAPLINK] Sorting Currency ID:" + ID);
+		MLLog.Log("Sorting Currency ID:" + ID);
 		array<MapLinkMoneyValue> StartingValues =  new array<MapLinkMoneyValue>;
 		for (int h = 0; h < MoneyValues.Count(); h++){
 			StartingValues.Insert(MoneyValues.Get(h));

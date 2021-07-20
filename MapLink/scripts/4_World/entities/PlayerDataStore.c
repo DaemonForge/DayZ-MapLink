@@ -46,7 +46,7 @@ class PlayerDataStore extends Managed{
 	}	
 	
 	void ~PlayerDataStore(){
-		//Print("[UAPI] ~PlayerDataStore() - " + GUID);
+		//MLLog.Debug("~PlayerDataStore() - " + GUID);
 		delete m_HealthZones;
 		delete m_Modifiers;
 		delete m_Agents;
@@ -63,7 +63,7 @@ class PlayerDataStore extends Managed{
 		if (player.GetIdentity()){
 			GUID = player.GetIdentity().GetId();
 			m_Name = player.GetIdentity().GetName();
-			Print("[MAPLINK] Savinging Player " + m_Name + " ("+ GUID +")");
+			//MLLog.Debug("Savinging Player " + m_Name + " ("+ GUID +")");
 		}
 		m_Type = player.GetType();
 		m_Health = player.GetHealth("", "Health");
@@ -122,7 +122,7 @@ class PlayerDataStore extends Managed{
 		if (vector.Distance(Pos, vector.Zero) < 1){
 			Pos = m_Position;
 		}
-		Print("[MAPLINK] CreateWithIdentity at " + Pos);
+		MLLog.Debug("CreateWithIdentity at " + Pos);
 		Entity playerEnt = GetGame().CreatePlayer(PlayerIdentity.Cast(identity), m_Type, Pos, 0, "NONE");
 		PlayerBase player;
 		Class.CastTo(player, playerEnt);
@@ -159,7 +159,7 @@ class PlayerDataStore extends Managed{
 		}
 		
 		
-		Print("[MAPLINK] SetupPlayer at " + Pos);
+		MLLog.Debug("SetupPlayer at " + Pos);
 		player.SetPosition(Pos);
 		player.SetOrientation(Ori);
 		
@@ -283,7 +283,7 @@ class PlayerDataStore extends Managed{
 		return true;
 	}
 	bool Write(string var, Class data){
-		Error("[UAPI] Trying to save undefined data class to " + var + " for " + m_Type + " try converting to a string before saving");
+		MLLog.Err("Trying to save undefined data class to " + var + " for " + m_Type + " try converting to a string before saving");
 		return false;
 	}
 	
@@ -385,7 +385,7 @@ class PlayerDataStore extends Managed{
 		return false;
 	}
 	bool Read(string var, out Class data){
-		Error("[UAPI] Trying to read undefined data class for " + var + " for " + m_Type + " try converting to a string before saving");
+		MLLog.Err("Trying to read undefined data class for " + var + " for " + m_Type + " try converting to a string before saving");
 		return false;
 	}
 	

@@ -67,7 +67,7 @@ class MapLinkConfig extends UApiConfigBase {
 		if (UApiJSONHandler<MapLinkConfig>.FromString(data, this)){
 			OnDataReceive();
 		} else {
-			Print("[UAPI] CallBack Failed errorCode: Invalid Data");
+			MLLog.Err("CallBack Failed errorCode: Invalid Data");
 		}
 	}
 	
@@ -84,7 +84,7 @@ class MapLinkConfig extends UApiConfigBase {
 		if (closestPointIndex >= 0){
 			return MapLinkDepaturePoint.Cast(DepaturePoints.Get(closestPointIndex));
 		}
-		Error("[MAPLINK] COULD NOT FIND A MAP LINK DEPATURE POINT");
+		MLLog.Err("COULD NOT FIND A MAP LINK DEPATURE POINT at " + Pos);
 		return NULL;
 	}
 	
@@ -121,7 +121,7 @@ class MapLinkConfig extends UApiConfigBase {
 				return ArrivalPoints.Get(i).ProtectionTime(UApiConfig().ServerID));
 			}
 		}
-		Print("GetProtectionTime - Failed to Get Protection Time for " + arrivalPoint);
+		MLLog.Err("GetProtectionTime - Failed to Get Protection Time for " + arrivalPoint);
 		return -1;
 	}
 	
@@ -131,7 +131,7 @@ class MapLinkConfig extends UApiConfigBase {
 				return MapLinkSpawnPointPos.Cast(ArrivalPoints.Get(i).GetSpawnPos(serverName));
 			}
 		}
-		Print("GetSpawnPointPos - Failed to Get SpawnPoint for " + arrivalPoint + " on " + serverName);
+		MLLog.Err("GetSpawnPointPos - Failed to Get SpawnPoint for " + arrivalPoint + " on " + serverName);
 		return NULL;
 	}
 	
@@ -141,6 +141,7 @@ class MapLinkConfig extends UApiConfigBase {
 				return UApiServerData.Cast(Servers.Get(i));
 			}
 		}
+		MLLog.Err("GetServer - Failed to Get Server Data for " + serverName);
 		return NULL;
 	}
 	
@@ -151,6 +152,7 @@ class MapLinkConfig extends UApiConfigBase {
 				return MapLinkArrivalPoint.Cast(ArrivalPoints.Get(i));
 			}
 		}
+		MLLog.Err("GetArrivalPoint - Failed to Get Arrival Point Data for " + arrivalPoint);
 		return NULL;
 	}
 	
@@ -186,7 +188,6 @@ class MapLinkConfig extends UApiConfigBase {
 	
 	string GetCostIcon(int id){
 		for (int i = 0; i < Currencies.Count(); i++){
-			Print("[MAPLINK] Getting Icon ID:" + id + " is it: " + Currencies.Get(i).ID);
 			if (Currencies.Get(i).ID == id){
 				string icon = Currencies.Get(i).Icon;
 				if (icon.Contains(".paa") || icon.Contains("set:") || icon.Contains(".edds") ){

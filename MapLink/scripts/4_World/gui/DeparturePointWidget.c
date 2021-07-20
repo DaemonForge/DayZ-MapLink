@@ -135,7 +135,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 				}
 			}
       	} else {
-			Print("[MAPLINK] Error Returning Status: " + status );
+			MLLog.Err("Error Returning Status: " + status );
 			m_ServerOnline = true; //For now to ensure if an error happens
 		}
 	}

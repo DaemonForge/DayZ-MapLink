@@ -18,7 +18,7 @@ modded class MissionGameplay
 		
 		Param1< UApiServerData > data; 
 		if ( !ctx.Read( data ) ) return;
-		Print("[MAPLINK] Kicked from Game");
+		MLLog.Info("Kicked from Game");
 		UApiServerData serverData = UApiServerData.Cast(data.param1);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetGame().DisconnectSessionForce);
 		GetDayZGame().HiveSetReconnectTo(serverData);
