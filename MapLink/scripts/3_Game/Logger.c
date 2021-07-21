@@ -202,12 +202,10 @@ class MapLinkLogObject extends UApiObject_Base {
 	
 	string Message;
 	string Level;
-	string Server;
 	
 	void MapLinkLogObject(string text, string level){
 		Message = text;
 		Level = level;
-		Server = UApiConfig().ServerID;
 		
 	}
 	
