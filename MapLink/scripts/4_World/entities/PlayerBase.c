@@ -320,9 +320,11 @@ modded class PlayerBase extends ManBase{
 	
 	void UApiRequestTravel(string arrivalPoint, string serverName ){
 		if (GetGame().IsClient()){
+			MLLog.Debug("Player: " + GetIdentity().GetId() + " is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
 			RPCSingleParam(MAPLINK_REQUESTTRAVEL, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
 		}
 		if (GetGame().IsServer()){
+			MLLog.Debug("Player: " + GetIdentity().GetName() + "("+ GetIdentity().GetId() + ") is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
 			UApiDoTravel(arrivalPoint, serverName);
 		}
 	}

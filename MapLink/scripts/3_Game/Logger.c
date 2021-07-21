@@ -26,7 +26,7 @@ class MLLog extends Managed {
 	}
 
 	static void Err(string text){
-		Error("[MapLink] [ERROR]" + text);
+		Error2("[MapLink] Error", text);
 		GetInstance().DoLog(text, MLERROR);
 	}
 	
