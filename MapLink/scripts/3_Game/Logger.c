@@ -13,8 +13,8 @@ class MLLog extends Managed {
 		return m_MapLinkLogFileInstance;
 	}
 	
-	static void Log(string text, int loglevel = 1) {
-		GetInstance().DoLog(text,loglevel);
+	static void Log(string text, int level = 1) {
+		GetInstance().DoLog(text,level);
 	}
 	
 	static void Info(string text){
@@ -40,8 +40,8 @@ class MLLogFileInstance extends Managed {
 	protected static string LogDir = "$profile:";
 	protected FileHandle		m_FileHandle;
 	
-	void MLLogFileInstance(int LogLevel = 4) {	
-		m_LogLevel = LogLevel;	
+	void MLLogFileInstance(int level = 4) {	
+		m_LogLevel = level;	
 		if ( !GetGame().IsServer() || GetGame().IsClient() ){
 			return;	
 		}
@@ -57,8 +57,8 @@ class MLLogFileInstance extends Managed {
 		}
 	}
 	
-	void SetLogLevel(int Loglevel){
-		m_LogLevel = Loglevel;
+	void SetLogLevel(int level){
+		m_LogLevel = level;
 	}
 	
 	protected FileHandle CreateFile(string path) {
