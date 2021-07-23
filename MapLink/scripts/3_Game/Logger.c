@@ -6,7 +6,7 @@ static const int MLDEBUG = 3;
 
 class MLLog extends Managed {
 	
-	static ref MLLogFileInstance m_MapLinkLogFileInstance;
+	protected static ref MLLogFileInstance m_MapLinkLogFileInstance;
 	
 	static MLLogFileInstance GetInstance(){
 		if (!m_MapLinkLogFileInstance){m_MapLinkLogFileInstance = new MLLogFileInstance;}
@@ -30,12 +30,20 @@ class MLLog extends Managed {
 		GetInstance().DoLog(text, MLERROR);
 	}
 	
+	static void SetLogLevels(int level, int apiLevel = -99){
+		if (apiLevel == -99){
+			apiLevel = level;
+		}
+		GetInstance().SetLogLevel(level);
+		GetInstance().SetApiLogLevel(apiLevel);
+	}
+	
 };
 class MLLogFileInstance extends Managed {
 	
 	protected int				m_LogLevel	= 3;
+	protected int				m_LogToApiLevel = 3;
 	protected bool 			m_isInit = false;
-	protected bool				m_LogToApi = true;
 	
 	protected static string LogDir = "$profile:";
 	protected FileHandle		m_FileHandle;
@@ -61,6 +69,10 @@ class MLLogFileInstance extends Managed {
 		m_LogLevel = level;
 	}
 	
+	void SetApiLogLevel(int level){
+		m_LogToApiLevel = level;
+	}
+	
 	protected FileHandle CreateFile(string path) {
 		if ( !GetGame().IsServer() || GetGame().IsClient() ){
 			return null;	
@@ -71,7 +83,7 @@ class MLLogFileInstance extends Managed {
 			FPrintln(fHandle, "MapLink Log Started: " + GetDateStamp() + " " + GetTimeStamp() );
 			return fHandle;
 		}
-		Error("[MapLink][Error] Unable to create" + path + " file in Profile.");
+		Error2("[MapLink] Error", "Unable to create" + path + " file in Profile.");
 		return fHandle;
 	}
 	
@@ -134,20 +146,17 @@ class MLLogFileInstance extends Managed {
 	
 	void DoLog(string text, int level = 1)
 	{	
-		if (m_LogLevel < level){
-			return;
-		}
-		if (level == 2) {
+		if (level == 2 && m_LogLevel >= level) {
 			GetGame().AdminLog("[MapLink]" + GetTag(level) + text);
 		}
-		if (m_isInit){
+		if (m_isInit && m_LogLevel >= level){
 			//Print("[MapLink] " + GetTag(level) + GetTimeStamp() + " | " + text);
 			string towrite = GetTag(level)  + GetTimeStamp() + " | " + " " + text;
 			FPrintln(m_FileHandle, towrite);
-		} else {
+		} else if (m_LogLevel >= level) {
 			Print("[MapLink]" + GetTag(level) + " " + text);
 		}
-		if (m_LogToApi){
+		if (m_LogToApiLevel >= level){
 			UApi().Rest().Log(GetJsonObject(text, level));
 		}
 	}

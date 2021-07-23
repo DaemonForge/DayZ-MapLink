@@ -1,13 +1,21 @@
 class MapLinkConfig extends UApiConfigBase {
 
+	string ConfigVersion = "0";
+	static string CurrentVersion = "0";
+	
 	ref array<ref UApiServerData> Servers = new array<ref UApiServerData>;
 	ref array<ref MapLinkArrivalPoint> ArrivalPoints = new array<ref MapLinkArrivalPoint>;
 	ref array<ref MapLinkDepaturePoint> DepaturePoints = new array<ref MapLinkDepaturePoint>;
 	ref array<ref MapLinkCurrency> Currencies = new array<ref MapLinkCurrency>;
 	
+	int LogLevel_File = 3;
+	int LogLevel_API = 2;
+	
+	
 	static float MAX_DEPATUREPOINT_DISTANCE = 20;
 	
 	static float MAX_DEPATUREPOINTANY_DISTANCE = 0.7;
+	
 	
 	override void SetDefaults(){
 		/*
@@ -25,14 +33,14 @@ class MapLinkConfig extends UApiConfigBase {
 
 	override void OnDataReceive(){
 		SetDataReceived();
-		/*
-		if(ModVersion != CurrentVersion){
-			DoSome Code Upgrade
-		
+		if(!ConfigVersion || ConfigVersion != CurrentVersion){
+			 ConfigVersion = CurrentVersion;
+			LogLevel_File = 3;
+			LogLevel_API = 2;
 			Save(); //Resave the upgrade Version Back to the server
 		}
-		*/
-		
+		MLLog.SetLogLevels(LogLevel_File, LogLevel_API);
+		Valiate();
 	}
 	
 	void Valiate(){

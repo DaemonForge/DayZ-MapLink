@@ -30,7 +30,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	protected void UpdateMapLinkProtectionClient(int time){
-		MLLog.Log("UpdateMapLinkProtectionClient" + time);
+		MLLog.Debug("UpdateMapLinkProtectionClient" + time);
 		if (time > 0){
 			GetDayZGame().MapLinkStartCountDown(time);		
 			GetInputController().OverrideRaise(true, false);
@@ -45,7 +45,7 @@ modded class PlayerBase extends ManBase{
 	
 	
 	void UpdateMapLinkProtection(int time = -1){
-		MLLog.Log("UpdateMapLinkProtection" + time);
+		MLLog.Debug("UpdateMapLinkProtection" + time);
 		if (!GetGame().IsServer()){return;}
 		RPCSingleParam(MAPLINK_UNDERPROTECTION, new Param1<int>(time), true, GetIdentity());
 		if (m_MapLink_UnderProtection && time < 0){
@@ -127,7 +127,7 @@ modded class PlayerBase extends ManBase{
 	
 	void SavePlayerToUApi(){
 		if (this.GetIdentity() && GetGame().IsServer()){
-			MLLog.Info("Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
+			MLLog.Debug("Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
