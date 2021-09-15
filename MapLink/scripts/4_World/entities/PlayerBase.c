@@ -1,5 +1,7 @@
 modded class PlayerBase extends ManBase{
 	
+	protected string m_MapLinkGUIDCache = "";
+	protected string m_MapLinkNameCache = "";
 	protected bool m_MapLink_UnderProtection = false;
 	
 	protected string m_TransferPoint = "";
@@ -13,6 +15,16 @@ modded class PlayerBase extends ManBase{
 		super.Init();
 		RegisterNetSyncVariableBool("m_MapLink_UnderProtection");
 	}
+	
+	override void OnPlayerLoaded()
+	{
+		super.OnPlayerLoaded();
+		if (GetIdentity()){
+			m_MapLinkGUIDCache = GetIdentity().GetId();
+			m_MapLinkNameCache = GetIdentity().GetName();
+		}
+	}
+	
 	
 	bool IsUnderMapLinkProtection(){
 		return (m_MapLink_UnderProtection);
@@ -28,6 +40,16 @@ modded class PlayerBase extends ManBase{
 	bool IsBeingTransfered(){
 		return (m_TransferPoint != "");
 	}
+	
+	bool GetCachedIdentity(out string guid, out string name){
+		if (!m_MapLinkGUIDCache || !m_MapLinkNameCache){
+			return false;
+		}
+		guid = m_MapLinkGUIDCache;
+		name = m_MapLinkNameCache;
+		return true;
+	}
+	
 	
 	protected void UpdateMapLinkProtectionClient(int time){
 		MLLog.Debug("UpdateMapLinkProtectionClient" + time);
@@ -120,17 +142,19 @@ modded class PlayerBase extends ManBase{
         super.OnStoreSave(ctx);
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (GetIdentity() && !GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
+		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
 			this.SavePlayerToUApi();
 		}
     }
 	
 	void SavePlayerToUApi(){
-		if (this.GetIdentity() && GetGame().IsServer()){
-			MLLog.Debug("Saving Player to API " + GetIdentity().GetName() + "(" + GetIdentity().GetId() + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) );
+		if (m_MapLinkGUIDCache && m_MapLinkNameCache && GetGame().IsServer()){
+			MLLog.Debug("Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) + " IsUnconscious: " + IsUnconscious() + " IsRestrained: " + IsRestrained() );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
-			UApi().db(PLAYER_DB).Save("MapLink", this.GetIdentity().GetId(), teststore.ToJson());
+			UApi().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
+		} else {
+			MLLog.Debug("Failed to save player to API");
 		}
 	}
 	
