@@ -87,7 +87,7 @@ modded class MissionServer extends MissionBase
 						GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, identity);
 					}
 				}
-				MLLog.Info("Player " + identity.GetId() +" IsAlive: " + playerdata.IsAlive() + " IsUnconscious: " + playerdata.IsUnconscious() + " on the API, spawning them fresh");
+				MLLog.Info("Player " + identity.GetId() +" IsAlive: " + playerdata.IsAlive() + " IsUnconscious: " + playerdata.IsUnconscious() + " IsRestrained: " + playerdata.IsRestrained()  + " on the API, spawning them fresh");
 				MLLog.Debug("Removing Player from Queue " + identity.GetId());
 				m_PlayerDBQue.Remove(identity.GetId());
 			    return false;

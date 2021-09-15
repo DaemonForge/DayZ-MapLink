@@ -7,6 +7,7 @@ class PlayerDataStore extends Managed{
 	float m_Blood;
 	float m_Shock;
 	bool m_IsUnconscious;
+	bool m_IsRestrained;
 	float m_TimeSurvivedValue;
 	float m_PlayersKilledValue;
 	float m_InfectedKilledValue;
@@ -57,7 +58,8 @@ class PlayerDataStore extends Managed{
 	}
 	
 	void SavePlayer(PlayerBase player){
-		if (!player || !player.GetIdentity()){return;}
+		if (!player){ return; }
+		if (!player.GetCachedIdentity(GUID, m_Name) && !player.GetIdentity()){return;}
 		int i = 0;
 		
 		if (player.GetIdentity()){
@@ -88,6 +90,7 @@ class PlayerDataStore extends Managed{
 		m_HasBloodTypeVisible = player.HasBloodTypeVisible();
 		m_HasBloodyHandsVisible = player.HasBloodyHands();
 		m_IsUnconscious = player.IsUnconscious();
+		m_IsRestrained = player.IsRestrained();
 		
 		// Damage System
 		DamageZoneMap zones = new DamageZoneMap;
@@ -442,6 +445,10 @@ class PlayerDataStore extends Managed{
 	
 	bool IsUnconscious(){
 		return m_IsUnconscious;
+	}
+	
+	bool IsRestrained(){
+		return m_IsRestrained;
 	}
 }
 
