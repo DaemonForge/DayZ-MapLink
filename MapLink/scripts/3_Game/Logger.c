@@ -209,6 +209,7 @@ class MLLogFileInstance extends Managed {
 
 class MapLinkLogObject extends UApiObject_Base {
 	
+	string Type = "MapLink";
 	string Message;
 	string Level;
 	
