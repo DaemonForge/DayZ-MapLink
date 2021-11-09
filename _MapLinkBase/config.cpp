@@ -1,20 +1,18 @@
 class CfgPatches
 {
-	class MapLink
+	class MapLinkBase
 	{
 		requiredVersion=0.1;
 		requiredAddons[]={
-			"UniversalApi",
-			"MapLinkBase"
 		};
 	};
 };
 
 class CfgMods
 {
-	class MapLink
+	class MapLinkBase
 	{
-		dir="MapLink";
+		dir="MapLinkBase";
         name="MapLink";
         credits="DaemonForge, Iceblade, Dumpgrah";
         author="DaemonForge";
@@ -22,31 +20,23 @@ class CfgMods
         version="0.1";
         extra=0;
         type="mod";
-		inputs = "MapLink/inputs/inputs.xml";
 	    dependencies[]={ "Game", "World", "Mission"};
 	    class defs
 	    {
-			
-			class imageSets
-			{
-				files[]=
-				{
-					"MapLink/gui/maplink_icons.imageset",
-					"MapLink/gui/maplink_money.imageset"
-				};
-			};
 			class gameScriptModule
             {
 				value = "";
                 files[]={
-					"MapLink/scripts/3_Game"
+					"_MapLinkBase/scripts/3_Game",
+					"_MapLinkBase/scripts/Common"
 				};
             };
 			class worldScriptModule
             {
                 value="";
                 files[]={ 
-					"MapLink/scripts/4_World"
+					"_MapLinkBase/scripts/4_World" ,
+					"_MapLinkBase/scripts/Common"
 				};
             };
 			
@@ -54,7 +44,8 @@ class CfgMods
             {
                 value="";
                 files[]={
-					"MapLink/scripts/5_Mission"
+					"_MapLinkBase/scripts/5_Mission" ,
+					"_MapLinkBase/scripts/Common"
 				};
             };
         };

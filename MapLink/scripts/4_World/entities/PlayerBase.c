@@ -1,56 +1,7 @@
 modded class PlayerBase extends ManBase{
 	
-	protected string m_MapLinkGUIDCache = "";
-	protected string m_MapLinkNameCache = "";
-	protected bool m_MapLink_UnderProtection = false;
-	
-	protected string m_TransferPoint = "";
 	protected autoptr Timer m_MapLink_UnderProtectionTimer;
-	
-	protected bool m_MapLink_ShouldDelete = false;
-	
-	
-	override void Init()
-	{
-		super.Init();
-		RegisterNetSyncVariableBool("m_MapLink_UnderProtection");
-	}
-	
-	override void OnPlayerLoaded()
-	{
-		super.OnPlayerLoaded();
-		if (GetIdentity()){
-			m_MapLinkGUIDCache = GetIdentity().GetId();
-			m_MapLinkNameCache = GetIdentity().GetName();
-		}
-	}
-	
-	
-	bool IsUnderMapLinkProtection(){
-		return (m_MapLink_UnderProtection);
-	}
-	
-	
-	bool UApiSaveTransferPoint(string point = ""){
-		m_TransferPoint = point;
-		return true;
-	}
-	
-	
-	bool IsBeingTransfered(){
-		return (m_TransferPoint != "");
-	}
-	
-	bool GetCachedIdentity(out string guid, out string name){
-		if (!m_MapLinkGUIDCache || !m_MapLinkNameCache){
-			return false;
-		}
-		guid = m_MapLinkGUIDCache;
-		name = m_MapLinkNameCache;
-		return true;
-	}
-	
-	
+			
 	protected void UpdateMapLinkProtectionClient(int time){
 		MLLog.Debug("UpdateMapLinkProtectionClient" + time);
 		if (time > 0){
@@ -152,13 +103,21 @@ modded class PlayerBase extends ManBase{
 			MLLog.Debug("Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) + " IsUnconscious: " + IsUnconscious() + " IsRestrained: " + IsRestrained() );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
+			if (IsAlive() && !IsUnconscious()){
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,100,false,"MapLink_Server", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(UApiConfig().ServerID),NULL,"");
+			} else {
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,100,false,"MapLink_Server", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
+			}
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,300,false,"MapLink_TransferPoint", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(m_TransferPoint),NULL,"");
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		} else {
 			MLLog.Debug("Failed to save player to API");
 		}
 	}
 	
-	void OnUApiSave(ref PlayerDataStore data){
+	
+	override void OnUApiSave(autoptr PlayerDataStore data){
+		super.OnUApiSave(data);
 		int i = 0;
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
@@ -197,7 +156,8 @@ modded class PlayerBase extends ManBase{
 		data.m_Camera3rdPerson = m_Camera3rdPerson;
 	}
 	
-	void OnUApiLoad(ref PlayerDataStore data){
+	override void OnUApiLoad(autoptr PlayerDataStore data){
+		super.OnUApiLoad(data);
 		int i = 0;
 		
 		for (i = 0; i < GetPlayerStats().GetPCO().Get().Count(); i++){
@@ -321,11 +281,6 @@ modded class PlayerBase extends ManBase{
 		SavePlayerToUApi();
 	}
 	
-	
-	bool MapLinkShoudDelete(){
-		return m_MapLink_ShouldDelete;
-	}
-	
 	void MapLinkUpdateClientSettingsToServer(){
 		if (GetGame().IsClient()){
 			RPCSingleParam(MAPLINK_UPDATE3RDPERSON, new Param1<bool>(m_Camera3rdPerson), true, NULL);
@@ -373,7 +328,6 @@ modded class PlayerBase extends ManBase{
 			}
 			MLLog.Err("User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
-			
 	} 
 	
 	override void OnRPC(PlayerIdentity sender, int rpc_type, ParamsReadContext ctx)
@@ -599,185 +553,8 @@ modded class PlayerBase extends ManBase{
 		this.UpdateInventoryMenu(); // RPC-Call needed?
 		return Amount;
 	}
-	
-	//Return How many Items it faild to create in the Inventory
-	int MLCreateMoneyInventory(string itemType, int amount)
-	{
-		array<EntityAI> itemsArray = new array<EntityAI>;
-		this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, itemsArray);
-		string itemTypeLower = itemType;
-		itemTypeLower.ToLower();
-		ItemBase item;
-		Ammunition_Base ammoItem;
-		int currentAmount = amount;
-		bool hasQuantity = ((MLMaxQuantity(itemType) > 0) || MLHasQuantity(itemType));
-		if (hasQuantity){
-			for (int i = 0; i < itemsArray.Count(); i++){
-				if (currentAmount <= 0){
-					this.UpdateInventoryMenu(); // RPC-Call needed?
-					return 0;
-				}
-				Class.CastTo(item, itemsArray.Get(i));
-				string itemPlayerType = "";
-				if (item){
-					if (item.IsRuined()){
-						continue;
-					}
-					itemPlayerType = item.GetType();
-					itemPlayerType.ToLower();
-					if (itemTypeLower == itemPlayerType && !item.IsFullQuantity() && !item.IsMagazine()){
-						currentAmount = item.MLAddQuantity(currentAmount);
-					}
-				}
-
-				Class.CastTo(ammoItem, itemsArray.Get(i));
-				if (ammoItem){
-					if (ammoItem.IsRuined()){	
-						continue;
-					}
-					itemPlayerType = ammoItem.GetType();
-					itemPlayerType.ToLower();
-					if (itemTypeLower == itemPlayerType && ammoItem.IsAmmoPile()){
-						currentAmount = ammoItem.MLAddQuantity(currentAmount);
-					}
-				}
-			}
-		}
-		bool stoploop = false;
-		int MaxLoop = 5000;
-		//any leftover or new stacks
-		while (currentAmount > 0 && !stoploop && MaxLoop > 0){
-			MaxLoop--;
-			ItemBase newItem = ItemBase.Cast(this.GetInventory().CreateInInventory(itemType));
-			if (!newItem){
-				stoploop = true; //To stop the loop from running away since it couldn't create an item
-				for (int j = 0; j < itemsArray.Count(); j++){
-					Class.CastTo(item, itemsArray.Get(j));
-					if (item){ 
-						newItem = ItemBase.Cast(item.GetInventory().CreateInInventory(itemType)); //CreateEntityInCargo	
-						if (newItem){
-							//MLLog.Debug("NewItem Created " + newItem.GetType() + " in " + item.GetType());
-							stoploop = false; //Item was created so we don't need to stop the loop anymore
-							break;
-						}
-					}
-				}
-			}
-			
-			Magazine newMagItem = Magazine.Cast(newItem);
-			Ammunition_Base newammoItem = Ammunition_Base.Cast(newItem);
-			if (newMagItem && !newammoItem)	{	
-				int SetAmount = currentAmount;
-				if (newMagItem.GetQuantityMax() <= currentAmount){
-					SetAmount = currentAmount;
-					currentAmount = 0;
-				} else {
-					SetAmount = newMagItem.GetQuantityMax();
-					currentAmount = currentAmount - SetAmount;
-				}
-				newMagItem.ServerSetAmmoCount(SetAmount);
-			} else if (hasQuantity){
-				if (newammoItem){
-					currentAmount = newammoItem.MLSetQuantity(currentAmount);
-	
-				}	
-				ItemBase newItemBase;
-				if (Class.CastTo(newItemBase, newItem)){
-					currentAmount = newItemBase.MLSetQuantity(currentAmount);
-				}
-			} else { //It created just one of the item
-				currentAmount--;
-			}
-		}
-		return currentAmount;
-	}
-	
-	void MLCreateMoneyGround(string Type, int Amount){
-		int AmountToSpawn = Amount;
-		bool HasQuantity = ((MLMaxQuantity(Type) > 0) || MLHasQuantity(Type));
-		int MaxQuanity = MLMaxQuantity(Type);
-		int StacksRequired = AmountToSpawn;
-		if (MaxQuanity != 0){
-			StacksRequired = Math.Ceil( AmountToSpawn /  MaxQuanity);
-		}
-		for (int i = 0; i <= StacksRequired; i++){
-			if (AmountToSpawn > 0){
-				ItemBase newItem = ItemBase.Cast(GetGame().CreateObjectEx(Type, GetPosition(), ECE_PLACE_ON_SURFACE));
-				if (newItem && HasQuantity){
-					AmountToSpawn = newItem.MLSetQuantity(AmountToSpawn);
-				}
-			}
-		}
-	}
-	
-	int MLCurrentQuantity(ItemBase money){
-		ItemBase moneyItem = ItemBase.Cast(money);
-		if (!moneyItem){
-			return false;
-		}	
-		if (MLMaxQuantity(moneyItem.GetType()) == 0){
-			return 1;
-		}
-		if ( moneyItem.IsMagazine() ){
-			Magazine mag = Magazine.Cast(moneyItem);
-			if (mag){
-				return mag.GetAmmoCount();
-			}
-		}
-		return moneyItem.GetQuantity();
-	}
-
-	int MLMaxQuantity(string Type)
-	{
-		if ( GetGame().ConfigIsExisting(  CFG_MAGAZINESPATH  + " " + Type + " count" ) ){
-			return GetGame().ConfigGetInt(  CFG_MAGAZINESPATH  + " " + Type + " count" );
-		}
-		if ( GetGame().ConfigIsExisting(  CFG_VEHICLESPATH + " " + Type + " varQuantityMax" ) ){
-			return GetGame().ConfigGetInt( CFG_VEHICLESPATH + " " + Type + " varQuantityMax" ) );
-		}
-		return 0;
-	}
-	
-	bool MLSetMoneyAmount(ItemBase item, int amount)
-	{
-		ItemBase money = ItemBase.Cast(item);
-		if (!money){
-			return false;
-		}
-		if ( money.IsMagazine() ){
-			Magazine mag = Magazine.Cast(money);
-			if (mag){
-				return true;
-				mag.ServerSetAmmoCount(amount);
-			}
-		}
-		else{
-			money.SetQuantity(amount);
-			return true;
-		}
-		return false;
-	}
-	
-	bool MLHasQuantity(string Type)
-	{   
-		
-		string path = CFG_MAGAZINESPATH  + " " + Type + " count";
-	    if (GetGame().ConfigIsExisting(path)){
-	     	if (GetGame().ConfigGetInt(path) > 0){
-				return true;
-			}
-		}
-	    path = CFG_VEHICLESPATH  + " " + Type + " quantityBar";
-	    if (GetGame().ConfigIsExisting(path))   {
-	        return GetGame().ConfigGetInt(path) == 1;
-		}
-	
-	    return false;
-	}
-	
-	
-	
 }
+	
 
 modded class DayZPlayerMeleeFightLogic_LightHeavy
 {
