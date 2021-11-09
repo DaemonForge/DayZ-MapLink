@@ -58,7 +58,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		UApiServerData serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(spawnPoint.ServerName));
 		if (serverData.QueryPort > 0){
 			m_Status_Frame.Show(true);
-			m_LookupCid = UApi().api().ServerQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
+			m_LookupCid = UApi().api().SteamQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
 			
 			m_ServerOnline = false;
 		} else {
@@ -110,29 +110,26 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	
 	
 	
-	void UpdateServerStatus(int cid, int status, string oid, string data){	
-      	if (status == UAPI_SUCCESS &&  m_Root && m_Root.IsVisible() && m_Status_Image){  //If its a success
-			UApiServerStatus serverStatus;
-			if (UApiJSONHandler<UApiServerStatus>.FromString(data, serverStatus)){
-				if (serverStatus.Status == "Online"){
-					m_Status_Image.SetColor(ARGB(255, 105, 240, 174));
-					m_Status_Text.SetText("Online");
-					m_Status_Text.SetColor(ARGB(255, 105, 240, 174));
-					m_ServerOnline = true;
-					m_PlayerCount_Frame.Show(true);
-					string playerCount = serverStatus.Players.ToString() + "/" + serverStatus.MaxPlayers.ToString();
-					m_PlayerCount_Text.SetText(playerCount);
-					if (serverStatus.QueuePlayers > 0){
-						m_Queue_Frame.Show(true);
-						m_Queue_Text.SetText(serverStatus.QueuePlayers.ToString());
-					}
-				} else {
-					m_Status_Image.SetColor(ARGB(255, 255, 61, 0));
-					m_Status_Text.SetText("Offline");
-					m_Status_Text.SetColor(ARGB(255, 255, 61, 0));
-					m_ServerOnline = false;
-					m_Transfer.SetAlpha(0.3);
+	void UpdateServerStatus(int cid, int status, string oid, UApiServerStatus data){	
+      	if (status == UAPI_SUCCESS &&  m_Root && m_Root.IsVisible() && m_Status_Image && data){  //If its a success
+			if (data.Status == "Online"){
+				m_Status_Image.SetColor(ARGB(255, 105, 240, 174));
+				m_Status_Text.SetText("Online");
+				m_Status_Text.SetColor(ARGB(255, 105, 240, 174));
+				m_ServerOnline = true;
+				m_PlayerCount_Frame.Show(true);
+				string playerCount = data.Players.ToString() + "/" + data.MaxPlayers.ToString();
+				m_PlayerCount_Text.SetText(playerCount);
+				if (data.QueuePlayers > 0){
+					m_Queue_Frame.Show(true);
+					m_Queue_Text.SetText(data.QueuePlayers.ToString());
 				}
+			} else {
+				m_Status_Image.SetColor(ARGB(255, 255, 61, 0));
+				m_Status_Text.SetText("Offline");
+				m_Status_Text.SetColor(ARGB(255, 255, 61, 0));
+				m_ServerOnline = false;
+				m_Transfer.SetAlpha(0.3);
 			}
       	} else {
 			MLLog.Err("Error Returning Status: " + status );
