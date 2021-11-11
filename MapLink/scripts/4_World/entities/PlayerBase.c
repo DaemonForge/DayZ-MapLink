@@ -308,7 +308,30 @@ modded class PlayerBase extends ManBase{
 		}
 	}
 	
-	protected void UApiDoTravel(string arrivalPoint, string serverName){
+	bool UApiDoManualServerTravel(string arrivalPoint, UApiServerData serverData, int cost = 0, int id = 0){
+		string pid = "NULL";
+		if (GetIdentity()){
+			pid = GetIdentity().GetId();
+		}
+		if (!serverData){
+			MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " failed NULL Server Data");
+			return false;
+		}
+		if (serverData && GetIdentity() && (cost <= 0 || MLGetPlayerBalance(id) >= cost)){
+			MLRemoveMoney(id,cost);
+			this.UApiSaveTransferPoint(arrivalPoint);
+			this.SavePlayerToUApi();
+			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
+			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+			SetAllowDamage(false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
+			return true;
+		}
+		MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " on " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") failed");
+		return false;
+	}
+	
+	protected bool UApiDoTravel(string arrivalPoint, string serverName){
 		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
 		int cost;
@@ -321,6 +344,7 @@ modded class PlayerBase extends ManBase{
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
 			SetAllowDamage(false);
 			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
+			return true;
 		} else {
 			string pid = "NULL";
 			if (GetIdentity()){
@@ -328,6 +352,7 @@ modded class PlayerBase extends ManBase{
 			}
 			MLLog.Err("User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
+		return false;
 	} 
 	
 	override void OnRPC(PlayerIdentity sender, int rpc_type, ParamsReadContext ctx)

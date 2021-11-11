@@ -1,4 +1,4 @@
-modded class DayZGame
+modded class DayZGame extends CGame
 {	
 	autoptr UApiServerData ConnectTo;
 	bool m_IsToTransfer = false;
