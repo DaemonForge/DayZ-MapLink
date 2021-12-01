@@ -27,6 +27,7 @@ modded class MissionServer extends MissionBase
 				return;
 			}
 			MLLog.Err("LoadPlayerFromDB - Error Loading Data from the API - ID:" + cid + " - GUID: " + oid);
+			return;
       	} 
 		if (status == UAPI_EMPTY){
 			MLLog.Info("LoadPlayerFromDB - Empty Response - ID:" + cid + " - GUID: " + oid );
