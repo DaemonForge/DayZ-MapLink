@@ -5,7 +5,7 @@ class MapLinkDepaturePoint extends Managed {
 	int SafeZoneCoolDown;
 	string TerminalType;
 	vector Position;
-	ref array<ref MapLinkArrivalPointsRef> ArrivalPoints = new array<ref MapLinkArrivalPointsRef>;
+	autoptr array<autoptr MapLinkArrivalPointsRef> ArrivalPoints = new array<autoptr MapLinkArrivalPointsRef>;
 	
 	void MapLinkDepaturePoint(string displayName){
 		DisplayName = displayName;
@@ -43,19 +43,6 @@ class MapLinkArrivalPointsRef {
 	int Cost;
 	int AcceptedCurrencyId;
 		
-	MapLinkMoneyValue GetHighestDenomination(float amount){
-		if (GetMapLinkConfig() && GetMapLinkConfig().Currencies.Get(AcceptedCurrencyId)){
-			return MapLinkMoneyValue.Cast(GetMapLinkConfig().Currencies.Get(AcceptedCurrencyId).GetHighestDenomination(amount));
-		}
-		return NULL;
-	}
-	
-	int GetAmount(MapLinkMoneyValue MoneyObj, float amount){
-		if (GetMapLinkConfig() && GetMapLinkConfig().Currencies.Get(AcceptedCurrencyId)){
-			return GetMapLinkConfig().Currencies.Get(AcceptedCurrencyId).GetAmount(MapLinkMoneyValue.Cast(MoneyObj), amount);
-		}
-		return 0;
-	}
 	
 	MapLinkArrivalPoint Get(){
 		return GetMapLinkConfig().GetArrivalPoint(ArrivalPointName);
@@ -71,7 +58,7 @@ class MapLinkArrivalPointsRef {
 
 class MapLinkArrivalPoint extends Managed {
 	string Name;
-	ref array<ref MapLinkSpawnPoint> SpawnPoints = new array<ref MapLinkSpawnPoint>;
+	autoptr array<autoptr MapLinkSpawnPoint> SpawnPoints = new array<autoptr MapLinkSpawnPoint>;
 	
 	void MapLinkArrivalPoint(string displayName){
 		Name = displayName;
@@ -115,7 +102,7 @@ class MapLinkSpawnPoint extends Managed{
 	string ServerName;
 	string DisplayName;
 	int ProtectionTime;
-	ref array<ref MapLinkSpawnPointPos> Positions = new array<ref MapLinkSpawnPointPos>;
+	autoptr array<autoptr MapLinkSpawnPointPos> Positions = new array<autoptr MapLinkSpawnPointPos>;
 	
 	void MapLinkSpawnPoint(bool defaultCfg = false){
 		Positions.Insert(new MapLinkSpawnPointPos());	
@@ -219,11 +206,8 @@ class MapLinkCurrency extends Managed {
 	string Name;
 	string Icon;
 	bool CanUseRuinedBills = false;
-	ref array<ref MapLinkMoneyValue> MoneyValues = new array<ref MapLinkMoneyValue>;
-	
-	[NonSerialized()]
-	protected bool IsSorted = false;
-	
+	autoptr array<autoptr MapLinkMoneyValue> MoneyValues = new array<autoptr MapLinkMoneyValue>;
+			
 	void MapLinkCurrency(int id = 1){
 		if (id == -1){
 			ID = 0;
@@ -249,51 +233,6 @@ class MapLinkCurrency extends Managed {
 			MoneyValues.Insert(new MapLinkMoneyValue("Essker_Ticket", 1));
 			MoneyValues.Insert(new MapLinkMoneyValue("Utes_Ticket", 1));
 		}
-	}
-	
-	void SortMoney(){
-		if (IsSorted) {
-			return;
-		}
-		IsSorted = true;
-		MLLog.Log("Sorting Currency ID:" + ID);
-		array<MapLinkMoneyValue> StartingValues =  new array<MapLinkMoneyValue>;
-		for (int h = 0; h < MoneyValues.Count(); h++){
-			StartingValues.Insert(MoneyValues.Get(h));
-		}
-		ref array<ref MapLinkMoneyValue> SortedMoneyValues = new array<ref MapLinkMoneyValue>;
-		while (StartingValues.Count() > 0){
-			ref MapLinkMoneyValue HighestValue = StartingValues.Get(0);
-			for (int i = 1; i < StartingValues.Count(); i++){
-				if (StartingValues.Get(i).Value > HighestValue.Value){
-					HighestValue = StartingValues.Get(i);
-				}
-			}
-			StartingValues.RemoveItem(HighestValue);
-			SortedMoneyValues.Insert(HighestValue);
-		}
-		if (StartingValues.Count() == 1){
-			SortedMoneyValues.Insert(StartingValues.Get(0));
-		}
-		MoneyValues = SortedMoneyValues;
-	}
-	
-	MapLinkMoneyValue GetHighestDenomination(int amount){
-		SortMoney();
-		int LastIndex = MoneyValues.Count() - 1;
-		for (int i = 0; i < MoneyValues.Count(); i++){
-			if (GetAmount(MoneyValues.Get(i), amount) > 0){
-				return MoneyValues.Get(i);
-			}
-		}
-		return NULL;
-	}
-	
-	int GetAmount(MapLinkMoneyValue MoneyObj, int amount){
-		if (MoneyObj){
-			return Math.Floor(amount / MoneyObj.Value);
-		} 
-		return 0;
 	}
 	
 	string GetIcon(){

@@ -3,10 +3,10 @@ class MapLinkConfig extends UApiConfigBase {
 	string ConfigVersion = "0";
 	static string CurrentVersion = "0";
 	
-	ref array<ref UApiServerData> Servers = new array<ref UApiServerData>;
-	ref array<ref MapLinkArrivalPoint> ArrivalPoints = new array<ref MapLinkArrivalPoint>;
-	ref array<ref MapLinkDepaturePoint> DepaturePoints = new array<ref MapLinkDepaturePoint>;
-	ref array<ref MapLinkCurrency> Currencies = new array<ref MapLinkCurrency>;
+	autoptr array<autoptr UApiServerData> Servers = new array<autoptr UApiServerData>;
+	autoptr array<autoptr MapLinkArrivalPoint> ArrivalPoints = new array<autoptr MapLinkArrivalPoint>;
+	autoptr array<autoptr MapLinkDepaturePoint> DepaturePoints = new array<autoptr MapLinkDepaturePoint>;
+	autoptr array<autoptr MapLinkCurrency> Currencies = new array<autoptr MapLinkCurrency>;
 	
 	int LogLevel_File = 3;
 	int LogLevel_API = 2;
@@ -33,13 +33,22 @@ class MapLinkConfig extends UApiConfigBase {
 
 	override void OnDataReceive(){
 		SetDataReceived();
-		if(!ConfigVersion || ConfigVersion != CurrentVersion){
+		if (!ConfigVersion || ConfigVersion != CurrentVersion){
 			 ConfigVersion = CurrentVersion;
 			LogLevel_File = 3;
 			LogLevel_API = 2;
 			Save(); //Resave the upgrade Version Back to the server
 		}
 		MLLog.SetLogLevels(LogLevel_File, LogLevel_API);
+		if (Currencies && Currencies.Count()){
+			for (int i = 0; i < Currencies.Count(); i++){
+				autoptr TStringIntMap currenciesMap = new TStringIntMap;
+				for (int j = 0; j < Currencies.Get(i).MoneyValues.Count(); j++){
+					currenciesMap.Insert(Currencies.Get(i).MoneyValues.Get(j).Item, Currencies.Get(i).MoneyValues.Get(j).Value);
+				}
+				UCurrency.Register(Currencies.Get(i).Name, currenciesMap);
+			}
+		}
 		Valiate();
 	}
 	
@@ -212,11 +221,18 @@ class MapLinkConfig extends UApiConfigBase {
 		
 		for (int i = 0; i < Currencies.Count(); i++){
 			if (Currencies.Get(i).ID == id){
-				Currencies.Get(i).SortMoney();
 				return Currencies.Get(i);
 			}
 		}
 		return NULL;
+	}
+	
+	string GetCurrencyKey(int id){
+		MapLinkCurrency currency = GetCurrency(id);
+		if (currency){
+			return currency.Name;
+		}
+		return "";
 	}
 }
 

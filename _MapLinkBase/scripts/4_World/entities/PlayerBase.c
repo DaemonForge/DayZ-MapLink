@@ -60,7 +60,7 @@ modded class PlayerBase extends ManBase{
 	bool MapLinkShoudDelete(){
 		return m_MapLink_ShouldDelete;
 	}	
-		
+		/*
 	//Return How many Items it faild to create in the Inventory
 	int MLCreateMoneyInventory(string itemType, int amount)
 	{
@@ -236,6 +236,6 @@ modded class PlayerBase extends ManBase{
 	    return false;
 	}
 	
-	
+	*/
 	
 }

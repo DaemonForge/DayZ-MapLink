@@ -317,8 +317,8 @@ modded class PlayerBase extends ManBase{
 			MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " failed NULL Server Data");
 			return false;
 		}
-		if (serverData && GetIdentity() && (cost <= 0 || MLGetPlayerBalance(id) >= cost)){
-			MLRemoveMoney(id,cost);
+		if (serverData && GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
+			URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
 			this.UApiSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToUApi();
 			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
@@ -336,22 +336,24 @@ modded class PlayerBase extends ManBase{
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
 		int cost;
 		int id;
-		if (dpoint && serverData && dpoint.GetArrivalPointData(arrivalPoint, id, cost) && GetIdentity() && (cost <= 0 || MLGetPlayerBalance(id) >= cost)){
-			MLRemoveMoney(id,cost);
-			this.UApiSaveTransferPoint(arrivalPoint);
-			this.SavePlayerToUApi();
-			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
-			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
-			SetAllowDamage(false);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
-			return true;
-		} else {
-			string pid = "NULL";
-			if (GetIdentity()){
-				pid = GetIdentity().GetId();
+		if (dpoint && serverData && dpoint.GetArrivalPointData(arrivalPoint, id, cost)) {
+			MLLog.Debug( "Working with Currency Key: " + GetMapLinkConfig().GetCurrencyKey(id) );
+			if ( GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
+				URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
+				this.UApiSaveTransferPoint(arrivalPoint);
+				this.SavePlayerToUApi();
+				MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
+				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+				SetAllowDamage(false);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
+				return true;
 			}
-			MLLog.Err("User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		}
+		string pid = "NULL";
+		if (GetIdentity()){
+			pid = GetIdentity().GetId();
+		}
+		MLLog.Err("User " + pid + " Tried to travel to " + arrivalPoint + " on " + serverName + " but validation failed");
 		return false;
 	} 
 	
@@ -432,7 +434,7 @@ modded class PlayerBase extends ManBase{
 	
 	
 	
-	
+	/*
 	//Money Handling used from Hived Banking
 	bool MLCanAccept(int ID, ItemBase item){
 		return !item.IsRuined() || GetMapLinkConfig().GetCurrency(ID).CanUseRuinedBills;
@@ -577,7 +579,7 @@ modded class PlayerBase extends ManBase{
 		}
 		this.UpdateInventoryMenu(); // RPC-Call needed?
 		return Amount;
-	}
+	}*/
 }
 	
 

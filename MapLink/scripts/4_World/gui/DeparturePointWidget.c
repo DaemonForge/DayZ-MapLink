@@ -76,7 +76,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 			m_Cost_Image.LoadImageFile(0, costImage);
 			
 			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
-			if (player && player.MLGetPlayerBalance(m_ArrivalPoint.AcceptedCurrencyId) >= m_ArrivalPoint.Cost){
+			if (player && player.UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(m_ArrivalPoint.AcceptedCurrencyId)) >= m_ArrivalPoint.Cost){
 				m_Cost_Text.SetColor(ARGB(255, 105, 240, 174));
 				m_HasEnoughMoney = true;
 			} else {
