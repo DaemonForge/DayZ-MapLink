@@ -104,11 +104,10 @@ modded class PlayerBase extends ManBase{
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			UApi().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
 			if (IsAlive() && !IsUnconscious()){
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,100,false,"MapLink_Server", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(UApiConfig().ServerID),NULL,"");
+				UApi().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(UApiConfig().ServerID + "~" + m_TransferPoint),NULL,"");
 			} else {
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,100,false,"MapLink_Server", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
+				UApi().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
 			}
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(UApi().db(PLAYER_DB).PublicSave,300,false,"MapLink_TransferPoint", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(m_TransferPoint),NULL,"");
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		} else {
 			MLLog.Debug("Failed to save player to API");

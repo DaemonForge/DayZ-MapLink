@@ -12,6 +12,7 @@ modded class MissionServer extends MissionBase
 	}
 	
 	
+	
 	void LoadPlayerFromUApiDB(int cid, int status, string oid, string data){	
       	if (status == UAPI_SUCCESS){  //If its a success
 			PlayerDataStore dataload;
@@ -33,7 +34,7 @@ modded class MissionServer extends MissionBase
 			MLLog.Info("LoadPlayerFromDB - Empty Response - ID:" + cid + " - GUID: " + oid );
 			return;
 		}
-        MLLog.Err("LoadPlayerFromDB - API CALL FAILED - CHECK OVER YOUR CONFIGS AND ENSURE THAT THE API IS RUNNING");
+        MLLog.Err("LoadPlayerFromDB - API CALL FAILED - CHECK OVER YOUR CONFIGS AND ENSURE THAT THE API IS RUNNING ID: " + oid + " S:" + status);
 	}
 
 	override void OnClientPrepareEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout)
