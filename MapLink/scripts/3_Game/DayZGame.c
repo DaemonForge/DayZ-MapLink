@@ -18,11 +18,13 @@ modded class DayZGame {
 	}
 	
 	bool MLReadPublicData(string in, out string server, out string transferPoint){
-		if (in != ""){
+		Print("[MAPLINK] MLReadPublicData " + in);
+		if (in != "" && in.Length() > 1){
 			TStringArray results = new TStringArray;
 			in.Split("~", results);
 			if (results.Count() == 1){
 				server = results.Get(0);
+				transferPoint = "";
 				return true;
 			} else if (results.Count() == 2){
 				server = results.Get(0);
@@ -30,7 +32,8 @@ modded class DayZGame {
 				return true;
 			} else if (results.Count() >= 3){
 				Error2("[MAPLINK] MLReadPublicData", "Error reading public data");
-				results.Debug();
+				server = "";
+				transferPoint = "";
 				return false;
 			}
 		}

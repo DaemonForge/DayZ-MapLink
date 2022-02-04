@@ -29,6 +29,8 @@ modded class DayZGame extends CGame
 	void HiveDoReconnect(UIScriptedMenu menu){
 		if (ConnectTo && m_IsToTransfer){
 			m_IsToTransfer = false;
+			SetConnecting(true);
+			DeleteTitleScreen();
 			GetGame().Connect(menu, ConnectTo.IP, ConnectTo.Port, ConnectTo.Password);
 			ConnectTo = NULL;
 		}

@@ -17,43 +17,43 @@ class CfgVehicles
 	class GN_Hive_Boat : HouseNoDestruct
 	{
 		scope=2;
-		displayName = "Testing";
+		displayName = "GN_Hive_Boat";
 		descriptionShort = "Testing";
-		model="\MapLink\data\StaticAssests\StaticAssests\Boat.p3d";
+		model="MapLink\data\StaticAssests\Boat.p3d";
 	};
 	class Hive_Small_Boarding_Plank : HouseNoDestruct
 	{
 		scope=2;
-		displayName = "Testing";
+		displayName = "GN_Hive_Boat";
 		descriptionShort = "Testing";
-		model="\MapLink\data\StaticAssests\StaticAssests\ShortPlank.p3d";
+		model="MapLink\data\StaticAssests\ShortPlank.p3d";
 		physLayer = "item_large";
 		itemBehaviour = 2;
 	};
 	class Hive_Medium_Boarding_Plank : HouseNoDestruct
 	{
 		scope=2;
-		displayName = "Testing";
+		displayName = "GN_Hive_Boat";
 		descriptionShort = "Testing";
-		model="\MapLink\data\StaticAssests\StaticAssests\MediumPLank.p3d";
+		model="MapLink\data\StaticAssests\MediumPLank.p3d";
 		physLayer = "item_large";
 		itemBehaviour = 2;
 	};
 	class Hive_Long_Boarding_Plank : HouseNoDestruct
 	{
 		scope=2;
-		displayName = "Testing";
+		displayName = "GN_Hive_Boat";
 		descriptionShort = "Testing";
-		model="\MapLink\data\StaticAssests\StaticAssests\LongPlank.p3d";
+		model="MapLink\data\StaticAssests\LongPlank.p3d";
 		physLayer = "item_large";
 		itemBehaviour = 2;
 	};
 	class HiveStaticHeli: HouseNoDestruct
 	{
 		scope=2;
-		displayName="";
+		displayName="GN_Hive_Boat";
 		descriptionShort="";
-		model="\MapLink\data\StaticAssests\StaticAssests\StaticHeli.p3d";
+		model="MapLink\data\StaticAssests\StaticHeli.p3d";
 		forceFarBubble="false";
 		carveNavmesh=1;
 		rotationFlags=2;
