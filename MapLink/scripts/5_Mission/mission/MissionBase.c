@@ -1,8 +1,8 @@
 modded class MissionBase
 {
 	
-	override void UniversalApiReady(){
-		super.UniversalApiReady();
+	override void UFrameworkReady(){
+		super.UFrameworkReady();
 		MLLog.Info("[MAPLINK] Init");
 		GetMapLinkConfig();
 	}

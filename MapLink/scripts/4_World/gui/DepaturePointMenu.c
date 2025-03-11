@@ -74,7 +74,7 @@ class DeparturePointMenu extends UIScriptedMenu
 		for (int i = 0; i < m_MapLinkDepaturePoint.ArrivalPoints.Count(); i++){
 			MapLinkArrivalPoint arrivalPoint = MapLinkArrivalPoint.Cast(m_MapLinkDepaturePoint.ArrivalPoints.Get(i).Get());
 			for (int j = 0; j < arrivalPoint.SpawnPoints.Count(); j++){
-				if (arrivalPoint.SpawnPoints.Get(j).ServerName != UApiConfig().ServerID){
+				if (arrivalPoint.SpawnPoints.Get(j).ServerName != UFConfig().ServerID){
 					dPointWidgets.Insert(new DeparturePointWidget(m_ArrivalPoints, this, m_MapLinkDepaturePoint.ArrivalPoints.Get(i), arrivalPoint.SpawnPoints.Get(j)));
 				}
 			}
@@ -114,7 +114,7 @@ class DeparturePointMenu extends UIScriptedMenu
 	void DoTravel(){
 		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
 		if (player){
-			player.UApiRequestTravel(m_TravelTo_ArrivalPoint, m_TravelTo_ServerName);
+			player.MLRequestTravel(m_TravelTo_ArrivalPoint, m_TravelTo_ServerName);
 		}
 		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CloseSelf, 1);
 	}

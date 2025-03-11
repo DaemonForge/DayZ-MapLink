@@ -54,18 +54,18 @@ modded class PlayerDataStore extends Managed{
 		if (items && items.Count() > 0){
 			for (i = 0; i < items.Count(); i++){
 				EntityAI attachment_item = EntityAI.Cast(items.Get(i));
-				if (!m_Attachments){m_Attachments = new array<autoptr UApiEntityStore>;}
+				if (!m_Attachments){m_Attachments = new array<autoptr UEntityStore>;}
 				if (attachment_item && (player.GetInventory().HasAttachment(attachment_item) || attachment_item == player.GetItemInHands())){
-					UApiEntityStore att_itemstore = new UApiEntityStore(attachment_item);
+					UEntityStore att_itemstore = new UEntityStore(attachment_item);
 					m_Attachments.Insert(att_itemstore);
 				} else {
 					break;
 				}
 			}
 		}
-		player.OnUApiSave(this);
+		player.OnUFSave(this);
 		GetGame().GetWorldName(m_Map);
-		m_Server = UApiConfig().ServerID;
+		m_Server = UFConfig().ServerID;
 	}
 	
 	
@@ -135,7 +135,7 @@ modded class PlayerDataStore extends Managed{
 		player.SetLastShavedSeconds(m_LastShavedSeconds);
 		player.SetBloodyHands(m_HasBloodyHandsVisible);
 		
-		player.OnUApiLoad(this);
+		player.OnUFLoad(this);
 		
 		player.GetStatBloodType().Set(m_BloodType);
 	}

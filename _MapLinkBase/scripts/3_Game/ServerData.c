@@ -1,4 +1,4 @@
-class UApiServerData extends Managed {
+class UServerData extends Managed {
 	
 	string Name;
 	string Map;
@@ -8,7 +8,7 @@ class UApiServerData extends Managed {
 	string Password = "";
 	string RespawnServer = "";
 	
-	void UApiServerData(string ip, int port = 2302, string password = ""){
+	void UServerData(string ip, int port = 2302, string password = ""){
 		IP = ip;
 		Port = port;
 		Password = password;

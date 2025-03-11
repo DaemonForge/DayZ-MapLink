@@ -28,17 +28,17 @@ class PlayerDataStore extends Managed{
 	bool m_Camera3rdPerson;
 	
 	int m_BrokenLegState;
-	autoptr array<autoptr UApiPlayerZoneHealthData> m_HealthZones;
+	autoptr array<autoptr UPlayerZoneHealthData> m_HealthZones;
 	
-	autoptr array<autoptr UApiPlayerIdFloatData> m_Modifiers;
-	autoptr array<autoptr UApiPlayerIdFloatData> m_Agents;
-	autoptr array<autoptr UApiMetaData> m_Stats;
+	autoptr array<autoptr UPlayerIdFloatData> m_Modifiers;
+	autoptr array<autoptr UPlayerIdFloatData> m_Agents;
+	autoptr array<autoptr UMetaData> m_Stats;
 
-	autoptr array<autoptr UApiEntityStore> m_Attachments;
+	autoptr array<autoptr UEntityStore> m_Attachments;
 	
-	autoptr array<autoptr UApiStomachItem> m_Stomach;
+	autoptr array<autoptr UStomachItem> m_Stomach;
 	
-	autoptr array<autoptr UApiMetaData> m_MetaData;
+	autoptr array<autoptr UMetaData> m_MetaData;
 	
 	void PlayerDataStore(PlayerBase player = NULL){
 		
@@ -57,26 +57,26 @@ class PlayerDataStore extends Managed{
 	
 	
 	string ToJson(){
-		return UApiJSONHandler<PlayerDataStore>.ToString(this);
+		return UJSONHandler<PlayerDataStore>.ToString(this);
 	}
 	
 	
 	void AddModifier(int id, float attachedTime) {
-		if (!m_Modifiers){m_Modifiers = new array<autoptr UApiPlayerIdFloatData>;}
-		m_Modifiers.Insert(new UApiPlayerIdFloatData(id, attachedTime));
+		if (!m_Modifiers){m_Modifiers = new array<autoptr UPlayerIdFloatData>;}
+		m_Modifiers.Insert(new UPlayerIdFloatData(id, attachedTime));
     }
 	void AddAgent(int key, float value) {
-		if (!m_Agents){m_Agents = new array<autoptr UApiPlayerIdFloatData>;}
-		m_Agents.Insert(new UApiPlayerIdFloatData(key, value));
+		if (!m_Agents){m_Agents = new array<autoptr UPlayerIdFloatData>;}
+		m_Agents.Insert(new UPlayerIdFloatData(key, value));
     }
 	void AddStomachItem(float amount, int foodstage, string className, int agents){
-		if ( !m_Stomach ){ m_Stomach = new array<autoptr UApiStomachItem>; }
-		m_Stomach.Insert(new UApiStomachItem(amount, foodstage, className, agents));
+		if ( !m_Stomach ){ m_Stomach = new array<autoptr UStomachItem>; }
+		m_Stomach.Insert(new UStomachItem(amount, foodstage, className, agents));
 	}
 	
 	bool AddStat(string label, float data){
-		if (!m_Stats) { m_Stats = new array<autoptr UApiMetaData>;}
-		m_Stats.Insert(new UApiMetaData(label, data.ToString()));
+		if (!m_Stats) { m_Stats = new array<autoptr UMetaData>;}
+		m_Stats.Insert(new UMetaData(label, data.ToString()));
 		return true;
 	}
 	
@@ -91,63 +91,63 @@ class PlayerDataStore extends Managed{
 	}
 	
 	bool Write(string var, bool data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
+		m_MetaData.Insert(new UMetaData(var, data.ToString()));
 		return true;
 	}
 	bool Write(string var, int data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
+		m_MetaData.Insert(new UMetaData(var, data.ToString()));
 		return true;
 	}
 	bool Write(string var, float data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
+		m_MetaData.Insert(new UMetaData(var, data.ToString()));
 		return true;
 	}
 	bool Write(string var, vector data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(var, data.ToString()));
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
+		m_MetaData.Insert(new UMetaData(var, data.ToString()));
 		return true;
 	}
 	bool Write(string var, TStringArray data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
 		for (int ii = 0; ii < data.Count(); ii++){
-			m_MetaData.Insert(new UApiMetaData(var, data.Get(ii)));
+			m_MetaData.Insert(new UMetaData(var, data.Get(ii)));
 		}
 		return true;
 	}
 	bool Write(string var, TIntArray data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
 		for (int ii = 0; ii < data.Count(); ii++){
-			m_MetaData.Insert(new UApiMetaData(var, data.Get(ii).ToString()));
+			m_MetaData.Insert(new UMetaData(var, data.Get(ii).ToString()));
 		}
 		return true;
 	}
 	bool Write(string var, TBoolArray data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
 		for (int ii = 0; ii < data.Count(); ii++){
-			m_MetaData.Insert(new UApiMetaData(var, data.Get(ii).ToString()));
+			m_MetaData.Insert(new UMetaData(var, data.Get(ii).ToString()));
 		}
 		return true;
 	}
 	bool Write(string var, TFloatArray data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
 		for (int ii = 0; ii < data.Count(); ii++){
-			m_MetaData.Insert(new UApiMetaData(var, data.Get(ii).ToString()));
+			m_MetaData.Insert(new UMetaData(var, data.Get(ii).ToString()));
 		}
 		return true;
 	}
 	bool Write(string var, TVectorArray data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
 		for (int ii = 0; ii < data.Count(); ii++){
-			m_MetaData.Insert(new UApiMetaData(var, data.Get(ii).ToString()));
+			m_MetaData.Insert(new UMetaData(var, data.Get(ii).ToString()));
 		}
 		return true;
 	}
 	bool Write(string var, string data){
-		if (!m_MetaData) { m_MetaData = new array<autoptr UApiMetaData>;}
-		m_MetaData.Insert(new UApiMetaData(var, data));
+		if (!m_MetaData) { m_MetaData = new array<autoptr UMetaData>;}
+		m_MetaData.Insert(new UMetaData(var, data));
 		return true;
 	}
 	bool Write(string var, Class data){
@@ -284,8 +284,8 @@ class PlayerDataStore extends Managed{
 	
 	
 	bool SaveZoneHealth(string zone, float health, float blood, float shock){
-		if (!m_HealthZones){m_HealthZones = new array<autoptr UApiPlayerZoneHealthData>}
-		m_HealthZones.Insert(new UApiPlayerZoneHealthData(zone, health, blood, shock));
+		if (!m_HealthZones){m_HealthZones = new array<autoptr UPlayerZoneHealthData>}
+		m_HealthZones.Insert(new UPlayerZoneHealthData(zone, health, blood, shock));
 		return true;
 	}
 	bool ReadZoneHealth(string zone, out float health, out float blood, out float shock){
@@ -317,12 +317,12 @@ class PlayerDataStore extends Managed{
 	}
 }
 
-class UApiPlayerIdFloatData extends Managed{
+class UPlayerIdFloatData extends Managed{
 	
 	int m_ID;
 	float m_Value = -1;
 	
-	void UApiPlayerIdFloatData(int id, float value = -1){
+	void UPlayerIdFloatData(int id, float value = -1){
 		m_ID = id;
 		m_Value = value;
 	}
@@ -332,14 +332,14 @@ class UApiPlayerIdFloatData extends Managed{
 	
 }
 
-class UApiStomachItem extends Managed {
+class UStomachItem extends Managed {
 	
 	float m_Amount;
 	int m_FoodStage;
 	string m_ClassName;
 	int m_Agents;
 	
-	void UApiStomachItem(float amount, int foodstage, string className, int agents){
+	void UStomachItem(float amount, int foodstage, string className, int agents){
 		m_Amount = amount;
 		m_FoodStage = foodstage;
 		m_ClassName = className;
@@ -348,14 +348,14 @@ class UApiStomachItem extends Managed {
 	
 }
 
-class UApiPlayerZoneHealthData extends Managed {
+class UPlayerZoneHealthData extends Managed {
 	
 	string m_Zone;
 	float m_Health;
 	float m_Blood;
 	float m_Shock;
 	
-	void UApiPlayerZoneHealthData(string zone, float health, float blood, float shock) {
+	void UPlayerZoneHealthData(string zone, float health, float blood, float shock) {
 		m_Zone = zone;
 		m_Health = health;
 		m_Blood = blood;

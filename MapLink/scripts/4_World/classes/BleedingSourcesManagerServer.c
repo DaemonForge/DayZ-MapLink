@@ -1,6 +1,6 @@
 modded class BleedingSourcesManagerServer extends BleedingSourcesManagerBase {
     
-	void OnUApiLoad(PlayerDataStore data) {
+	void OnUFLoad(PlayerDataStore data) {
 		//MLLog.Debug("Loading Bleeding Manager");	
 		int BleedActiveIndex = 0;
 		for (int i = 0; i < BIT_INT_SIZE; i++) {
@@ -15,7 +15,7 @@ modded class BleedingSourcesManagerServer extends BleedingSourcesManagerBase {
 		}	
 	}
 	
-	void OnUApiSave(PlayerDataStore data){
+	void OnUFSave(PlayerDataStore data){
 		data.m_BleedingActiveTime = new TIntArray;
 		//MLLog.Debug("Saving Bleeding Manager");	
 		for (int i = 0; i < BIT_INT_SIZE; i++) {

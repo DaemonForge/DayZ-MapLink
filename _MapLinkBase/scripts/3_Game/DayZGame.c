@@ -1,6 +1,6 @@
 modded class DayZGame extends CGame
 {	
-	autoptr UApiServerData ConnectTo;
+	autoptr UServerData ConnectTo;
 	bool m_IsToTransfer = false;
 		
 	bool IsToTransfer(){
@@ -18,8 +18,8 @@ modded class DayZGame extends CGame
 		super.DeferredInit();
 	}
 	
-	void HiveSetReconnectTo(UApiServerData data){
-		ConnectTo = UApiServerData.Cast(data);
+	void HiveSetReconnectTo(UServerData data){
+		ConnectTo = UServerData.Cast(data);
 		if (ConnectTo){
 			m_IsToTransfer = true;
 		}

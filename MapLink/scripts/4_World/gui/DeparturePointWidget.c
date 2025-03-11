@@ -55,10 +55,10 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		m_Queue_Frame 		= Widget.Cast(m_Root.FindAnyWidget("Queue_Frame"));
 		m_Queue_Text 		= TextWidget.Cast(m_Root.FindAnyWidget("Queue_Text"));
 		
-		UApiServerData serverData = UApiServerData.Cast(GetMapLinkConfig().GetServer(spawnPoint.ServerName));
+		UServerData serverData = UServerData.Cast(GetMapLinkConfig().GetServer(spawnPoint.ServerName));
 		if (serverData.QueryPort > 0){
 			m_Status_Frame.Show(true);
-			m_LookupCid = UApi().api().SteamQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
+			m_LookupCid = U().api().SteamQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
 			
 			m_ServerOnline = false;
 		} else {
@@ -95,13 +95,13 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	}
 		
 	void ~DeparturePointWidget(){
-		UApi().RequestCallCancel(m_LookupCid);
+		U().RequestCallCancel(m_LookupCid);
 	}
 	
 	override bool OnClick( Widget w, int x, int y, int button )
 	{		
 		if (w == m_Transfer && m_ServerOnline && m_HasEnoughMoney) {
-			UApi().RequestCallCancel(m_LookupCid);
+			U().RequestCallCancel(m_LookupCid);
 			m_Parent.InitTravel(m_ArrivalPoint.ArrivalPointName, m_ArrivalPoint.TransitionWaitTime, m_MapLinkSpawnPoint.ServerName);
 			return true;
 		}
@@ -110,8 +110,8 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	
 	
 	
-	void UpdateServerStatus(int cid, int status, string oid, UApiServerStatus data){	
-      	if (status == UAPI_SUCCESS &&  m_Root && m_Root.IsVisible() && m_Status_Image && data){  //If its a success
+	void UpdateServerStatus(int cid, int status, string oid, UFServerStatus data){	
+      	if (status == UF_SUCCESS &&  m_Root && m_Root.IsVisible() && m_Status_Image && data){  //If its a success
 			if (data.Status == "Online"){
 				m_Status_Image.SetColor(ARGB(255, 105, 240, 174));
 				m_Status_Text.SetText("Online");

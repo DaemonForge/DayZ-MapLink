@@ -50,12 +50,6 @@ modded class PlayerBase extends ManBase{
 
 	protected void RemoveProtectionSafe(){
 		bool PlayerHasGodMode = false;
-		#ifdef JM_COT
-			if ( GetGame().IsServer() && m_JMHasGodMode ){
-				MLLog.Log("RemoveProtectionSafe COT ADMIN TOOLS ACTIVE");
-				PlayerHasGodMode = true;
-			}
-		#endif
 		#ifdef VPPADMINTOOLS
 			if ( GetGame().IsServer() && hasGodmode ){
 				MLLog.Log("RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
@@ -94,19 +88,19 @@ modded class PlayerBase extends ManBase{
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
 		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
-			this.SavePlayerToUApi();
+			this.SavePlayerToU();
 		}
     }
 	
-	void SavePlayerToUApi(){
+	void SavePlayerToU(){
 		if (m_MapLinkGUIDCache && m_MapLinkNameCache && GetGame().IsServer()){
 			MLLog.Debug("Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) + " IsUnconscious: " + IsUnconscious() + " IsRestrained: " + IsRestrained() );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
-			UApi().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
+			U().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
 			if (IsAlive() && !IsUnconscious()){
-				UApi().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(UApiConfig().ServerID + "~" + m_TransferPoint),NULL,"");
+				U().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(UFConfig().ServerID + "~" + m_TransferPoint),NULL,"");
 			} else {
-				UApi().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
+				U().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
 			}
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		} else {
@@ -115,8 +109,8 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	
-	override void OnUApiSave(autoptr PlayerDataStore data){
-		super.OnUApiSave(data);
+	override void OnUFSave( PlayerDataStore data){
+		super.OnUFSave(data);
 		int i = 0;
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
@@ -132,7 +126,7 @@ modded class PlayerBase extends ManBase{
 		
 		data.m_BleedingBits = GetBleedingBits();
 		if (GetBleedingManagerServer()){
-			GetBleedingManagerServer().OnUApiSave(data);
+			GetBleedingManagerServer().OnUFSave(data);
 		} else {
 			MLLog.Log("Bleeding Manager is NULL");
 		}
@@ -155,8 +149,8 @@ modded class PlayerBase extends ManBase{
 		data.m_Camera3rdPerson = m_Camera3rdPerson;
 	}
 	
-	override void OnUApiLoad(autoptr PlayerDataStore data){
-		super.OnUApiLoad(data);
+	override void OnUFLoad( PlayerDataStore data){
+		super.OnUFLoad(data);
 		int i = 0;
 		
 		for (i = 0; i < GetPlayerStats().GetPCO().Get().Count(); i++){
@@ -186,24 +180,24 @@ modded class PlayerBase extends ManBase{
 		m_BrokenLegState = data.m_BrokenLegState;
 		//SetBleedingBits(data.m_BleedingBits);
 		if (GetBleedingManagerServer()){	
-			GetBleedingManagerServer().OnUApiLoad(data);
+			GetBleedingManagerServer().OnUFLoad(data);
 		} else {
 			MLLog.Log("Bleeding Manager is NULL");
 		}
 		if (m_PlayerStomach && data.m_Stomach){
 			for (i = 0; i < data.m_Stomach.Count(); i++){
-				UApiStomachItem stomachItem;
+				UStomachItem stomachItem;
 				if (Class.CastTo(stomachItem, data.m_Stomach.Get(i))){
 					m_PlayerStomach.AddToStomach(stomachItem.m_ClassName, stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_Agents );
 				}
 			}
 		}	
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUApiAfterLoadClient, 200);
+		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUFAfterLoadClient, 200);
 		m_Camera3rdPerson = data.m_Camera3rdPerson && !GetGame().GetWorld().Is3rdPersonDisabled();
 	}
 	
-	void SendUApiAfterLoadClient(){
+	void SendUFAfterLoadClient(){
 		RPCSingleParam(MAPLINK_AFTERLOADCLIENT, new Param2<bool, bool>( true, m_Camera3rdPerson ), true, GetIdentity());
 	}
 	
@@ -239,7 +233,7 @@ modded class PlayerBase extends ManBase{
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
-			this.SavePlayerToUApi();
+			this.SavePlayerToU();
 		}
 		//If they are transfering delete
 		if ( IsBeingTransfered()  && ( !killer || killer == this )){
@@ -271,13 +265,13 @@ modded class PlayerBase extends ManBase{
 	override void OnUnconsciousStart()
 	{
 		super.OnUnconsciousStart();
-		SavePlayerToUApi();
+		SavePlayerToU();
 	}
 	
 	override void OnUnconsciousStop(int pCurrentCommandID)
 	{		
 		super.OnUnconsciousStop(pCurrentCommandID);
-		SavePlayerToUApi();
+		SavePlayerToU();
 	}
 	
 	void MapLinkUpdateClientSettingsToServer(){
@@ -286,7 +280,7 @@ modded class PlayerBase extends ManBase{
 		}
 	}
 	
-	void UApiKillAndDeletePlayer(){
+	void UFKillAndDeletePlayer(){
 		if (GetIdentity()){
 			MLLog.Info("Killing for transfering Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ")" );
 		} else{
@@ -296,18 +290,18 @@ modded class PlayerBase extends ManBase{
 		SetHealth("","", 0);
 	}
 	
-	void UApiRequestTravel(string arrivalPoint, string serverName ){
+	void MLRequestTravel(string arrivalPoint, string serverName ){
 		if (GetGame().IsClient()){
 			MLLog.Debug("Player: " + GetIdentity().GetId() + " is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
 			RPCSingleParam(MAPLINK_REQUESTTRAVEL, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
 		}
 		if (GetGame().IsServer()){
 			MLLog.Debug("Player: " + GetIdentity().GetName() + "("+ GetIdentity().GetId() + ") is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
-			UApiDoTravel(arrivalPoint, serverName);
+			UFDoTravel(arrivalPoint, serverName);
 		}
 	}
 	
-	bool UApiDoManualServerTravel(string arrivalPoint, UApiServerData serverData, int cost = 0, int id = 0){
+	bool UFDoManualServerTravel(string arrivalPoint, UServerData serverData, int cost = 0, int id = 0){
 		string pid = "NULL";
 		if (GetIdentity()){
 			pid = GetIdentity().GetId();
@@ -318,20 +312,20 @@ modded class PlayerBase extends ManBase{
 		}
 		if (serverData && GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 			URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
-			this.UApiSaveTransferPoint(arrivalPoint);
-			this.SavePlayerToUApi();
+			this.UFSaveTransferPoint(arrivalPoint);
+			this.SavePlayerToU();
 			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
-			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
 			SetAllowDamage(false);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
+			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 			return true;
 		}
 		MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " on " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") failed");
 		return false;
 	}
 	
-	protected bool UApiDoTravel(string arrivalPoint, string serverName){
-		UApiServerData serverData = UApiServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
+	protected bool UFDoTravel(string arrivalPoint, string serverName){
+		UServerData serverData = UServerData.Cast( GetMapLinkConfig().GetServer( serverName ) );
 		MapLinkDepaturePoint dpoint = MapLinkDepaturePoint.Cast( GetMapLinkConfig().GetDepaturePoint( GetPosition() ) );
 		int cost;
 		int id;
@@ -339,12 +333,12 @@ modded class PlayerBase extends ManBase{
 			MLLog.Debug( "Working with Currency Key: " + GetMapLinkConfig().GetCurrencyKey(id) );
 			if ( GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 				URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
-				this.UApiSaveTransferPoint(arrivalPoint);
-				this.SavePlayerToUApi();
+				this.UFSaveTransferPoint(arrivalPoint);
+				this.SavePlayerToU();
 				MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
-				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UApiServerData>(serverData), true, GetIdentity());
+				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
 				SetAllowDamage(false);
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UApiKillAndDeletePlayer, 350, false);
+				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 				return true;
 			}
 		}
@@ -364,7 +358,7 @@ modded class PlayerBase extends ManBase{
 			Param2<bool, bool> alcdata;
 			if (ctx.Read(alcdata))	{
 				if (alcdata.param1){
-					UApiAfterLoadClient();
+					UFAfterLoadClient();
 					m_Camera3rdPerson = alcdata.param2 && !GetGame().GetWorld().Is3rdPersonDisabled();
 				}
 			}
@@ -379,7 +373,7 @@ modded class PlayerBase extends ManBase{
 		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && GetGame().IsServer() ){
 			Param2<string, string> rtdata;
 			if (ctx.Read(rtdata) && GetIdentity().GetId() == sender.GetId())	{
-				UApiDoTravel(rtdata.param1, rtdata.param2);
+				UFDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}
 		
@@ -392,7 +386,7 @@ modded class PlayerBase extends ManBase{
 
 	}
 	
-	void UApiAfterLoadClient(){
+	void UFAfterLoadClient(){
 		this.UpdateInventoryMenu();
 	}
 	
@@ -408,7 +402,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	
-	void SetActions(out TInputActionMap InputActionMap) {
+	override void SetActions(out TInputActionMap InputActionMap) {
 		
 		super.SetActions(InputActionMap);
 		AddAction(ActionMapLinkOpenOnAny, InputActionMap);

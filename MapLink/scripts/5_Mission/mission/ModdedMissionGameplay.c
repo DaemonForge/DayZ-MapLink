@@ -6,20 +6,20 @@ modded class MissionGameplay
 		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 	
-	override void UniversalApiReadyTokenReceived(){
-		if (m_UApi_Initialized){ //So we don't load 3 times!
+	override void UFrameworkReadyTokenReceived(){
+		if (m_UF_Initialized){ //So we don't load 3 times!
 			GetMapLinkConfig().Load(); //  Reload config everytime the Auth key is renewed.
 		}
 		
-		super.UniversalApiReadyTokenReceived();
+		super.UFrameworkReadyTokenReceived();
 	}
 
-	void RPCRedirectedKicked( CallType type, ref ParamsReadContext ctx, ref PlayerIdentity sender, ref Object target ) {
+	void RPCRedirectedKicked( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target ) {
 		
-		Param1< UApiServerData > data; 
+		Param1< UServerData > data; 
 		if ( !ctx.Read( data ) ) return;
 		MLLog.Info("Kicked from Game");
-		UApiServerData serverData = UApiServerData.Cast(data.param1);
+		UServerData serverData = UServerData.Cast(data.param1);
 		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetGame().DisconnectSessionForce);
 		GetDayZGame().HiveSetReconnectTo(serverData);
 	}

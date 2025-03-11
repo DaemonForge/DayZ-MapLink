@@ -4,7 +4,7 @@ class CfgPatches
 	{
 		requiredVersion=0.1;
 		requiredAddons[]={
-			"UniversalApi",
+			"UFramework",
 			"MapLinkBase"
 		};
 	};

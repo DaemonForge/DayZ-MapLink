@@ -157,7 +157,7 @@ class MLLogFileInstance extends Managed {
 			Print("[MapLink]" + GetTag(level) + " " + text);
 		}
 		if (m_LogToApiLevel >= level){
-			UApi().Rest().Log(GetJsonObject(text, level));
+			U().Rest().Log(GetJsonObject(text, level));
 		}
 	}
 	
@@ -207,7 +207,7 @@ class MLLogFileInstance extends Managed {
 	}
 }
 
-class MapLinkLogObject extends UApiObject_Base {
+class MapLinkLogObject extends UFObject_Base {
 	
 	string Type = "MapLink";
 	string Message;

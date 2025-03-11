@@ -1,9 +1,9 @@
-class MapLinkConfig extends UApiConfigBase {
+class MapLinkConfig extends UFConfigBase {
 
 	string ConfigVersion = "0";
 	static string CurrentVersion = "0";
 	
-	autoptr array<autoptr UApiServerData> Servers = new array<autoptr UApiServerData>;
+	autoptr array<autoptr UServerData> Servers = new array<autoptr UServerData>;
 	autoptr array<autoptr MapLinkArrivalPoint> ArrivalPoints = new array<autoptr MapLinkArrivalPoint>;
 	autoptr array<autoptr MapLinkDepaturePoint> DepaturePoints = new array<autoptr MapLinkDepaturePoint>;
 	autoptr array<autoptr MapLinkCurrency> Currencies = new array<autoptr MapLinkCurrency>;
@@ -24,7 +24,7 @@ class MapLinkConfig extends UApiConfigBase {
 		if it doesn't exsit the API will create the file
 	
 		*/
-		Servers.Insert(new UApiServerData(""));
+		Servers.Insert(new UServerData(""));
 		DepaturePoints.Insert(new MapLinkDepaturePoint("Demo000"));
 		ArrivalPoints.Insert(new MapLinkArrivalPoint("Demo000"));
 		Currencies.Insert(new MapLinkCurrency(-1));
@@ -64,24 +64,24 @@ class MapLinkConfig extends UApiConfigBase {
 		}
 		m_DataReceived = false;
 		//Set the Defaults so that way, when you load if this its the server Requesting the data it will create it based on the defaults
-		UApi().Rest().GlobalsLoad("MapLink", this, this.ToJson());
+		U().Rest().GlobalsLoad("MapLink", this, this.ToJson());
 	}
 	
 	
 	override void Save(){
 		if (GetGame().IsServer()){
-			UApi().Rest().GlobalsSave("MapLink", this.ToJson());
+			U().Rest().GlobalsSave("MapLink", this.ToJson());
 		}
 	}
 	
 	
 	override string ToJson(){
-		return UApiJSONHandler<MapLinkConfig>.ToString(this);
+		return UJSONHandler<MapLinkConfig>.ToString(this);
 	}
 	
 	// This is called by the API System on the successfull response from the API
 	override void OnSuccess(string data, int dataSize) {
-		if (UApiJSONHandler<MapLinkConfig>.FromString(data, this)){
+		if (UJSONHandler<MapLinkConfig>.FromString(data, this)){
 			OnDataReceive();
 		} else {
 			MLLog.Err("CallBack Failed errorCode: Invalid Data");
@@ -128,14 +128,14 @@ class MapLinkConfig extends UApiConfigBase {
 	
 	
 	MapLinkSpawnPointPos SpawnPointPos(string arrivalPoint){
-		return GetSpawnPointPos(UApiConfig().ServerID, arrivalPoint);
+		return GetSpawnPointPos(UFConfig().ServerID, arrivalPoint);
 	}
 	
 	int GetProtectionTime(string arrivalPoint){
 		for (int i = 0; i < ArrivalPoints.Count(); i++){
 			//Print("GetProtectionTime - Is: " + arrivalPoint + " -> " + ArrivalPoints.Get(i).Name);
 			if (ArrivalPoints.Get(i).Name == arrivalPoint){
-				return ArrivalPoints.Get(i).ProtectionTime(UApiConfig().ServerID));
+				return ArrivalPoints.Get(i).ProtectionTime(UFConfig().ServerID));
 			}
 		}
 		MLLog.Err("GetProtectionTime - Failed to Get Protection Time for " + arrivalPoint);
@@ -152,10 +152,10 @@ class MapLinkConfig extends UApiConfigBase {
 		return NULL;
 	}
 	
-	UApiServerData GetServer(string serverName){
+	UServerData GetServer(string serverName){
 		for(int i = 0; i < Servers.Count(); i++){
 			if (Servers.Get(i).Name == serverName){
-				return UApiServerData.Cast(Servers.Get(i));
+				return UServerData.Cast(Servers.Get(i));
 			}
 		}
 		MLLog.Err("GetServer - Failed to Get Server Data for " + serverName);
