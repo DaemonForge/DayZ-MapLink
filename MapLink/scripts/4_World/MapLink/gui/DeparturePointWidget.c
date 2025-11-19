@@ -28,7 +28,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	TextWidget 					m_Queue_Text
 	
 	void DeparturePointWidget(Widget parent, DeparturePointMenu mapMenu, MapLinkArrivalPointsRef arrivalPoint,	MapLinkSpawnPoint spawnPoint){
-		m_Root				= GetGame().GetWorkspace().CreateWidgets(m_LayoutPath, Widget.Cast(parent), true);
+		m_Root				= g_Game.GetWorkspace().CreateWidgets(m_LayoutPath, Widget.Cast(parent), true);
 		
 		m_Parent	 		= DeparturePointMenu.Cast(mapMenu);
 		m_ArrivalPoint 		= MapLinkArrivalPointsRef.Cast(arrivalPoint);
@@ -75,7 +75,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 			//Print("[MAPLINK] Settings Cost Image " + costImage);
 			m_Cost_Image.LoadImageFile(0, costImage);
 			
-			PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+			PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 			if (player && player.UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(m_ArrivalPoint.AcceptedCurrencyId)) >= m_ArrivalPoint.Cost){
 				m_Cost_Text.SetColor(ARGB(255, 105, 240, 174));
 				m_HasEnoughMoney = true;

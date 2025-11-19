@@ -14,7 +14,7 @@ class MapLinkCountTimerWidget  extends ScriptedWidgetEventHandler {
 	}
 	
 	protected void CreateWidget(){
-		m_Root	= Widget.Cast(GetGame().GetWorkspace().CreateWidgets(m_LayoutPath));
+		m_Root	= Widget.Cast(g_Game.GetWorkspace().CreateWidgets(m_LayoutPath));
 		m_Time	= TextWidget.Cast(m_Root.FindAnyWidget("Timer"));
 		m_Root.SetHandler(this);
 	}

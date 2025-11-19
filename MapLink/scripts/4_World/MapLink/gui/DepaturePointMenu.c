@@ -30,7 +30,7 @@ class DeparturePointMenu extends UIScriptedMenu
 	override Widget Init()
     {
 		CountDownTimer = new Timer();
-		layoutRoot 				= Widget.Cast(GetGame().GetWorkspace().CreateWidgets(m_LayoutPath));
+		layoutRoot 				= Widget.Cast(g_Game.GetWorkspace().CreateWidgets(m_LayoutPath));
 		
 		m_ArrivalPoints 		= Widget.Cast(layoutRoot.FindAnyWidget("ArrivalPoints_Grid"));
 		
@@ -46,7 +46,7 @@ class DeparturePointMenu extends UIScriptedMenu
 		m_Heading				= RichTextWidget.Cast(layoutRoot.FindAnyWidget("Heading"));
 		
 		
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CreateChildern, 50);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CreateChildern, 50);
 		return layoutRoot;
 	}
 	
@@ -112,15 +112,15 @@ class DeparturePointMenu extends UIScriptedMenu
 	}
 	
 	void DoTravel(){
-		PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
+		PlayerBase player = PlayerBase.Cast(g_Game.GetPlayer());
 		if (player){
 			player.MLRequestTravel(m_TravelTo_ArrivalPoint, m_TravelTo_ServerName);
 		}
-		GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CloseSelf, 1);
+		g_Game.GetCallQueue(CALL_CATEGORY_GUI).CallLater(this.CloseSelf, 1);
 	}
 	
 	void CloseSelf(){
-		GetGame().GetUIManager().CloseMenu(MAPLINK_DEPARTUREPOINTMENU);
+		g_Game.GetUIManager().CloseMenu(MAPLINK_DEPARTUREPOINTMENU);
 	}
 	
 	void Cancel(){
@@ -130,18 +130,18 @@ class DeparturePointMenu extends UIScriptedMenu
 		} else {
 			m_TravelTo_ArrivalPoint = "";
 			m_TravelTo_ServerName = "";
-			GetGame().GetUIManager().CloseMenu(MAPLINK_DEPARTUREPOINTMENU);
+			g_Game.GetUIManager().CloseMenu(MAPLINK_DEPARTUREPOINTMENU);
 		}
 	}
 	
 	protected void MLLockControls() {
-        GetGame().GetMission().PlayerControlDisable(INPUT_EXCLUDE_INVENTORY);
-        GetGame().GetUIManager().ShowUICursor(true);
+        g_Game.GetMission().PlayerControlDisable(INPUT_EXCLUDE_INVENTORY);
+        g_Game.GetUIManager().ShowUICursor(true);
     }
 
     protected void MLUnLockControls() {
-        GetGame().GetMission().PlayerControlEnable(false);
-        GetGame().GetInput().ResetGameFocus();
-        GetGame().GetUIManager().ShowUICursor(false);
+        g_Game.GetMission().PlayerControlEnable(false);
+        g_Game.GetInput().ResetGameFocus();
+        g_Game.GetUIManager().ShowUICursor(false);
     }
 }

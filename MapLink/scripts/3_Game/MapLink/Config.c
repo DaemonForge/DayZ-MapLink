@@ -69,7 +69,7 @@ class MapLinkConfig extends UFConfigBase {
 	
 	
 	override void Save(){
-		if (GetGame().IsServer()){
+		if (g_Game.IsServer()){
 			U().Rest().GlobalsSave("MapLink", this.ToJson());
 		}
 	}
@@ -135,7 +135,7 @@ class MapLinkConfig extends UFConfigBase {
 		for (int i = 0; i < ArrivalPoints.Count(); i++){
 			//Print("GetProtectionTime - Is: " + arrivalPoint + " -> " + ArrivalPoints.Get(i).Name);
 			if (ArrivalPoints.Get(i).Name == arrivalPoint){
-				return ArrivalPoints.Get(i).ProtectionTime(UFConfig().ServerID));
+				return ArrivalPoints.Get(i).ProtectionTime(UFConfig().ServerID);
 			}
 		}
 		MLLog.Err("GetProtectionTime - Failed to Get Protection Time for " + arrivalPoint);
@@ -179,9 +179,9 @@ class MapLinkConfig extends UFConfigBase {
 		LowerWorldName.ToLower();
 		switch (LowerWorldName){
 			case "enoch":
-				return "Liviona";
+				return "Livonia";
 			case "enochgloom":
-				return "Liviona";
+				return "Livonia";
 			case "chernarusplus":
 				return "Chernarus";
 			case "chernarusplusgloom":
@@ -196,6 +196,8 @@ class MapLinkConfig extends UFConfigBase {
 				return "Namalsk";
 			case "esseker":
 				return "Esseker";
+			case "sakhal":
+				return "Sakhal";
 		}
 		string FirstLeter = worldName.Substring(0,1);
 		FirstLeter.ToUpper();
@@ -234,6 +236,13 @@ class MapLinkConfig extends UFConfigBase {
 		}
 		return "";
 	}
+	
+	void ~MapLinkConfig(){
+		delete Currencies;
+		delete DepaturePoints;
+		delete ArrivalPoints;
+		delete Servers;
+	}
 }
 
 
@@ -241,7 +250,6 @@ static ref MapLinkConfig m_MapLinkConfig;
 static MapLinkConfig GetMapLinkConfig(){
 	if (!m_MapLinkConfig){
 		m_MapLinkConfig = new MapLinkConfig;
-		m_MapLinkConfig.Load();
 	}
 	return m_MapLinkConfig;
 }

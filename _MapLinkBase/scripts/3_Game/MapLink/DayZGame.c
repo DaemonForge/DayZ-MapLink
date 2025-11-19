@@ -31,7 +31,7 @@ modded class DayZGame extends CGame
 			m_IsToTransfer = false;
 			SetConnecting(true);
 			DeleteTitleScreen();
-			GetGame().Connect(menu, ConnectTo.IP, ConnectTo.Port, ConnectTo.Password);
+			g_Game.Connect(menu, ConnectTo.IP, ConnectTo.Port, ConnectTo.Password);
 			ConnectTo = NULL;
 		}
 	}

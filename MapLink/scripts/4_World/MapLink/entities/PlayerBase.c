@@ -19,7 +19,7 @@ modded class PlayerBase extends ManBase{
 	
 	void UpdateMapLinkProtection(int time = -1){
 		MLLog.Debug("UpdateMapLinkProtection" + time);
-		if (!GetGame().IsServer()){return;}
+		if (!g_Game.IsServer()){return;}
 		RPCSingleParam(MAPLINK_UNDERPROTECTION, new Param1<int>(time), true, GetIdentity());
 		if (m_MapLink_UnderProtection && time < 0){
 			GetInputController().OverrideMeleeEvade(false, false);
@@ -51,30 +51,30 @@ modded class PlayerBase extends ManBase{
 	protected void RemoveProtectionSafe(){
 		bool PlayerHasGodMode = false;
 		#ifdef VPPADMINTOOLS
-			if ( GetGame().IsServer() && hasGodmode ){
+			if ( g_Game.IsServer() && hasGodmode ){
 				MLLog.Log("RemoveProtectionSafe VPP ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef ZOMBERRY_AT
-			if ( GetGame().IsServer() && ZBGodMode ){
+			if ( g_Game.IsServer() && ZBGodMode ){
 				MLLog.Log("RemoveProtectionSafe ZOMBERRY ADMIN TOOLS ACTIVE");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADER 
-			if (GetGame().IsServer() && m_Trader_IsInSafezone){
+			if (g_Game.IsServer() && m_Trader_IsInSafezone){
 				MLLog.Log("RemoveProtectionSafe Player Is In Trader(DrJones) Safe Zone");
 				PlayerHasGodMode = true;
 			}
 		#endif
 		#ifdef TRADERPLUS
-			if (GetGame().IsServer() && IsInsideSZ && IsInsideSZ.SZStatut){
+			if (g_Game.IsServer() && IsInsideSZ && IsInsideSZ.SZStatut){
 				MLLog.Log("RemoveProtectionSafe Player Is In Trader+ Safe Zone");
 				PlayerHasGodMode = true;
 			}		
 		#endif
-		if (!PlayerHasGodMode && GetGame().IsServer() ){
+		if (!PlayerHasGodMode && g_Game.IsServer() ){
 			SetAllowDamage(true);
 		}
 		m_MapLink_UnderProtection = false;
@@ -85,15 +85,16 @@ modded class PlayerBase extends ManBase{
     override void OnStoreSave(ParamsWriteContext ctx)
     {
         super.OnStoreSave(ctx);
-		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (!GetGame().IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
+		if (!g_Game.IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
+			StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 			this.SavePlayerToU();
+			//Print("[UF] Would be saving player but not!");
 		}
     }
 	
 	void SavePlayerToU(){
-		if (m_MapLinkGUIDCache && m_MapLinkNameCache && GetGame().IsServer()){
+		if (m_MapLinkGUIDCache && m_MapLinkNameCache && g_Game.IsServer()){
 			MLLog.Debug("Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) + " IsUnconscious: " + IsUnconscious() + " IsRestrained: " + IsRestrained() );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
 			U().db(PLAYER_DB).Save("MapLink", m_MapLinkGUIDCache, teststore.ToJson());
@@ -102,10 +103,12 @@ modded class PlayerBase extends ManBase{
 			} else {
 				U().db(PLAYER_DB).PublicSave("MapLink", m_MapLinkGUIDCache, SimpleValueStore.StoreValue(""),NULL,"");
 			}
+			MLLog.Debug("Completed Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")");
 			//NotificationSystem.SimpleNoticiation(" You're Data has been saved to the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, this.GetIdentity());
 		} else {
 			MLLog.Debug("Failed to save player to API");
 		}
+		
 	}
 	
 	
@@ -192,9 +195,9 @@ modded class PlayerBase extends ManBase{
 				}
 			}
 		}	
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUFAfterLoadClient, 200);
-		m_Camera3rdPerson = data.m_Camera3rdPerson && !GetGame().GetWorld().Is3rdPersonDisabled();
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUFAfterLoadClient, 200);
+		m_Camera3rdPerson = data.m_Camera3rdPerson && !g_Game.GetWorld().Is3rdPersonDisabled();
 	}
 	
 	void SendUFAfterLoadClient(){
@@ -234,6 +237,7 @@ modded class PlayerBase extends ManBase{
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
 			this.SavePlayerToU();
+			m_MLPlayerStoreCache.Remove(GetIdentity().GetId());
 		}
 		//If they are transfering delete
 		if ( IsBeingTransfered()  && ( !killer || killer == this )){
@@ -242,7 +246,7 @@ modded class PlayerBase extends ManBase{
 			} else {
 				MLLog.Info("Marking Player: NULL (NULL)  for delete cause of transfer" );
 			}
-			//GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
+			//g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
 			m_MapLink_ShouldDelete = true;
 		}
@@ -254,7 +258,7 @@ modded class PlayerBase extends ManBase{
 			} else {
 				MLLog.Info("Deleteing Player: NULL (NULL) cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			}
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.Delete, 400, false);
 			SetPosition(vector.Zero);
 			m_MapLink_ShouldDelete = true;
 		}
@@ -275,7 +279,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	void MapLinkUpdateClientSettingsToServer(){
-		if (GetGame().IsClient()){
+		if (g_Game.IsClient()){
 			RPCSingleParam(MAPLINK_UPDATE3RDPERSON, new Param1<bool>(m_Camera3rdPerson), true, NULL);
 		}
 	}
@@ -291,11 +295,11 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	void MLRequestTravel(string arrivalPoint, string serverName ){
-		if (GetGame().IsClient()){
+		if (g_Game.IsClient()){
 			MLLog.Debug("Player: " + GetIdentity().GetId() + " is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
 			RPCSingleParam(MAPLINK_REQUESTTRAVEL, new Param2<string, string>(arrivalPoint,  serverName), true, NULL);
 		}
-		if (GetGame().IsServer()){
+		if (g_Game.IsServer()){
 			MLLog.Debug("Player: " + GetIdentity().GetName() + "("+ GetIdentity().GetId() + ") is requesting to travel to " + arrivalPoint + " on Server: " + serverName);
 			UFDoTravel(arrivalPoint, serverName);
 		}
@@ -317,7 +321,7 @@ modded class PlayerBase extends ManBase{
 			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
 			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
 			SetAllowDamage(false);
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 			return true;
 		}
 		MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " on " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") failed");
@@ -338,7 +342,7 @@ modded class PlayerBase extends ManBase{
 				MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
 				SetAllowDamage(false);
-				GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
+				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 				return true;
 			}
 		}
@@ -354,30 +358,30 @@ modded class PlayerBase extends ManBase{
 	{
 		super.OnRPC(sender, rpc_type, ctx);
 		
-		if (rpc_type == MAPLINK_AFTERLOADCLIENT && GetGame().IsClient()) {
+		if (rpc_type == MAPLINK_AFTERLOADCLIENT && g_Game.IsClient()) {
 			Param2<bool, bool> alcdata;
 			if (ctx.Read(alcdata))	{
 				if (alcdata.param1){
 					UFAfterLoadClient();
-					m_Camera3rdPerson = alcdata.param2 && !GetGame().GetWorld().Is3rdPersonDisabled();
+					m_Camera3rdPerson = alcdata.param2 && !g_Game.GetWorld().Is3rdPersonDisabled();
 				}
 			}
 		}
-		if (rpc_type == MAPLINK_UNDERPROTECTION && GetGame().IsClient()) {
+		if (rpc_type == MAPLINK_UNDERPROTECTION && g_Game.IsClient()) {
 			Param1<int> updata;
 			if (ctx.Read(updata))	{
 				UpdateMapLinkProtectionClient(updata.param1);
 			}
 		}
 		
-		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && GetGame().IsServer() ){
+		if ( rpc_type == MAPLINK_REQUESTTRAVEL && sender && GetIdentity() && g_Game.IsServer() ){
 			Param2<string, string> rtdata;
 			if (ctx.Read(rtdata) && GetIdentity().GetId() == sender.GetId())	{
 				UFDoTravel(rtdata.param1, rtdata.param2);
 			}
 		}
 		
-		if ( rpc_type == MAPLINK_UPDATE3RDPERSON && sender && GetIdentity() && GetGame().IsServer() ) {
+		if ( rpc_type == MAPLINK_UPDATE3RDPERSON && sender && GetIdentity() && g_Game.IsServer() ) {
 			Param1<bool> trdpdata;
 			if ( ctx.Read(trdpdata) && GetIdentity().GetId() == sender.GetId()) {
 				m_Camera3rdPerson = trdpdata.param1;
@@ -396,7 +400,7 @@ modded class PlayerBase extends ManBase{
 	{
 		super.SetSuicide(state);
 
-		if (state && IsUnderMapLinkProtection() && GetGame().IsServer()){
+		if (state && IsUnderMapLinkProtection() && g_Game.IsServer()){
 			SetAllowDamage(true);
 		}
 	}
@@ -423,156 +427,6 @@ modded class PlayerBase extends ManBase{
 		return true;
 	}
 	
-	
-	
-	
-	
-	/*
-	//Money Handling used from Hived Banking
-	bool MLCanAccept(int ID, ItemBase item){
-		return !item.IsRuined() || GetMapLinkConfig().GetCurrency(ID).CanUseRuinedBills;
-	}
-	
-	
-	int MLGetPlayerBalance(int ID){
-		int PlayerBalance = 0;
-		if (!GetMapLinkConfig().GetCurrency(ID) || GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() < 1){
-			MLLog.Err("Currency ID: " + ID + " is not configured");
-			return 0;
-		}
-		array<EntityAI> inventory = new array<EntityAI>;
-		this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, inventory);
-		
-		ItemBase item;
-		for (int i = 0; i < inventory.Count(); i++){
-			if (Class.CastTo(item, inventory.Get(i))){
-				for (int j = 0; j < GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count(); j++){
-					if (item.GetType() == GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item && MLCanAccept(ID, item)){
-						PlayerBalance += MLCurrentQuantity(item) * GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value;
-					}
-				}
-			}
-		}
-		return PlayerBalance;
-	}
-	
-	
-	int MLAddMoney(int ID, int Amount){
-		if (Amount <= 0){
-			return 2;
-		}
-		int Return = 0;
-		int AmountToAdd = Amount;
-		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
-		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
-		bool NoError = true;
-		int PlayerBalance = MLGetPlayerBalance(ID);
-		int OptimalPlayerBalance = PlayerBalance + AmountToAdd;
-		
-		MapLinkMoneyValue MoneyValue = GetMapLinkConfig().GetCurrency(ID).GetHighestDenomination(AmountToAdd);
-		int MaxLoop = 3000;
-		while (MoneyValue && AmountToAdd >= SmallestCurrency && NoError && MaxLoop > 0){
-			MaxLoop--;
-			int AmountToSpawn = GetMapLinkConfig().GetCurrency(ID).GetAmount(MoneyValue,AmountToAdd);
-			if (AmountToSpawn == 0){
-				NoError = false;
-			}
-			
-			int AmountLeft = MLCreateMoneyInventory(MoneyValue.Item, AmountToSpawn);
-			if (AmountLeft > 0){
-				Return = 1;
-				MLCreateMoneyGround(MoneyValue.Item, AmountLeft);
-			}
-			
-			int AmmountAdded = MoneyValue.Value * AmountToSpawn;
-			
-			AmountToAdd = AmountToAdd - AmmountAdded;
-			
-			MapLinkMoneyValue NewMoneyValue = GetMapLinkConfig().GetCurrency(ID).GetHighestDenomination(AmountToAdd);
-			if (NewMoneyValue && NewMoneyValue != MoneyValue){
-				MoneyValue = NewMoneyValue;
-			} else {
-				NoError = false;
-			}
-		}
-		return Return;
-	}
-	
-	
-	int MLRemoveMoney(int ID, int Amount){
-		if (Amount <= 0){
-			return 2;
-		}
-		int Return = 0;
-		int AmountToRemove = Amount;
-		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
-		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
-		bool NoError = true;
-		for (int i = 0; i < GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count(); i++){
-			AmountToRemove =  MLRemoveMoneyInventory(ID, GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(i), AmountToRemove);
-		}
-		if (AmountToRemove >= SmallestCurrency){ // Now to delete a larger bill and make change
-			for (int j = LastIndex; j >= 0; j--){
-				//MLLog.Debug("Trying to remove " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item);
-				int NewAmountToRemove =  MLRemoveMoneyInventory(ID, GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j), GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value);
-				if (NewAmountToRemove == 0){
-					int AmountToAddBack = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Value - AmountToRemove;
-					//MLLog.Debug("A " + GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(j).Item + " removed trying to add back " + AmountToAddBack );
-					Return = MLAddMoney(ID, AmountToAddBack);
-				}
-			}
-		}
-		return Return;
-	}
-	
-	//Return how much left still to remove
-	int MLRemoveMoneyInventory(int ID, MapLinkMoneyValue MoneyValue, float Amount ){
-		int AmountToRemove = GetMapLinkConfig().GetCurrency(ID).GetAmount(MoneyValue, Amount);
-		int LastIndex = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Count() - 1;
-		int SmallestCurrency = GetMapLinkConfig().GetCurrency(ID).MoneyValues.Get(LastIndex).Value;
-		if (AmountToRemove > 0){
-			array<EntityAI> itemsArray = new array<EntityAI>;
-			this.GetInventory().EnumerateInventory(InventoryTraversalType.PREORDER, itemsArray);
-			for (int i = 0; i < itemsArray.Count(); i++){
-				ItemBase item = ItemBase.Cast(itemsArray.Get(i));
-				if (item && MLCanAccept(ID, item)){
-					string ItemType = item.GetType();
-					ItemType.ToLower();
-					string MoneyType = MoneyValue.Item;
-					MoneyType.ToLower();
-					if (ItemType == MoneyType){
-						int CurQuantity = item.GetQuantity();
-						int AmountRemoved = 0;
-						if (!item.HasQuantity()){
-							CurQuantity = 1;
-						} 
-						if (AmountToRemove < CurQuantity){
-							AmountRemoved = MoneyValue.Value * AmountToRemove;
-							item.MLSetQuantity(CurQuantity - AmountToRemove);
-							this.UpdateInventoryMenu(); // RPC-Call needed?
-							return Amount - AmountRemoved;
-						} else if (AmountToRemove == CurQuantity){
-							AmountRemoved = MoneyValue.Value * AmountToRemove;
-							GetGame().ObjectDelete(item);
-							this.UpdateInventoryMenu(); // RPC-Call needed?
-							return Amount - AmountRemoved;
-						} else {
-							AmountRemoved = MoneyValue.Value * CurQuantity;
-							AmountToRemove = AmountToRemove - CurQuantity;
-							GetGame().ObjectDelete(item);
-							Amount = Amount - AmountRemoved;
-						}
-						if (AmountToRemove <= 0){
-							this.UpdateInventoryMenu(); // RPC-Call needed?
-							return Amount;
-						}
-					}
-				}
-			}
-		}
-		this.UpdateInventoryMenu(); // RPC-Call needed?
-		return Amount;
-	}*/
 }
 	
 

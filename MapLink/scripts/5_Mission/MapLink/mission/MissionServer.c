@@ -1,14 +1,14 @@
 modded class MissionServer extends MissionBase
 {
-	ref map<string, autoptr PlayerDataStore> m_PlayerDBQue = new map<string, autoptr PlayerDataStore>;
 	string m_worldname;
 	int MapLinkConfigRefreshTimer = 0;
 	static int MAPLINK_CONFIG_REFRESH_TIME = 90000;
 	
 	override void OnMissionStart(){
 		super.OnMissionStart();
-		GetGame().GetWorldName(m_worldname);
+		g_Game.GetWorldName(m_worldname);
 		MLLog.Info("On Mission Start World: " + m_worldname + " Server: " + UFConfig().ServerID);
+		m_MLPlayerStoreCache =  new MLPlayerStoreCache();
 	}
 	
 	
@@ -20,10 +20,10 @@ modded class MissionServer extends MissionBase
 				MLLog.Debug("LoadPlayerFromDB - Success ID:" + cid + " - GUID: " + oid );
 				if (dataload.IsValid() && dataload.GUID == oid){
 					MLLog.Info("Add Player to PlayerQue " + dataload.m_Name + "(" + dataload.GUID + ") Health:  " + dataload.m_Health + " PlayTime: " + dataload.m_TimeSurvivedValue + " Server: " + dataload.m_Server + " TransferPoint: " + dataload.m_TransferPoint);
-					m_PlayerDBQue.Set(oid, PlayerDataStore.Cast(dataload));
-				} else if (m_PlayerDBQue.Contains(oid)) { //This shouldn't be needed any more
+					m_MLPlayerStoreCache.Add(oid, PlayerDataStore.Cast(dataload));
+				} else if (m_MLPlayerStoreCache.Check(oid)) { //This shouldn't be needed any more
 					MLLog.Log("Player is dead or data invlaid Removing Player from Queue " + oid);
-					m_PlayerDBQue.Remove(oid);
+					m_MLPlayerStoreCache.Remove(oid);
 				}
 				return;
 			}
@@ -39,7 +39,7 @@ modded class MissionServer extends MissionBase
 
 	override void OnClientPrepareEvent(PlayerIdentity identity, out bool useDB, out vector pos, out float yaw, out int preloadTimeout)
 	{
-		int CurrentTime = GetGame().GetTime();
+		int CurrentTime = g_Game.GetTime();
 		if (CurrentTime > MapLinkConfigRefreshTimer){
 			MapLinkConfigRefreshTimer = CurrentTime + MAPLINK_CONFIG_REFRESH_TIME;
 			GetMapLinkConfig().Load();
@@ -73,7 +73,7 @@ modded class MissionServer extends MissionBase
 	bool UFOnClientNewEvent(PlayerIdentity identity, vector pos, ParamsReadContext ctx)
 	{
 		PlayerDataStore playerdata;		
-		if (identity && m_PlayerDBQue.Contains(identity.GetId()) &&  m_PlayerDBQue.Find(identity.GetId(), playerdata) && playerdata.IsValid()) {
+		if (identity && m_MLPlayerStoreCache.Check(identity.GetId()) &&  m_MLPlayerStoreCache.Find(identity.GetId(), playerdata) && playerdata.IsValid()) {
 			pos = "0 0 0";
 			vector ori = "0 0 0";
 			UServerData serverData;
@@ -91,7 +91,7 @@ modded class MissionServer extends MissionBase
 				}
 				MLLog.Info("Player " + identity.GetId() +" IsAlive: " + playerdata.IsAlive() + " IsUnconscious: " + playerdata.IsUnconscious() + " IsRestrained: " + playerdata.IsRestrained()  + " on the API, spawning them fresh");
 				MLLog.Debug("Removing Player from Queue " + identity.GetId());
-				m_PlayerDBQue.Remove(identity.GetId());
+				m_MLPlayerStoreCache.Remove(identity.GetId());
 			    return false;
 			}
 			MLLog.Log("Spawning player " + identity.GetId() + " on: " + UFConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
@@ -101,7 +101,7 @@ modded class MissionServer extends MissionBase
 				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, identity);
 				MLLog.Info("Player " + identity.GetId() + " Redirected to correct server " +  FromServerName);
 				MLLog.Debug("Removing Player from Queue " + identity.GetId());
-				m_PlayerDBQue.Remove(identity.GetId());
+				m_MLPlayerStoreCache.Remove(identity.GetId());
 				return false;
 			}
 			if (FromServerName != UFConfig().ServerID && transferPoint != "") {
@@ -113,14 +113,14 @@ modded class MissionServer extends MissionBase
 					MLLog.Err("Server isn't set up to receive this arrival point(" + transferPoint + ") Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
 					
 					MLLog.Debug("Removing Player from Queue " + identity.GetId());
-					m_PlayerDBQue.Remove(identity.GetId());
+					m_MLPlayerStoreCache.Remove(identity.GetId());
 					return false;
 				}
 				pos = pointPos.Get();
 				ori = pointPos.GetOrientation();
 			}
 			PlayerBase player = PlayerBase.Cast(PlayerDataStore.Cast(playerdata).CreateWithIdentity(PlayerIdentity.Cast(identity), pos));
-			GetGame().SelectPlayer(identity, player);
+			g_Game.SelectPlayer(identity, player);
 			InvokeOnConnect(player, identity);
 			SyncEvents.SendPlayerList();
 			ControlPersonalLight(player);
@@ -130,12 +130,12 @@ modded class MissionServer extends MissionBase
 				int protectionTime = GetMapLinkConfig().GetProtectionTime(transferPoint);
 				MLLog.Info("Adding Protection to " + playerdata.GUID + "  at " + transferPoint + " for " + protectionTime);
 				if (protectionTime > 0){
-					GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(player.UpdateMapLinkProtection, protectionTime);
+					g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(player.UpdateMapLinkProtection, protectionTime);
 				}
 			}
-			GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(player.SavePlayerToU, 100);
+			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(player.SavePlayerToU, 100);
 			MLLog.Debug("Removing Player from Queue " + identity.GetId());
-			m_PlayerDBQue.Remove(identity.GetId());
+			m_MLPlayerStoreCache.Remove(identity.GetId());
 			return true;
 		}
 		return false;

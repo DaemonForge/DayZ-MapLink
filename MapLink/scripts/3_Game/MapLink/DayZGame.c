@@ -3,7 +3,7 @@ modded class DayZGame {
 	autoptr MapLinkCountTimerWidget m_MapLinkCountTimerWidget;
 	
 	void MapLinkStartCountDown(int time){
-		if(!GetGame().IsClient()){return;}
+		if(!g_Game.IsClient()){return;}
 		if (!m_MapLinkCountTimerWidget){
 			m_MapLinkCountTimerWidget = new MapLinkCountTimerWidget;
 		}
@@ -11,7 +11,7 @@ modded class DayZGame {
 	}
 	
 	void MapLinkStopCountDown(){
-		if(!GetGame().IsClient()){return;}
+		if(!g_Game.IsClient()){return;}
 		if (m_MapLinkCountTimerWidget){
 			m_MapLinkCountTimerWidget.Stop();
 		}

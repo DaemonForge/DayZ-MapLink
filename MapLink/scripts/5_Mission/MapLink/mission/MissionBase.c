@@ -4,7 +4,7 @@ modded class MissionBase
 	override void UFrameworkReady(){
 		super.UFrameworkReady();
 		MLLog.Info("[MAPLINK] Init");
-		GetMapLinkConfig();
+		GetMapLinkConfig().Load();
 	}
 
     override UIScriptedMenu CreateScriptedMenu(int id) {

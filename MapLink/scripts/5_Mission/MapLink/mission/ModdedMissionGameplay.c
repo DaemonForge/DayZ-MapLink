@@ -1,15 +1,12 @@
 modded class MissionGameplay
 {
-
+	
 	void MissionGameplay()
     {   
 		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 	
 	override void UFrameworkReadyTokenReceived(){
-		if (m_UF_Initialized){ //So we don't load 3 times!
-			GetMapLinkConfig().Load(); //  Reload config everytime the Auth key is renewed.
-		}
 		
 		super.UFrameworkReadyTokenReceived();
 	}
@@ -20,7 +17,7 @@ modded class MissionGameplay
 		if ( !ctx.Read( data ) ) return;
 		MLLog.Info("Kicked from Game");
 		UServerData serverData = UServerData.Cast(data.param1);
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(GetGame().DisconnectSessionForce);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(g_Game.DisconnectSessionForce);
 		GetDayZGame().HiveSetReconnectTo(serverData);
 	}
 	
@@ -42,7 +39,7 @@ modded class MissionMainMenu {
 	
 	override void OnMissionStart(){
 		super.OnMissionStart();
-		GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.DoReconnect);
+		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.DoReconnect);
 	}
 
 	

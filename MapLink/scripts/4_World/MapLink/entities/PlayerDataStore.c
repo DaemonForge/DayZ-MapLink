@@ -64,7 +64,7 @@ modded class PlayerDataStore extends Managed{
 			}
 		}
 		player.OnUFSave(this);
-		GetGame().GetWorldName(m_Map);
+		g_Game.GetWorldName(m_Map);
 		m_Server = UFConfig().ServerID;
 	}
 	
@@ -75,7 +75,7 @@ modded class PlayerDataStore extends Managed{
 			Pos = m_Position;
 		}
 		MLLog.Debug("CreateWithIdentity at " + Pos);
-		Entity playerEnt = GetGame().CreatePlayer(PlayerIdentity.Cast(identity), m_Type, Pos, 0, "NONE");
+		Entity playerEnt = g_Game.CreatePlayer(PlayerIdentity.Cast(identity), m_Type, Pos, 0, "NONE");
 		PlayerBase player;
 		Class.CastTo(player, playerEnt);
 		return player;

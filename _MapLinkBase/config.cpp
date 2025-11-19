@@ -21,31 +21,23 @@ class CfgMods
         extra=0;
         type="mod";
 	    dependencies[]={ "Game", "World", "Mission"};
+		defines[]={
+			"MAPLINK"
+		};
 	    class defs
 	    {
 			class gameScriptModule
             {
 				value = "";
                 files[]={
-					"_MapLinkBase/scripts/3_Game",
-					"_MapLinkBase/scripts/Common"
+					"_MapLinkBase/scripts/3_Game"
 				};
             };
 			class worldScriptModule
             {
                 value="";
                 files[]={ 
-					"_MapLinkBase/scripts/4_World" ,
-					"_MapLinkBase/scripts/Common"
-				};
-            };
-			
-	        class missionScriptModule
-            {
-                value="";
-                files[]={
-					"_MapLinkBase/scripts/5_Mission" ,
-					"_MapLinkBase/scripts/Common"
+					"_MapLinkBase/scripts/4_World"
 				};
             };
         };

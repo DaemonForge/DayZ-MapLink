@@ -27,7 +27,7 @@ class ActionMapLinkOpenOnTerminal extends ActionInteractBase
 		if (player){
 			player.MapLinkUpdateClientSettingsToServer();
 			if (!m_DeparturePointMenu){
-				m_DeparturePointMenu = DeparturePointMenu.Cast(GetGame().GetUIManager().EnterScriptedMenu(MAPLINK_DEPARTUREPOINTMENU, NULL));
+				m_DeparturePointMenu = DeparturePointMenu.Cast(g_Game.GetUIManager().EnterScriptedMenu(MAPLINK_DEPARTUREPOINTMENU, NULL));
 			}
 			m_DeparturePointMenu.SetDeparturePoint(GetMapLinkConfig().GetDepaturePoint(player.GetPosition()));
 		}

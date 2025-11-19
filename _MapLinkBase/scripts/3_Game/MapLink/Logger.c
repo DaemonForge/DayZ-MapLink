@@ -50,7 +50,7 @@ class MLLogFileInstance extends Managed {
 	
 	void MLLogFileInstance(int level = 4) {	
 		m_LogLevel = level;	
-		if ( !GetGame().IsServer() || GetGame().IsClient() ){
+		if ( !g_Game.IsServer() || g_Game.IsClient() ){
 			return;	
 		}
 		m_FileHandle = CreateFile(LogDir + "MapLink_" + GetDateStampFile() + ".log");
@@ -74,7 +74,7 @@ class MLLogFileInstance extends Managed {
 	}
 	
 	protected FileHandle CreateFile(string path) {
-		if ( !GetGame().IsServer() || GetGame().IsClient() ){
+		if ( !g_Game.IsServer() || g_Game.IsClient() ){
 			return null;	
 		}
 		
@@ -147,7 +147,7 @@ class MLLogFileInstance extends Managed {
 	void DoLog(string text, int level = 1)
 	{	
 		if (level == 2 && m_LogLevel >= level) {
-			GetGame().AdminLog("[MapLink]" + GetTag(level) + text);
+			g_Game.AdminLog("[MapLink]" + GetTag(level) + text);
 		}
 		if (m_isInit && m_LogLevel >= level){
 			//Print("[MapLink] " + GetTag(level) + GetTimeStamp() + " | " + text);

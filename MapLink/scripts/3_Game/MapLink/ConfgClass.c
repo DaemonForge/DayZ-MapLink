@@ -36,7 +36,7 @@ class MapLinkDepaturePoint extends Managed {
 	
 }
 
-class MapLinkArrivalPointsRef {
+class MapLinkArrivalPointsRef extends Managed{
 	string ArrivalPointName;
 	string Icon = "";
 	int TransitionWaitTime;
@@ -138,7 +138,7 @@ class MapLinkSpawnPoint extends Managed{
 	} 
 }
 
-class MapLinkSpawnPointPos{
+class MapLinkSpawnPointPos extends Managed{
 	float X;
 	float Y;
 	float Z;
@@ -149,7 +149,7 @@ class MapLinkSpawnPointPos{
 	vector GetPosition(){
 		float y = Y;
 		if (Y <= 0){
-			y = GetGame().SurfaceY(X,Z);
+			y = g_Game.SurfaceY(X,Z);
 		}
 		return Vector(X, y, Z);
 	}
@@ -167,7 +167,7 @@ class MapLinkSpawnPointPos{
 		
         vector rndPos = GetRandomPosition();
         int maxCalcs = 25;
-        while ((GetGame().SurfaceIsSea(rndPos[0], rndPos[2]) || GetGame().SurfaceIsPond(rndPos[0],rndPos[2])) && maxCalcs > 0) {
+        while ((g_Game.SurfaceIsSea(rndPos[0], rndPos[2]) || g_Game.SurfaceIsPond(rndPos[0],rndPos[2])) && maxCalcs > 0) {
 			maxCalcs--;
             rndPos = GetRandomPosition();
         }
@@ -241,9 +241,13 @@ class MapLinkCurrency extends Managed {
 		}
 		return "set:maplink_money image:"+Icon;
 	}
+	
+	void ~MapLinkCurrency(){
+		if (MoneyValues) delete MoneyValues;
+	}
 }
 
-class MapLinkMoneyValue{
+class MapLinkMoneyValue extends Managed{
 	
 	string Item;
 	int Value
