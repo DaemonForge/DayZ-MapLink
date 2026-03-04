@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapLink Configuration Wizard</title>
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ─── Layout Shell ─── */
+    .app-shell { display: flex; height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: #181818;
+      border-right: 1px solid #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-header .version {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid #2a2a2a;
+    }
+
+    .sidebar-footer .sf-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      margin-bottom: 0;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin-bottom 0.25s ease;
+    }
+
+    .sidebar-footer .sf-actions.visible {
+      max-height: 50px;
+      opacity: 1;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-footer .sf-actions button {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .sidebar-footer .sf-save {
+      background: #0e639c;
+      color: #fff;
+    }
+    .sidebar-footer .sf-save:hover { background: #1177bb; }
+    .sidebar-footer .sf-save:disabled { opacity: 0.5; cursor: default; }
+
+    .sidebar-footer .sf-discard {
+      background: #333;
+      color: #ccc;
+    }
+    .sidebar-footer .sf-discard:hover { background: #444; color: #fff; }
+
+    .sidebar-footer .sf-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.15s;
+      margin-bottom: 6px;
+    }
+    .sidebar-footer .sf-link:last-child { margin-bottom: 0; }
+    .sidebar-footer .sf-link .sf-link-icon { font-size: 16px; flex-shrink: 0; }
+    .sidebar-footer .sf-link strong { display: block; }
+    .sidebar-footer .sf-link .sf-link-sub { color: #888; font-size: 11px; }
+
+    .sidebar-footer .sf-link.discord { color: #7289da; }
+    .sidebar-footer .sf-link.discord:hover { border-color: #7289da; background: #2d2d40; }
+
+    .sidebar-footer .sf-link.sponsor { color: #db61a2; }
+    .sidebar-footer .sf-link.sponsor:hover { border-color: #db61a2; background: #2d2030; }
+
+    .nav-section { padding: 12px 0; }
+
+    .nav-section-title {
+      padding: 0 16px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #555;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 13px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: #252526; color: #f0f0f0; }
+    .nav-item.active { background: #252526; color: #0e639c; border-left-color: #0e639c; }
+
+    .nav-item .nav-icon { width: 18px; text-align: center; font-size: 14px; }
+
+    .nav-item .nav-badge {
+      margin-left: auto;
+      background: #0e639c;
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* ─── Main Content ─── */
+    .main-content { flex: 1; overflow-y: auto; }
+
+    .page { display: none; padding: 28px 32px; max-width: 1100px; }
+    .page.active { display: block; }
+
+    .page-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #2a2a2a; }
+    .page-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .page-header p { color: #888; font-size: 13px; }
+
+    /* ─── Status Toast ─── */
+    .status-bar {
+      position: fixed; top: 16px; right: 16px; z-index: 9999;
+      padding: 10px 18px; border-radius: 6px; font-size: 13px;
+      display: none; max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      animation: slideIn 0.25s ease-out;
+    }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .status-bar.success { display: block; background: #1b3a1b; color: #4caf50; border: 1px solid #2e5c2e; }
+    .status-bar.error   { display: block; background: #3a1b1b; color: #f44336; border: 1px solid #5c2e2e; }
+    .status-bar.info    { display: block; background: #1b2a3a; color: #64b5f6; border: 1px solid #2e4a5c; }
+    .status-bar.warning { display: block; background: #3a2e1b; color: #ff9800; border: 1px solid #5c4a2e; }
+
+    /* ─── Cards ─── */
+    .card {
+      background: #252526; border: 1px solid #333;
+      border-radius: 8px; padding: 20px; margin-bottom: 16px;
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-header h3 { font-size: 15px; font-weight: 600; }
+
+    /* ─── Form Controls ─── */
+    label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; font-weight: 500; }
+
+    input[type="text"], input[type="number"], input[type="password"], textarea, select {
+      width: 100%; padding: 8px 12px;
+      border: 1px solid #3a3a3a; background-color: #2a2a2a; color: #f0f0f0;
+      border-radius: 4px; font-size: 13px; margin-bottom: 12px;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #0e639c; }
+    input.error, select.error { border-color: #f44336 !important; }
+    .field-error { color: #f44336; font-size: 11px; margin-top: -8px; margin-bottom: 8px; display: none; }
+    .field-error.show { display: block; }
+    textarea { resize: vertical; min-height: 70px; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; }
+    select option { background: #2a2a2a; color: #f0f0f0; }
+
+    /* ─── Toggle Switch ─── */
+    .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: #3a3a3a; border-radius: 22px; transition: 0.2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; height: 16px; width: 16px;
+      left: 3px; bottom: 3px; background: #888; border-radius: 50%; transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: #0e639c; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: #fff; }
+    .toggle-label { font-size: 13px; color: #ccc; cursor: pointer; }
+
+    /* ─── Buttons ─── */
+    button {
+      padding: 8px 18px; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    button:disabled { opacity: 0.4; cursor: default; }
+    .btn-primary { background: #0e639c; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1177bb; }
+    .btn-secondary { background: #3a3d41; color: #fff; }
+    .btn-secondary:hover:not(:disabled) { background: #4a4d51; }
+    .btn-danger { background: #5a1d1d; color: #f44336; }
+    .btn-danger:hover:not(:disabled) { background: #6a2020; }
+    .btn-success { background: #1b3a1b; color: #4caf50; }
+    .btn-success:hover:not(:disabled) { background: #245a24; }
+    .btn-ghost { background: transparent; color: #888; padding: 6px 10px; border: 1px solid #444; }
+    .btn-ghost:hover:not(:disabled) { color: #f0f0f0; border-color: #666; background: #333; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-icon { padding: 6px 8px; font-size: 14px; line-height: 1; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ─── Grid ─── */
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .col { flex: 1; min-width: 200px; }
+
+    /* ─── Item List ─── */
+    .item-list { display: flex; flex-direction: column; gap: 6px; }
+    .item-row {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: #1e1e1e; border: 1px solid #333; border-radius: 6px; transition: all 0.15s;
+    }
+    .item-row:hover { border-color: #444; }
+    .item-row .item-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .item-row .item-info { flex: 1; min-width: 0; }
+    .item-row .item-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-row .item-meta { font-size: 11px; color: #777; }
+    .item-row .item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+    /* ─── Drag & Drop ─── */
+    .item-row.draggable { cursor: grab; }
+    .item-row.dragging { opacity: 0.4; border-color: #0e639c; }
+    .item-row.drag-over { border-color: #0e639c; background: #1b2a3a; }
+    .drag-handle { cursor: grab; color: #555; font-size: 14px; padding: 0 4px; user-select: none; }
+    .drag-handle:hover { color: #888; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 5000; display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #252526; border: 1px solid #3a3a3a; border-radius: 10px;
+      padding: 24px; min-width: 440px; max-width: 700px; max-height: 85vh;
+      overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: modalIn 0.2s ease-out;
+    }
+    @keyframes modalIn { from { transform: scale(0.95) translateY(-10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+    .modal h3 { font-size: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #333; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #333; }
+
+    /* ─── Chips ─── */
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; background: #333; border-radius: 12px; font-size: 11px; color: #ccc; }
+    .chip.blue { background: #1a3a5c; color: #64b5f6; }
+    .chip.green { background: #1b3a1b; color: #4caf50; }
+
+    /* ─── Icon Picker ─── */
+    .icon-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: 6px; max-height: 260px; overflow-y: auto; padding: 4px;
+    }
+    .icon-option {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 4px; border: 2px solid transparent; border-radius: 6px;
+      cursor: pointer; transition: all 0.15s; font-size: 10px; color: #888; text-align: center;
+    }
+    .icon-option:hover { background: #333; border-color: #444; }
+    .icon-option.selected { border-color: #0e639c; background: #1b2a3a; color: #64b5f6; }
+    .icon-option .icon-preview { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+
+    /* ─── Position Tags ─── */
+    .pos-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; background: #2a2a2a; border: 1px solid #3a3a3a;
+      border-radius: 4px; font-size: 12px; font-family: 'Consolas', monospace; margin: 2px 4px 2px 0;
+    }
+    .pos-tag .pos-remove { cursor: pointer; color: #666; font-size: 14px; }
+    .pos-tag .pos-remove:hover { color: #f44336; }
+
+    /* ─── Settings Grid ─── */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    .settings-grid .full-width { grid-column: 1 / -1; }
+    @media (max-width: 700px) { .settings-grid { grid-template-columns: 1fr; } .sidebar { display: none; } .row { flex-direction: column; } }
+
+    /* ─── Setup Steps ─── */
+    .setup-banner {
+      background: linear-gradient(135deg, #1a2a40, #1a3040);
+      border: 1px solid #2a4a6a; border-radius: 10px; padding: 24px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .setup-banner .banner-icon { font-size: 40px; }
+    .setup-banner .banner-text h3 { font-size: 16px; margin-bottom: 4px; }
+    .setup-banner .banner-text p { font-size: 13px; color: #88a8c8; }
+
+    .setup-steps { display: flex; gap: 0; margin-bottom: 24px; }
+    .setup-step {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px; background: #252526; border: 1px solid #333;
+      cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .setup-step:first-child { border-radius: 8px 0 0 8px; }
+    .setup-step:last-child { border-radius: 0 8px 8px 0; }
+    .setup-step .step-num {
+      width: 26px; height: 26px; border-radius: 50%; background: #333;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .setup-step.completed .step-num { background: #1b3a1b; color: #4caf50; }
+    .setup-step.active { border-color: #0e639c; background: #1b2a3a; }
+    .setup-step.active .step-num { background: #0e639c; color: #fff; }
+    .setup-step .step-text { font-size: 12px; color: #aaa; }
+    .setup-step.active .step-text { color: #f0f0f0; }
+    .setup-step.completed .step-text { color: #4caf50; }
+
+    /* ─── Route Visual ─── */
+    .route-visual {
+      display: flex; align-items: stretch; gap: 0; margin-bottom: 8px;
+      background: #1e1e1e; border: 1px solid #333; border-radius: 8px; overflow: hidden;
+    }
+    .route-from, .route-to { flex: 1; padding: 12px 16px; }
+    .route-from { border-right: 1px solid #333; }
+    .route-arrow { display: flex; align-items: center; justify-content: center; padding: 0 12px; color: #0e639c; font-size: 20px; background: #1a2530; }
+    .route-label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .route-value { font-size: 14px; font-weight: 600; }
+    .route-meta { font-size: 11px; color: #888; margin-top: 2px; }
+
+    /* ─── Link Connector ─── */
+    .link-connector {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; background: #1e1e1e; border: 1px solid #333;
+      border-radius: 6px; margin-bottom: 4px;
+    }
+
+    /* ─── Floating Save Bar ─── */
+    .save-bar {
+      position: fixed; bottom: 0; left: 240px; right: 0;
+      background: #1a1a1a; border-top: 1px solid #333; padding: 12px 32px;
+      display: flex; align-items: center; justify-content: space-between; z-index: 1000;
+      transform: translateY(100%); transition: transform 0.25s ease;
+    }
+    .save-bar.visible { transform: translateY(0); }
+    .save-bar .unsaved-text { color: #ff9800; font-size: 13px; }
+
+    /* ─── Loading ─── */
+    .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #888; gap: 16px; }
+    .spinner { width: 32px; height: 32px; border: 3px solid #333; border-top-color: #0e639c; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Empty State ─── */
+    .empty-state { text-align: center; padding: 40px 20px; color: #555; }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
+    .empty-state p { font-size: 13px; margin-bottom: 12px; }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e1e1e; }
+    ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* ─── Divider ─── */
+    hr { border: none; border-top: 1px solid #2a2a2a; margin: 20px 0; }
+
+    /* ─── Info Icon ─── */
+    .info-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #333; color: #888; font-size: 10px;
+      cursor: help; margin-left: 4px; font-style: normal; vertical-align: middle;
+    }
+    .info-icon:hover { background: #0e639c; color: #fff; }
+
+    /* ─── Preset Grid ─── */
+    .preset-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px; margin-bottom: 12px;
+    }
+    .preset-card {
+      padding: 14px; border: 1px solid #333; border-radius: 8px;
+      cursor: pointer; background: #2a2a2a; transition: all 0.15s; text-align: center;
+    }
+    .preset-card:hover { border-color: #0e639c; background: #1a2c3d; transform: translateY(-1px); }
+    .preset-card.added { border-color: #2e5c2e; background: #1b3a1b; opacity: 0.6; cursor: default; transform: none; }
+    .preset-card h4 { font-size: 14px; margin-bottom: 4px; color: #e0e0e0; }
+    .preset-card p { font-size: 11px; color: #888; }
+    .preset-card.added h4 { color: #4caf50; }
+
+    /* ─── Collapsible Section ─── */
+    .collapse-header {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; padding: 10px 0; user-select: none;
+    }
+    .collapse-header h3 { font-size: 15px; color: #ccc; flex: 1; }
+    .collapse-header .caret { transition: transform 0.2s; color: #666; font-size: 12px; }
+    .collapse-header.open .caret { transform: rotate(90deg); }
+    .collapse-body { display: none; padding-top: 8px; }
+    .collapse-body.open { display: block; }
+
+    /* ─── Card Badge ─── */
+    .card-header .badge {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #333; color: #aaa;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="spinner"></div>
+    <span>Loading MapLink Configuration...</span>
+  </div>
+
+  <!-- Main App -->
+  <div id="appShell" class="app-shell" style="display: none;">
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>&#x1f5fa;&#xfe0f; MapLink</h1>
+        <div class="version">Configuration Wizard</div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Setup</div>
+          <div class="nav-item active" data-page="overview"><span class="nav-icon">&#x1f4cb;</span> Overview</div>
+          <div class="nav-item" data-page="servers"><span class="nav-icon">&#x1f5a5;&#xfe0f;</span> Servers <span class="nav-badge" id="badgeServers">0</span></div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Travel</div>
+          <div class="nav-item" data-page="arrival"><span class="nav-icon">&#x1f4cd;</span> Arrival Points <span class="nav-badge" id="badgeArrival">0</span></div>
+          <div class="nav-item" data-page="departure"><span class="nav-icon">&#x1f680;</span> Departure Points <span class="nav-badge" id="badgeDeparture">0</span></div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Economy</div>
+          <div class="nav-item" data-page="currencies"><span class="nav-icon">&#x1f4b0;</span> Currencies <span class="nav-badge" id="badgeCurrencies">0</span></div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Advanced</div>
+          <div class="nav-item" data-page="settings"><span class="nav-icon">&#x2699;&#xfe0f;</span> Settings</div>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sf-actions" id="sidebarActions">
+          <button class="sf-discard" onclick="reloadConfig()" title="Discard changes and reload from database">&#x1f504; Discard</button>
+          <button class="sf-save" id="sidebarSaveBtn" onclick="saveConfig()" title="Save configuration to database">&#x1f4be; Save</button>
+        </div>
+        <a class="sf-link discord" href="https://discord.gg/SkUkPv4" target="_blank" rel="noopener">
+          <span class="sf-link-icon">&#x1f4ac;</span>
+          <span><strong>Need Help?</strong><span class="sf-link-sub">Join our Discord</span></span>
+        </a>
+        <a class="sf-link sponsor" href="https://github.com/sponsors/DaemonF0rge" target="_blank" rel="noopener">
+          <span class="sf-link-icon">&#x2764;&#xfe0f;</span>
+          <span><strong>Support the Mod</strong><span class="sf-link-sub">Sponsor on GitHub</span></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="main-content">
+
+      <!-- ═══ OVERVIEW ═══ -->
+      <div class="page active" id="page-overview">
+        <div class="page-header">
+          <h2>Welcome to MapLink Setup</h2>
+          <p>Configure your multi-server travel system in a few simple steps. Start by defining your servers, then create arrival and departure points to link them together.</p>
+        </div>
+
+        <div class="setup-banner">
+          <div class="banner-icon">&#x1f5fa;&#xfe0f;</div>
+          <div class="banner-text">
+            <h3>Quick Start Guide</h3>
+            <p>Follow these 4 steps to set up cross-server travel. Click each step to jump to that section.</p>
+          </div>
+        </div>
+
+        <div class="setup-steps" id="setupSteps">
+          <div class="setup-step active" data-target="servers"><span class="step-num">1</span><span class="step-text">Add Servers</span></div>
+          <div class="setup-step" data-target="arrival"><span class="step-num">2</span><span class="step-text">Create Arrival Points</span></div>
+          <div class="setup-step" data-target="departure"><span class="step-num">3</span><span class="step-text">Set Up Departures</span></div>
+          <div class="setup-step" data-target="currencies"><span class="step-num">4</span><span class="step-text">Configure Currencies</span></div>
+        </div>
+
+        <div class="row" style="margin-bottom: 20px;">
+          <div class="col"><div class="card" style="text-align:center;"><div style="font-size:28px; margin-bottom:4px;" id="statServers">0</div><div style="font-size:12px; color:#888;">Servers</div></div></div>
+          <div class="col"><div class="card" style="text-align:center;"><div style="font-size:28px; margin-bottom:4px;" id="statArrivals">0</div><div style="font-size:12px; color:#888;">Arrival Points</div></div></div>
+          <div class="col"><div class="card" style="text-align:center;"><div style="font-size:28px; margin-bottom:4px;" id="statDepartures">0</div><div style="font-size:12px; color:#888;">Departure Points</div></div></div>
+          <div class="col"><div class="card" style="text-align:center;"><div style="font-size:28px; margin-bottom:4px;" id="statRoutes">0</div><div style="font-size:12px; color:#888;">Total Routes</div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>&#x1f5fa;&#xfe0f; Route Map</h3></div>
+          <div id="routeOverview"></div>
+        </div>
+      </div>
+
+      <!-- ═══ SERVERS ═══ -->
+      <div class="page" id="page-servers">
+        <div class="page-header">
+          <h2>&#x1f5a5;&#xfe0f; Servers</h2>
+          <p>Define each server in your network. The "Name" is the unique identifier used throughout MapLink to reference this server.</p>
+        </div>
+        <div class="btn-row" style="margin-bottom: 16px;">
+          <button class="btn-primary" onclick="openServerModal()">+ Add Server</button>
+        </div>
+        <div class="item-list" id="serverList"></div>
+        <div class="empty-state hidden" id="serversEmpty">
+          <div class="empty-icon">&#x1f5a5;&#xfe0f;</div>
+          <p>No servers configured yet. Add your first server to get started!</p>
+          <button class="btn-primary" onclick="openServerModal()">+ Add Server</button>
+        </div>
+      </div>
+
+      <!-- ═══ ARRIVAL POINTS ═══ -->
+      <div class="page" id="page-arrival">
+        <div class="page-header">
+          <h2>&#x1f4cd; Arrival Points</h2>
+          <p>Arrival points are named destinations where players spawn after traveling. Each has per-server spawn locations with weighted positions.</p>
+        </div>
+        <div class="btn-row" style="margin-bottom: 16px;">
+          <button class="btn-primary" onclick="openArrivalModal()">+ Add Arrival Point</button>
+        </div>
+        <div id="arrivalList"></div>
+        <div class="empty-state hidden" id="arrivalEmpty">
+          <div class="empty-icon">&#x1f4cd;</div>
+          <p>No arrival points yet. Create one to define where players spawn after traveling.</p>
+          <button class="btn-primary" onclick="openArrivalModal()">+ Add Arrival Point</button>
+        </div>
+      </div>
+
+      <!-- ═══ DEPARTURE POINTS ═══ -->
+      <div class="page" id="page-departure">
+        <div class="page-header">
+          <h2>&#x1f680; Departure Points</h2>
+          <p>Departure points are physical terminals in the world where players interact to start traveling. Link them to arrival points and set travel costs.</p>
+        </div>
+        <div class="btn-row" style="margin-bottom: 16px;">
+          <button class="btn-primary" onclick="openDepartureModal()">+ Add Departure Point</button>
+        </div>
+        <div id="departureList"></div>
+        <div class="empty-state hidden" id="departureEmpty">
+          <div class="empty-icon">&#x1f680;</div>
+          <p>No departure points yet. Add one to create travel terminals on your servers.</p>
+          <button class="btn-primary" onclick="openDepartureModal()">+ Add Departure Point</button>
+        </div>
+      </div>
+
+      <!-- ═══ CURRENCIES ═══ -->
+      <div class="page" id="page-currencies">
+        <div class="page-header">
+          <h2>&#x1f4b0; Currencies</h2>
+          <p>Define payment methods for travel. Map in-game items to currency values so players can pay for trips.</p>
+        </div>
+        <div class="btn-row" style="margin-bottom: 16px;">
+          <button class="btn-primary" onclick="openCurrencyModal()">+ Add Currency</button>
+        </div>
+
+        <!-- Quick-Add Presets -->
+        <div class="card" style="margin-bottom:16px;" id="currencyPresetsCard">
+          <div class="card-header"><h3>&#x26a1; Quick-Add Presets</h3><span class="badge">Click to add</span></div>
+          <p style="font-size:12px; color:#888; margin-bottom:12px;">Instantly add a pre-configured currency with all item values already set.</p>
+          <div class="preset-grid" id="currencyPresets"></div>
+        </div>
+
+        <div id="currencyList"></div>
+        <div class="empty-state hidden" id="currencyEmpty">
+          <div class="empty-icon">&#x1f4b0;</div>
+          <p>No currencies configured. Use the quick-add presets above or add a custom currency.</p>
+          <button class="btn-primary" onclick="openCurrencyModal()">+ Add Currency</button>
+        </div>
+      </div>
+
+      <!-- ═══ SETTINGS ═══ -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <h2>&#x2699;&#xfe0f; Advanced Settings</h2>
+          <p>Fine-tune logging and advanced options.</p>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Logging</h3><span class="badge">Server-side</span></div>
+          <div class="settings-grid">
+            <div>
+              <label for="logFile">File Log Level <i class="info-icon" title="Controls how much detail is written to the MapLink server log file. Higher = more verbose.">?</i></label>
+              <select id="logFile">
+                <option value="0">0 — Off</option>
+                <option value="1">1 — Errors Only</option>
+                <option value="2">2 — Warnings</option>
+                <option value="3">3 — Info (Default)</option>
+                <option value="4">4 — Debug</option>
+              </select>
+            </div>
+            <div>
+              <label for="logAPI">API Log Level <i class="info-icon" title="Controls logging verbosity for UFramework API calls (load/save globals).">?</i></label>
+              <select id="logAPI">
+                <option value="0">0 — Off</option>
+                <option value="1">1 — Errors Only</option>
+                <option value="2">2 — Warnings (Default)</option>
+                <option value="3">3 — Info</option>
+                <option value="4">4 — Debug</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Save Bar -->
+  <div class="save-bar" id="saveBar">
+    <span class="unsaved-text">&#x26a0;&#xfe0f; You have unsaved changes</span>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="reloadConfig()">Discard Changes</button>
+      <button class="btn-primary" id="saveBtn" onclick="saveConfig()">&#x1f4be; Save Configuration</button>
+    </div>
+  </div>
+
+  <!-- Status Toast -->
+  <div id="statusBar" class="status-bar"></div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  MODALS                                                     -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+
+  <!-- Server Modal -->
+  <div class="modal-overlay" id="serverModal">
+    <div class="modal" style="min-width:520px;">
+      <h3 id="serverModalTitle">Add Server</h3>
+      <input type="hidden" id="serverEditIdx" value="-1">
+      <div class="settings-grid">
+        <div class="full-width">
+          <label for="srv_name">Server Name (Unique ID) * <i class="info-icon" title="Must match the Server ID in your UFramework global config. Used everywhere to reference this server.">?</i></label>
+          <input type="text" id="srv_name" placeholder="e.g. Chernarus-PVE">
+          <div class="field-error" id="srv_name_err">Server name is required and must be unique.</div>
+        </div>
+        <div>
+          <label for="srv_map">Map / World * <i class="info-icon" title="Pick a known map or choose 'Custom' and type the world name below.">?</i></label>
+          <select id="srv_map">
+            <option value="">Select a map...</option>
+            <optgroup label="Official Maps">
+              <option value="chernarusplus">Chernarus</option>
+              <option value="enoch">Livonia</option>
+              <option value="sakhal">Sakhal</option>
+            </optgroup>
+            <optgroup label="Community Maps">
+              <option value="alteria">Alteria</option>
+              <option value="anastara">Anastara</option>
+              <option value="arland">Arland</option>
+              <option value="arsteinen">Arsteinen</option>
+              <option value="banov">Banov</option>
+              <option value="bitterroot">Bitterroot</option>
+              <option value="chiemsee">Chiemsee</option>
+              <option value="chiemseewinter">Chiemsee Winter</option>
+              <option value="deerisle">Deer Isle</option>
+              <option value="esseker">Esseker</option>
+              <option value="exclusionzone">Exclusion Zone</option>
+              <option value="greencounty">Green County</option>
+              <option value="iztek">Iztek</option>
+              <option value="lux">Lux</option>
+              <option value="melkart">Melkart</option>
+              <option value="namalsk">Namalsk</option>
+              <option value="nordic">Nordic</option>
+              <option value="nyheim">Nyheim</option>
+              <option value="pnw">Pacific Northwest</option>
+              <option value="pripyat">Pripyat</option>
+              <option value="rostow">Rostow</option>
+              <option value="stuartisland">Stuart Island</option>
+              <option value="swansisland">Swans Island</option>
+              <option value="takistanplus">Takistan</option>
+              <option value="utes">Utes</option>
+              <option value="valning">Valning</option>
+              <option value="vela">Vela</option>
+              <option value="yiprit">Yiprit</option>
+              <option value="zagoria">Zagoria</option>
+            </optgroup>
+            <option value="__custom__">Custom (enter below)...</option>
+          </select>
+          <input type="text" id="srv_map_custom" placeholder="Custom world name (e.g. mymap)" style="margin-top:-8px; display:none;">
+        </div>
+        <div>
+          <label for="srv_ip">IP Address *</label>
+          <input type="text" id="srv_ip" placeholder="e.g. 192.168.1.100">
+          <div class="field-error" id="srv_ip_err">Enter a valid IP address or hostname.</div>
+        </div>
+        <div>
+          <label for="srv_port">Game Port</label>
+          <input type="number" id="srv_port" value="2302" min="1" max="65535">
+        </div>
+        <div>
+          <label for="srv_qport">Query Port <i class="info-icon" title="Steam query port. Set to 0 to disable server status polling.">?</i></label>
+          <input type="number" id="srv_qport" value="27016" min="0" max="65535">
+        </div>
+        <div>
+          <label for="srv_pass">Password</label>
+          <input type="password" id="srv_pass" placeholder="Leave empty if none">
+        </div>
+        <div class="full-width">
+          <label for="srv_respawn">Respawn Redirect Server <i class="info-icon" title="When a player dies on this server, they'll be sent to the selected server instead of respawning locally.">?</i></label>
+          <select id="srv_respawn"><option value="">None (stay on this server)</option></select>
+        </div>
+      </div>
+      <h4 style="font-size:14px; margin: 16px 0 10px; color:#ccc;">&#x1f6ab; Item Blacklist</h4>
+      <p style="font-size:12px; color:#666; margin-bottom:10px;">Items matching these patterns cannot be transferred TO this server. Uses partial name matching (e.g. "M4A1" blocks M4A1, M4A1_Green, etc.) and inheritance matching (e.g. "Rifle_Base" blocks all rifles).</p>
+      <div id="srvBlacklistItems"></div>
+      <button class="btn-secondary btn-sm" onclick="addBlacklistItem()" style="margin-top:8px;">+ Add Blacklist Entry</button>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('serverModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveServer()">Save Server</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrival Point Modal -->
+  <div class="modal-overlay" id="arrivalModal">
+    <div class="modal" style="min-width:600px; max-width:750px;">
+      <h3 id="arrivalModalTitle">Add Arrival Point</h3>
+      <input type="hidden" id="arrivalEditIdx" value="-1">
+      <div>
+        <label for="arr_name">Arrival Point Name (Unique ID) * <i class="info-icon" title="Referenced by departure points to define where players travel to. Must be unique across all arrival points.">?</i></label>
+        <input type="text" id="arr_name" placeholder="e.g. ChernarusAirfield">
+        <div class="field-error" id="arr_name_err">Name is required and must be unique.</div>
+      </div>
+      <h4 style="font-size:14px; margin: 16px 0 10px; color:#ccc;">Spawn Points by Server</h4>
+      <p style="font-size:12px; color:#666; margin-bottom:12px;">Define where players appear on each server when traveling to this arrival point. Add one spawn point per server.</p>
+      <div id="arrSpawnPointsList"></div>
+      <button class="btn-secondary btn-sm" onclick="addArrivalSpawnPoint()" style="margin-top:8px;">+ Add Spawn Point for Server</button>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('arrivalModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveArrivalPoint()">Save Arrival Point</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Departure Point Modal -->
+  <div class="modal-overlay" id="departureModal">
+    <div class="modal" style="min-width:620px; max-width:780px;">
+      <h3 id="departureModalTitle">Add Departure Point</h3>
+      <input type="hidden" id="depEditIdx" value="-1">
+      <div class="settings-grid">
+        <div class="full-width">
+          <label for="dep_display">Display Name * <i class="info-icon" title="The name players see when they interact with this departure terminal.">?</i></label>
+          <input type="text" id="dep_display" placeholder="e.g. NWAF Terminal">
+          <div class="field-error" id="dep_display_err">Display name is required.</div>
+        </div>
+        <div>
+          <label for="dep_server">Server *</label>
+          <select id="dep_server"><option value="">Select server...</option></select>
+          <div class="field-error" id="dep_server_err">Select a server.</div>
+        </div>
+        <div>
+          <label for="dep_terminal">Terminal Type <i class="info-icon" title="The DayZ entity class name to match for this departure point. Defaults to the MapLink Hive Terminal.">?</i></label>
+          <input type="text" id="dep_terminal" placeholder="e.g. Hive_Terminal" value="Hive_Terminal">
+        </div>
+        <div>
+          <label for="dep_sz">Safe Zone Radius (m) <i class="info-icon" title="Creates a PvP-safe bubble around this terminal. 0 = disabled.">?</i></label>
+          <input type="number" id="dep_sz" value="0" min="0">
+        </div>
+        <div>
+          <label for="dep_szcd">Safe Zone Cooldown (s) <i class="info-icon" title="How many seconds after leaving the safe zone before it can re-activate for the player.">?</i></label>
+          <input type="number" id="dep_szcd" value="0" min="0">
+        </div>
+      </div>
+      <div style="margin-top:4px;">
+        <label>World Position</label>
+        <div class="row">
+          <div class="col"><label style="font-size:11px;">X</label><input type="number" id="dep_posX" step="0.1" value="0"></div>
+          <div class="col"><label style="font-size:11px;">Y (0 = auto)</label><input type="number" id="dep_posY" step="0.1" value="0"></div>
+          <div class="col"><label style="font-size:11px;">Z</label><input type="number" id="dep_posZ" step="0.1" value="0"></div>
+        </div>
+      </div>
+      <h4 style="font-size:14px; margin: 20px 0 10px; color:#ccc;">&#x1f517; Linked Arrival Points</h4>
+      <p style="font-size:12px; color:#666; margin-bottom:10px;">Choose which destinations players can travel to from this terminal, set costs and icons.</p>
+      <div id="depArrivalLinks"></div>
+      <button class="btn-secondary btn-sm" onclick="addDepartureLink()" style="margin-top:8px;">+ Link Arrival Point</button>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('departureModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveDeparturePoint()">Save Departure Point</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Currency Modal -->
+  <div class="modal-overlay" id="currencyModal">
+    <div class="modal" style="min-width:540px;">
+      <h3 id="currencyModalTitle">Add Currency</h3>
+      <input type="hidden" id="curEditIdx" value="-1">
+      <div class="settings-grid">
+        <div>
+          <label for="cur_id">Currency ID (Unique Number) * <i class="info-icon" title="A numeric ID referenced by departure arrival links. Must be unique across all currencies.">?</i></label>
+          <input type="number" id="cur_id" min="0" value="0">
+          <div class="field-error" id="cur_id_err">ID must be unique.</div>
+        </div>
+        <div>
+          <label for="cur_name">Currency Name *</label>
+          <input type="text" id="cur_name" placeholder="e.g. Rubles">
+          <div class="field-error" id="cur_name_err">Name is required.</div>
+        </div>
+      </div>
+      <label>Icon</label>
+      <div class="icon-grid" id="curIconGrid" style="margin-bottom:12px;"></div>
+      <input type="hidden" id="cur_icon" value="dollar">
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="cur_ruined"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">Accept Ruined Bills</span>
+      </div>
+      <h4 style="font-size:14px; margin: 12px 0 8px; color:#ccc;">&#x1f4b5; Money Values</h4>
+      <p style="font-size:12px; color:#666; margin-bottom:10px;">Map in-game item class names to their currency value.</p>
+      <div id="curMoneyValues"></div>
+      <button class="btn-secondary btn-sm" onclick="addMoneyValue()" style="margin-top:8px;">+ Add Item</button>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('currencyModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveCurrency()">Save Currency</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spawn Position Sub-Modal -->
+  <div class="modal-overlay" id="spawnPosModal">
+    <div class="modal" style="min-width:460px;">
+      <h3>Add Spawn Position</h3>
+      <input type="hidden" id="spawnPosTargetSpIdx" value="-1">
+      <input type="hidden" id="spawnPosEditIdx" value="-1">
+      <div class="settings-grid">
+        <div><label>X Coordinate *</label><input type="number" id="sp_posX" step="0.1"></div>
+        <div><label>Z Coordinate *</label><input type="number" id="sp_posZ" step="0.1"></div>
+        <div><label>Y (0 = surface height)</label><input type="number" id="sp_posY" step="0.1" value="0"></div>
+        <div><label>Direction (Yaw 0-360)</label><input type="number" id="sp_posD" step="1" value="0" min="0" max="360"></div>
+        <div>
+          <label>Random Radius <i class="info-icon" title="Random offset in meters from the exact spawn position. -1 or 0 = exact.">?</i></label>
+          <input type="number" id="sp_posR" step="0.1" value="-1">
+        </div>
+        <div>
+          <label>Spawn Chance Weight <i class="info-icon" title="Relative probability weight. Higher values make this position more likely to be chosen.">?</i></label>
+          <input type="number" id="sp_posC" step="0.01" value="1" min="0.01">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('spawnPosModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveSpawnPos()">Add Position</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  JAVASCRIPT                                                 -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <script>
+    var GLOBAL_NAME = 'MapLink';
+    var config = null;
+    var originalJSON = '';
+    var isDirty = false;
+
+    var TRAVEL_ICONS = ['plane','boat','car','bus','train','portal','planeticket','ticket','starticket','map','redirect','server','status','status2','go','day','moon','players','queue','multiplequeue'];
+    var MONEY_ICONS = ['dollar','euro','pound','yen','rubble','coins','coins2','planeticket','starticket','ticket'];
+
+    var MAP_NAMES = {
+      'alteria':'Alteria','anastara':'Anastara','arland':'Arland','arsteinen':'Arsteinen',
+      'banov':'Banov','bitterroot':'Bitterroot','chernarusplus':'Chernarus',
+      'chiemsee':'Chiemsee','chiemseewinter':'Chiemsee Winter','deerisle':'Deer Isle',
+      'enoch':'Livonia','esseker':'Esseker','exclusionzone':'Exclusion Zone',
+      'greencounty':'Green County','iztek':'Iztek','lux':'Lux','melkart':'Melkart',
+      'namalsk':'Namalsk','nordic':'Nordic','nyheim':'Nyheim','pnw':'Pacific Northwest',
+      'pripyat':'Pripyat','rostow':'Rostow','sakhal':'Sakhal',
+      'stuartisland':'Stuart Island','swansisland':'Swans Island','takistanplus':'Takistan',
+      'utes':'Utes','valning':'Valning','vela':'Vela','yiprit':'Yiprit','zagoria':'Zagoria'
+    };
+
+    var ICON_EMOJI = {
+      'plane':'\u2708\ufe0f','boat':'\ud83d\udea2','car':'\ud83d\ude97','bus':'\ud83d\ude8c','train':'\ud83d\ude82',
+      'portal':'\ud83c\udf00','planeticket':'\ud83c\udfab','ticket':'\ud83c\udf9f\ufe0f','starticket':'\u2b50',
+      'map':'\ud83d\uddfa\ufe0f','redirect':'\u21a9\ufe0f','server':'\ud83d\udda5\ufe0f','status':'\ud83d\udce1','status2':'\ud83d\udcf6',
+      'go':'\u25b6\ufe0f','day':'\u2600\ufe0f','moon':'\ud83c\udf19','players':'\ud83d\udc65','queue':'\u23f3',
+      'multiplequeue':'\u23f1\ufe0f','dollar':'\ud83d\udcb2','euro':'\u20ac','pound':'\u00a3',
+      'yen':'\u00a5','rubble':'\u20bd','coins':'\ud83e\ude99','coins2':'\ud83d\udcb0'
+    };
+
+    var DEFAULT_CONFIG = {
+      ConfigVersion: "0", LogLevel_File: 3, LogLevel_API: 2,
+      Servers: [], ArrivalPoints: [], DepaturePoints: [], Currencies: []
+    };
+
+    var tempArrivalSpawnPoints = [];
+    var tempDepLinks = [];
+    var tempMoneyValues = [];
+    var tempBlacklistItems = [];
+
+    /* ─── Utilities ─── */
+    function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    function showStatus(type, msg) {
+      var el = document.getElementById('statusBar');
+      el.className = 'status-bar ' + type; el.textContent = msg;
+      if (type === 'success' || type === 'info') setTimeout(function(){ el.className = 'status-bar'; }, 3500);
+    }
+
+    function markDirty() { isDirty = true; document.getElementById('saveBar').classList.add('visible'); document.getElementById('sidebarActions').classList.add('visible'); }
+    function markClean() { isDirty = false; document.getElementById('saveBar').classList.remove('visible'); document.getElementById('sidebarActions').classList.remove('visible'); originalJSON = JSON.stringify(config); }
+    function niceMapName(w) { if(!w)return '\u2014'; var l=(w+'').toLowerCase(); return MAP_NAMES[l]||(w.charAt(0).toUpperCase()+w.slice(1)); }
+    function getIconEmoji(ic) { return ICON_EMOJI[ic] || '\ud83d\udd39'; }
+    function getServerNames() { return (config && config.Servers || []).map(function(s){ return s.Name; }); }
+    function getArrivalNames() { return (config && config.ArrivalPoints || []).map(function(a){ return a.Name; }); }
+    function getCurrencyNames() { return (config && config.Currencies || []).map(function(c){ return {id:c.ID, name:c.Name}; }); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+    function clearErrors() {
+      document.querySelectorAll('.field-error').forEach(function(e){ e.classList.remove('show'); });
+      document.querySelectorAll('input.error, select.error').forEach(function(e){ e.classList.remove('error'); });
+    }
+
+    function showFieldError(inputId, errId) {
+      if (inputId) { var inp = document.getElementById(inputId); if (inp) inp.classList.add('error'); }
+      if (errId) { var err = document.getElementById(errId); if (err) err.classList.add('show'); }
+    }
+
+    /* ─── Navigation ─── */
+    function navigateTo(page) {
+      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.toggle('active', n.dataset.page === page); });
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.toggle('active', p.id === 'page-' + page); });
+
+    }
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
+      item.addEventListener('click', function(){ navigateTo(item.dataset.page); });
+    });
+    document.querySelectorAll('.setup-step[data-target]').forEach(function(step){
+      step.addEventListener('click', function(){ navigateTo(step.dataset.target); });
+    });
+
+    /* ─── Badges & Stats ─── */
+    function updateBadgesAndStats() {
+      if (!config) return;
+      var ns = (config.Servers||[]).length, na = (config.ArrivalPoints||[]).length;
+      var nd = (config.DepaturePoints||[]).length, nc = (config.Currencies||[]).length;
+      var nr = 0;
+      (config.DepaturePoints||[]).forEach(function(dp){ nr += (dp.ArrivalPoints||[]).length; });
+      document.getElementById('badgeServers').textContent = ns;
+      document.getElementById('badgeArrival').textContent = na;
+      document.getElementById('badgeDeparture').textContent = nd;
+      document.getElementById('badgeCurrencies').textContent = nc;
+      document.getElementById('statServers').textContent = ns;
+      document.getElementById('statArrivals').textContent = na;
+      document.getElementById('statDepartures').textContent = nd;
+      document.getElementById('statRoutes').textContent = nr;
+      var steps = document.querySelectorAll('.setup-step');
+      steps[0].classList.toggle('completed', ns > 0);
+      steps[1].classList.toggle('completed', na > 0);
+      steps[2].classList.toggle('completed', nd > 0);
+      steps[3].classList.toggle('completed', nc > 0);
+      updateRouteOverview();
+    }
+
+    /* ─── Route Overview ─── */
+    function updateRouteOverview() {
+      var c = document.getElementById('routeOverview');
+      if (!config || !config.DepaturePoints || config.DepaturePoints.length === 0) {
+        c.innerHTML = '<div class="empty-state"><div class="empty-icon">\ud83d\uddfa\ufe0f</div><p>No routes configured yet. Add departure points and link them to arrival points to see your travel network here.</p></div>';
+        return;
+      }
+      var h = '';
+      config.DepaturePoints.forEach(function(dp){
+        (dp.ArrivalPoints||[]).forEach(function(link){
+          var curName = '\u2014';
+          if (config.Currencies) {
+            for (var i = 0; i < config.Currencies.length; i++) {
+              if (config.Currencies[i].ID === link.AcceptedCurrencyId) { curName = config.Currencies[i].Name; break; }
+            }
+          }
+          h += '<div class="route-visual">' +
+            '<div class="route-from"><div class="route-label">From</div><div class="route-value">' + escapeHtml(dp.DisplayName) + '</div><div class="route-meta">Server: ' + escapeHtml(dp.ServerName||'\u2014') + '</div></div>' +
+            '<div class="route-arrow">' + getIconEmoji(link.Icon||'plane') + ' \u2192</div>' +
+            '<div class="route-to"><div class="route-label">To</div><div class="route-value">' + escapeHtml(link.ArrivalPointName) + '</div><div class="route-meta">Cost: ' + (link.Cost||0) + ' ' + escapeHtml(curName) + ' \u00b7 Wait: ' + (link.TransitionWaitTime||0) + 's</div></div>' +
+          '</div>';
+        });
+      });
+      c.innerHTML = h;
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  SERVERS                                    */
+    /* ═══════════════════════════════════════════ */
+    function renderBlacklistItems() {
+      var c = document.getElementById('srvBlacklistItems');
+      if (tempBlacklistItems.length === 0) {
+        c.innerHTML = '<div style="color:#555; font-size:12px; padding:8px;">No blacklisted items. Players can transfer any items to this server.</div>';
+        return;
+      }
+      var h = '';
+      tempBlacklistItems.forEach(function(item, idx){
+        h += '<div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">';
+        h += '<input type="text" class="bl-item" data-idx="'+idx+'" value="'+escapeHtml(item)+'" placeholder="Item class name pattern (e.g. M4A1, Rifle_Base)" style="flex:1; margin-bottom:0;">';
+        h += '<button class="btn-danger btn-icon btn-sm" onclick="removeBlacklistItem('+idx+')">&#x1f5d1;&#xfe0f;</button></div>';
+      });
+      c.innerHTML = h;
+      c.querySelectorAll('.bl-item').forEach(function(inp){
+        inp.addEventListener('input', function(){ tempBlacklistItems[parseInt(inp.dataset.idx)] = inp.value; });
+      });
+    }
+
+    function addBlacklistItem() {
+      tempBlacklistItems.push('');
+      renderBlacklistItems();
+    }
+    function removeBlacklistItem(i) {
+      tempBlacklistItems.splice(i, 1);
+      renderBlacklistItems();
+    }
+
+    function renderServers() {
+      var list = document.getElementById('serverList'), empty = document.getElementById('serversEmpty');
+      if (!config.Servers || config.Servers.length === 0) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      var h = '';
+      config.Servers.forEach(function(srv, idx){
+        var blCount = (srv.ItemBlacklist||[]).length;
+        var blText = blCount > 0 ? ' \u00b7 \ud83d\udeab ' + blCount + ' blacklisted' : '';
+        h += '<div class="item-row draggable" draggable="true" data-type="server" data-idx="' + idx + '">' +
+          '<span class="drag-handle" title="Drag to reorder">\u2630</span>' +
+          '<div class="item-icon" style="background:#1a3050; color:#64b5f6;">\ud83d\udda5\ufe0f</div>' +
+          '<div class="item-info"><div class="item-name">' + escapeHtml(srv.Name) + '</div>' +
+          '<div class="item-meta">' + escapeHtml(niceMapName(srv.Map)) + ' \u00b7 ' + escapeHtml(srv.IP||'\u2014') + ':' + (srv.Port||2302) + (srv.RespawnServer ? ' \u00b7 Respawn \u2192 ' + escapeHtml(srv.RespawnServer) : '') + blText + '</div></div>' +
+          '<div class="item-actions"><button class="btn-ghost btn-sm" onclick="editServer(' + idx + ')">\u270f\ufe0f Edit</button><button class="btn-danger btn-sm" onclick="deleteServer(' + idx + ')">\ud83d\uddd1\ufe0f</button></div></div>';
+      });
+      list.innerHTML = h;
+      initDragDrop(list, 'server');
+    }
+
+    function openServerModal(idx) {
+      clearErrors();
+      var editing = typeof idx === 'number' && idx >= 0;
+      document.getElementById('serverEditIdx').value = editing ? idx : -1;
+      document.getElementById('serverModalTitle').textContent = editing ? 'Edit Server' : 'Add Server';
+      var rSel = document.getElementById('srv_respawn');
+      rSel.innerHTML = '<option value="">None (stay on this server)</option>';
+      getServerNames().forEach(function(name, i){ if(!editing||i!==idx) rSel.innerHTML += '<option value="'+escapeHtml(name)+'">'+escapeHtml(name)+'</option>'; });
+      if (editing) {
+        var s = config.Servers[idx];
+        document.getElementById('srv_name').value = s.Name||'';
+        var mapSel = document.getElementById('srv_map'), found = false;
+        for (var i = 0; i < mapSel.options.length; i++) { if (mapSel.options[i].value === s.Map && s.Map !== '__custom__') { found = true; break; } }
+        if (found) {
+          mapSel.value = s.Map;
+          document.getElementById('srv_map_custom').value = '';
+          document.getElementById('srv_map_custom').style.display = 'none';
+        } else {
+          mapSel.value = '__custom__';
+          document.getElementById('srv_map_custom').value = s.Map||'';
+          document.getElementById('srv_map_custom').style.display = '';
+        }
+        document.getElementById('srv_ip').value = s.IP||'';
+        document.getElementById('srv_port').value = s.Port||2302;
+        document.getElementById('srv_qport').value = s.QueryPort!=null ? s.QueryPort : 27016;
+        document.getElementById('srv_pass').value = s.Password||'';
+        document.getElementById('srv_respawn').value = s.RespawnServer||'';
+        tempBlacklistItems = JSON.parse(JSON.stringify(s.ItemBlacklist||[]));
+      } else {
+        document.getElementById('srv_name').value = '';
+        document.getElementById('srv_map').value = '';
+        document.getElementById('srv_map_custom').value = '';
+        document.getElementById('srv_map_custom').style.display = 'none';
+        document.getElementById('srv_ip').value = '';
+        document.getElementById('srv_port').value = 2302;
+        document.getElementById('srv_qport').value = 27016;
+        document.getElementById('srv_pass').value = '';
+        document.getElementById('srv_respawn').value = '';
+        tempBlacklistItems = [];
+      }
+      renderBlacklistItems();
+      openModal('serverModal');
+    }
+    function editServer(idx) { openServerModal(idx); }
+
+    function saveServer() {
+      clearErrors();
+      var idx = parseInt(document.getElementById('serverEditIdx').value), editing = idx >= 0;
+      var name = document.getElementById('srv_name').value.trim();
+      var mapVal = document.getElementById('srv_map').value;
+      var map = (mapVal === '__custom__') ? document.getElementById('srv_map_custom').value.trim() : mapVal;
+      var ip = document.getElementById('srv_ip').value.trim();
+      var port = parseInt(document.getElementById('srv_port').value)||2302;
+      var qport = parseInt(document.getElementById('srv_qport').value)||0;
+      var pass = document.getElementById('srv_pass').value;
+      var respawn = document.getElementById('srv_respawn').value;
+      var valid = true;
+      if (!name) { showFieldError('srv_name','srv_name_err'); valid = false; }
+      for (var i = 0; i < config.Servers.length; i++) { if (config.Servers[i].Name === name && i !== idx) { showFieldError('srv_name','srv_name_err'); valid = false; break; } }
+      if (!ip || !/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9][a-zA-Z0-9\-]*(\.[a-zA-Z0-9\-]+)+)$/.test(ip)) { showFieldError('srv_ip','srv_ip_err'); valid = false; }
+      if (!valid) return;
+      var oldName = editing ? config.Servers[idx].Name : null;
+      var cleanedBL = tempBlacklistItems.filter(function(item){ return item && item.trim(); }).map(function(item){ return item.trim(); });
+      var srv = { Name:name, Map:map, IP:ip, Port:port, QueryPort:qport, Password:pass, RespawnServer:respawn, ItemBlacklist:cleanedBL };
+      if (editing) { config.Servers[idx] = srv; if (oldName && oldName !== name) renameServerRefs(oldName, name); }
+      else { config.Servers.push(srv); }
+      closeModal('serverModal'); renderServers(); updateBadgesAndStats(); markDirty();
+    }
+
+    function deleteServer(idx) {
+      if (!confirm('Delete server "' + config.Servers[idx].Name + '"?\nThis will remove references from all arrival/departure points.')) return;
+      var name = config.Servers[idx].Name; config.Servers.splice(idx, 1); removeServerRefs(name);
+      renderServers(); updateBadgesAndStats(); markDirty();
+    }
+
+    function renameServerRefs(o, n) {
+      (config.ArrivalPoints||[]).forEach(function(ap){ (ap.SpawnPoints||[]).forEach(function(sp){ if(sp.ServerName===o) sp.ServerName=n; }); });
+      (config.DepaturePoints||[]).forEach(function(dp){ if(dp.ServerName===o) dp.ServerName=n; });
+      config.Servers.forEach(function(s){ if(s.RespawnServer===o) s.RespawnServer=n; });
+    }
+    function removeServerRefs(name) {
+      (config.ArrivalPoints||[]).forEach(function(ap){ ap.SpawnPoints=(ap.SpawnPoints||[]).filter(function(sp){return sp.ServerName!==name;}); });
+      (config.DepaturePoints||[]).forEach(function(dp){ if(dp.ServerName===name) dp.ServerName=''; });
+      config.Servers.forEach(function(s){ if(s.RespawnServer===name) s.RespawnServer=''; });
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  ARRIVAL POINTS                             */
+    /* ═══════════════════════════════════════════ */
+    function renderArrivalPoints() {
+      var c = document.getElementById('arrivalList'), empty = document.getElementById('arrivalEmpty');
+      if (!config.ArrivalPoints || config.ArrivalPoints.length === 0) { c.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      var h = '';
+      config.ArrivalPoints.forEach(function(ap, idx){
+        var spCount = (ap.SpawnPoints||[]).length;
+        var srvList = (ap.SpawnPoints||[]).map(function(sp){return sp.ServerName||'?';}).join(', ');
+        h += '<div class="item-row draggable" draggable="true" data-type="arrival" data-idx="' + idx + '">' +
+          '<span class="drag-handle">\u2630</span>' +
+          '<div class="item-icon" style="background:#1b3a1b; color:#4caf50;">\ud83d\udccd</div>' +
+          '<div class="item-info"><div class="item-name">' + escapeHtml(ap.Name) + '</div>' +
+          '<div class="item-meta">' + spCount + ' spawn point(s) \u00b7 Servers: ' + escapeHtml(srvList||'none') + '</div></div>' +
+          '<div class="item-actions"><button class="btn-ghost btn-sm" onclick="editArrivalPoint(' + idx + ')">\u270f\ufe0f Edit</button><button class="btn-danger btn-sm" onclick="deleteArrivalPoint(' + idx + ')">\ud83d\uddd1\ufe0f</button></div></div>';
+      });
+      c.innerHTML = h;
+      initDragDrop(c, 'arrival');
+    }
+
+    function openArrivalModal(idx) {
+      clearErrors();
+      var editing = typeof idx === 'number' && idx >= 0;
+      document.getElementById('arrivalEditIdx').value = editing ? idx : -1;
+      document.getElementById('arrivalModalTitle').textContent = editing ? 'Edit Arrival Point' : 'Add Arrival Point';
+      if (editing) {
+        var ap = config.ArrivalPoints[idx];
+        document.getElementById('arr_name').value = ap.Name||'';
+        tempArrivalSpawnPoints = JSON.parse(JSON.stringify(ap.SpawnPoints||[]));
+      } else {
+        document.getElementById('arr_name').value = '';
+        tempArrivalSpawnPoints = [];
+      }
+      renderArrivalSpawnPointsForm();
+      openModal('arrivalModal');
+    }
+    function editArrivalPoint(idx) { openArrivalModal(idx); }
+
+    function renderArrivalSpawnPointsForm() {
+      var c = document.getElementById('arrSpawnPointsList');
+      if (tempArrivalSpawnPoints.length === 0) {
+        c.innerHTML = '<div style="color:#555; font-size:12px; padding:8px;">No spawn points yet. Click "+ Add Spawn Point for Server" below.</div>';
+        return;
+      }
+      var h = '';
+      tempArrivalSpawnPoints.forEach(function(sp, spIdx) {
+        var posCount = (sp.Positions||[]).length;
+        h += '<div style="background:#1e1e1e; border:1px solid #333; border-radius:6px; padding:12px; margin-bottom:8px;">';
+        h += '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">';
+        h += '<span style="font-weight:600; font-size:13px;">\ud83d\udda5\ufe0f ' + escapeHtml(sp.ServerName||'Unassigned') + '</span>';
+        h += '<button class="btn-danger btn-sm" onclick="removeArrivalSpawnPoint(' + spIdx + ')">\ud83d\uddd1\ufe0f Remove</button></div>';
+        h += '<div class="settings-grid" style="gap:6px 12px;">';
+        h += '<div><label style="font-size:11px;">Server</label><select class="arr-sp-server" data-spidx="' + spIdx + '" style="margin-bottom:4px;">' + serverOptions(sp.ServerName) + '</select></div>';
+        h += '<div><label style="font-size:11px;">Display Name</label><input type="text" class="arr-sp-display" data-spidx="' + spIdx + '" value="' + escapeHtml(sp.DisplayName||'') + '" placeholder="e.g. Chernarus Airfield" style="margin-bottom:4px;"></div>';
+        h += '<div><label style="font-size:11px;">Protection Time (sec)</label><input type="number" class="arr-sp-prot" data-spidx="' + spIdx + '" value="' + (sp.ProtectionTime||0) + '" min="0" style="margin-bottom:4px;"></div>';
+        h += '<div><label style="font-size:11px;">Positions (' + posCount + ')</label>';
+        h += '<button class="btn-secondary btn-sm" onclick="openSpawnPosModal(' + spIdx + ')" style="margin-top:2px;">+ Add Position</button></div>';
+        h += '</div>';
+        if (sp.Positions && sp.Positions.length > 0) {
+          h += '<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:4px;">';
+          sp.Positions.forEach(function(pos, posIdx) {
+            h += '<span class="pos-tag">X:' + (pos.X||0).toFixed(1) + ' Y:' + (pos.Y||0).toFixed(1) + ' Z:' + (pos.Z||0).toFixed(1);
+            if (pos.Radius > 0) h += ' R:' + pos.Radius;
+            h += ' <span class="pos-remove" onclick="removeSpawnPos(' + spIdx + ',' + posIdx + ')">\u00d7</span></span>';
+          });
+          h += '</div>';
+        }
+        h += '</div>';
+      });
+      c.innerHTML = h;
+      c.querySelectorAll('.arr-sp-server').forEach(function(sel){
+        sel.addEventListener('change', function(){ tempArrivalSpawnPoints[parseInt(sel.dataset.spidx)].ServerName = sel.value; });
+      });
+      c.querySelectorAll('.arr-sp-display').forEach(function(inp){
+        inp.addEventListener('input', function(){ tempArrivalSpawnPoints[parseInt(inp.dataset.spidx)].DisplayName = inp.value; });
+      });
+      c.querySelectorAll('.arr-sp-prot').forEach(function(inp){
+        inp.addEventListener('input', function(){ tempArrivalSpawnPoints[parseInt(inp.dataset.spidx)].ProtectionTime = parseInt(inp.value)||0; });
+      });
+    }
+
+    function serverOptions(sel) {
+      var h = '<option value="">Select server...</option>';
+      getServerNames().forEach(function(n){ h += '<option value="'+escapeHtml(n)+'"'+(n===sel?' selected':'')+'>'+escapeHtml(n)+'</option>'; });
+      return h;
+    }
+
+    function addArrivalSpawnPoint() {
+      tempArrivalSpawnPoints.push({ ServerName:'', DisplayName:'', ProtectionTime:30, Positions:[] });
+      renderArrivalSpawnPointsForm();
+    }
+    function removeArrivalSpawnPoint(i) { tempArrivalSpawnPoints.splice(i, 1); renderArrivalSpawnPointsForm(); }
+
+    function openSpawnPosModal(spIdx, posIdx) {
+      document.getElementById('spawnPosTargetSpIdx').value = spIdx;
+      document.getElementById('spawnPosEditIdx').value = typeof posIdx === 'number' ? posIdx : -1;
+      if (typeof posIdx === 'number') {
+        var p = tempArrivalSpawnPoints[spIdx].Positions[posIdx];
+        document.getElementById('sp_posX').value = p.X||0;
+        document.getElementById('sp_posY').value = p.Y||0;
+        document.getElementById('sp_posZ').value = p.Z||0;
+        document.getElementById('sp_posD').value = p.D||0;
+        document.getElementById('sp_posR').value = p.Radius!=null?p.Radius:-1;
+        document.getElementById('sp_posC').value = p.Chance||1;
+      } else {
+        document.getElementById('sp_posX').value = '';
+        document.getElementById('sp_posY').value = 0;
+        document.getElementById('sp_posZ').value = '';
+        document.getElementById('sp_posD').value = 0;
+        document.getElementById('sp_posR').value = -1;
+        document.getElementById('sp_posC').value = 1;
+      }
+      openModal('spawnPosModal');
+    }
+
+    function saveSpawnPos() {
+      var spIdx = parseInt(document.getElementById('spawnPosTargetSpIdx').value);
+      var posIdx = parseInt(document.getElementById('spawnPosEditIdx').value);
+      var pos = {
+        X: parseFloat(document.getElementById('sp_posX').value)||0,
+        Y: parseFloat(document.getElementById('sp_posY').value)||0,
+        Z: parseFloat(document.getElementById('sp_posZ').value)||0,
+        D: parseFloat(document.getElementById('sp_posD').value)||0,
+        Radius: parseFloat(document.getElementById('sp_posR').value),
+        Chance: parseFloat(document.getElementById('sp_posC').value)||1
+      };
+      if (isNaN(pos.Radius)) pos.Radius = -1;
+      if (!tempArrivalSpawnPoints[spIdx].Positions) tempArrivalSpawnPoints[spIdx].Positions = [];
+      if (posIdx >= 0) tempArrivalSpawnPoints[spIdx].Positions[posIdx] = pos;
+      else tempArrivalSpawnPoints[spIdx].Positions.push(pos);
+      closeModal('spawnPosModal');
+      renderArrivalSpawnPointsForm();
+    }
+
+    function removeSpawnPos(spIdx, posIdx) { tempArrivalSpawnPoints[spIdx].Positions.splice(posIdx, 1); renderArrivalSpawnPointsForm(); }
+
+    function saveArrivalPoint() {
+      clearErrors();
+      var idx = parseInt(document.getElementById('arrivalEditIdx').value), editing = idx >= 0;
+      var name = document.getElementById('arr_name').value.trim();
+      if (!name) { showFieldError('arr_name','arr_name_err'); return; }
+      for (var i = 0; i < config.ArrivalPoints.length; i++) { if (config.ArrivalPoints[i].Name === name && i !== idx) { showFieldError('arr_name','arr_name_err'); return; } }
+      var oldName = editing ? config.ArrivalPoints[idx].Name : null;
+      var ap = { Name: name, SpawnPoints: JSON.parse(JSON.stringify(tempArrivalSpawnPoints)) };
+      if (editing) { config.ArrivalPoints[idx] = ap; if (oldName && oldName!==name) renameArrivalRefs(oldName, name); }
+      else { config.ArrivalPoints.push(ap); }
+      closeModal('arrivalModal'); renderArrivalPoints(); updateBadgesAndStats(); markDirty();
+    }
+
+    function deleteArrivalPoint(idx) {
+      if (!confirm('Delete arrival point "' + config.ArrivalPoints[idx].Name + '"?\nAll references from departure points will be removed.')) return;
+      var name = config.ArrivalPoints[idx].Name; config.ArrivalPoints.splice(idx, 1); removeArrivalRefs(name);
+      renderArrivalPoints(); updateBadgesAndStats(); markDirty();
+    }
+
+    function renameArrivalRefs(o, n) { (config.DepaturePoints||[]).forEach(function(dp){ (dp.ArrivalPoints||[]).forEach(function(l){if(l.ArrivalPointName===o) l.ArrivalPointName=n;}); }); }
+    function removeArrivalRefs(name) { (config.DepaturePoints||[]).forEach(function(dp){ dp.ArrivalPoints=(dp.ArrivalPoints||[]).filter(function(l){return l.ArrivalPointName!==name;}); }); }
+
+    /* ═══════════════════════════════════════════ */
+    /*  DEPARTURE POINTS                           */
+    /* ═══════════════════════════════════════════ */
+    function renderDeparturePoints() {
+      var c = document.getElementById('departureList'), empty = document.getElementById('departureEmpty');
+      if (!config.DepaturePoints || config.DepaturePoints.length === 0) { c.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      var h = '';
+      config.DepaturePoints.forEach(function(dp, idx){
+        var linkCount = (dp.ArrivalPoints||[]).length;
+        var linkNames = (dp.ArrivalPoints||[]).map(function(l){return l.ArrivalPointName;}).join(', ');
+        var pos = dp.Position;
+        var posStr = pos ? (pos[0]||0).toFixed(0)+', '+(pos[1]||0).toFixed(0)+', '+(pos[2]||0).toFixed(0) : '\u2014';
+        h += '<div class="item-row draggable" draggable="true" data-type="departure" data-idx="' + idx + '">' +
+          '<span class="drag-handle">\u2630</span>' +
+          '<div class="item-icon" style="background:#2a1a3a; color:#bb86fc;">\ud83d\ude80</div>' +
+          '<div class="item-info"><div class="item-name">' + escapeHtml(dp.DisplayName||'Unnamed') + '</div>' +
+          '<div class="item-meta">Server: ' + escapeHtml(dp.ServerName||'\u2014') + ' \u00b7 Pos: ' + posStr + ' \u00b7 ' + linkCount + ' dest(s)' + (linkNames ? ': '+escapeHtml(linkNames) : '') + '</div></div>' +
+          '<div class="item-actions"><button class="btn-ghost btn-sm" onclick="editDeparturePoint(' + idx + ')">\u270f\ufe0f Edit</button><button class="btn-danger btn-sm" onclick="deleteDeparturePoint(' + idx + ')">\ud83d\uddd1\ufe0f</button></div></div>';
+      });
+      c.innerHTML = h;
+      initDragDrop(c, 'departure');
+    }
+
+    function openDepartureModal(idx) {
+      clearErrors();
+      var editing = typeof idx === 'number' && idx >= 0;
+      document.getElementById('depEditIdx').value = editing ? idx : -1;
+      document.getElementById('departureModalTitle').textContent = editing ? 'Edit Departure Point' : 'Add Departure Point';
+      var sel = document.getElementById('dep_server');
+      sel.innerHTML = '<option value="">Select server...</option>';
+      getServerNames().forEach(function(n){ sel.innerHTML += '<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>'; });
+      if (editing) {
+        var dp = config.DepaturePoints[idx];
+        document.getElementById('dep_display').value = dp.DisplayName||'';
+        document.getElementById('dep_server').value = dp.ServerName||'';
+        document.getElementById('dep_terminal').value = dp.TerminalType||'Hive_Terminal';
+        document.getElementById('dep_sz').value = dp.SafeZoneRadius||0;
+        document.getElementById('dep_szcd').value = dp.SafeZoneCoolDown||0;
+        var pos = dp.Position||[0,0,0];
+        document.getElementById('dep_posX').value = pos[0]||0;
+        document.getElementById('dep_posY').value = pos[1]||0;
+        document.getElementById('dep_posZ').value = pos[2]||0;
+        tempDepLinks = JSON.parse(JSON.stringify(dp.ArrivalPoints||[]));
+      } else {
+        document.getElementById('dep_display').value = '';
+        document.getElementById('dep_server').value = '';
+        document.getElementById('dep_terminal').value = 'Hive_Terminal';
+        document.getElementById('dep_sz').value = 0;
+        document.getElementById('dep_szcd').value = 0;
+        document.getElementById('dep_posX').value = 0;
+        document.getElementById('dep_posY').value = 0;
+        document.getElementById('dep_posZ').value = 0;
+        tempDepLinks = [];
+      }
+      renderDepartureLinks();
+      openModal('departureModal');
+    }
+    function editDeparturePoint(idx) { openDepartureModal(idx); }
+
+    function renderDepartureLinks() {
+      var c = document.getElementById('depArrivalLinks');
+      if (tempDepLinks.length === 0) {
+        c.innerHTML = '<div style="color:#555; font-size:12px; padding:8px;">No linked arrival points. Click "+ Link Arrival Point" to add destinations.</div>';
+        return;
+      }
+      var currencies = getCurrencyNames();
+      var h = '';
+      tempDepLinks.forEach(function(link, lIdx) {
+        h += '<div class="link-connector">';
+        h += '<div style="flex:1;"><div class="settings-grid" style="gap:6px 12px;">';
+        h += '<div><label style="font-size:11px;">Destination</label><select class="dep-link-arr" data-lidx="'+lIdx+'" style="margin-bottom:4px;">'+arrivalOptions(link.ArrivalPointName)+'</select></div>';
+        h += '<div><label style="font-size:11px;">Icon</label><select class="dep-link-icon" data-lidx="'+lIdx+'" style="margin-bottom:4px;">';
+        TRAVEL_ICONS.forEach(function(ic){ h += '<option value="'+ic+'"'+(link.Icon===ic?' selected':'')+'>'+getIconEmoji(ic)+' '+ic+'</option>'; });
+        h += '</select></div>';
+        h += '<div><label style="font-size:11px;">Wait Time (sec)</label><input type="number" class="dep-link-wait" data-lidx="'+lIdx+'" value="'+(link.TransitionWaitTime||0)+'" min="0" style="margin-bottom:4px;"></div>';
+        h += '<div><label style="font-size:11px;">Cost</label><input type="number" class="dep-link-cost" data-lidx="'+lIdx+'" value="'+(link.Cost||0)+'" min="0" style="margin-bottom:4px;"></div>';
+        h += '<div><label style="font-size:11px;">Currency</label><select class="dep-link-cur" data-lidx="'+lIdx+'" style="margin-bottom:4px;">';
+        h += '<option value="0">None / Default</option>';
+        currencies.forEach(function(cur){ h += '<option value="'+cur.id+'"'+(link.AcceptedCurrencyId===cur.id?' selected':'')+'>'+escapeHtml(cur.name)+' (ID: '+cur.id+')</option>'; });
+        h += '</select></div>';
+        h += '</div></div>';
+        h += '<button class="btn-danger btn-icon" onclick="removeDepartureLink('+lIdx+')">\ud83d\uddd1\ufe0f</button>';
+        h += '</div>';
+      });
+      c.innerHTML = h;
+      c.querySelectorAll('.dep-link-arr').forEach(function(s){ s.addEventListener('change', function(){ tempDepLinks[parseInt(s.dataset.lidx)].ArrivalPointName=s.value; }); });
+      c.querySelectorAll('.dep-link-icon').forEach(function(s){ s.addEventListener('change', function(){ tempDepLinks[parseInt(s.dataset.lidx)].Icon=s.value; }); });
+      c.querySelectorAll('.dep-link-wait').forEach(function(inp){ inp.addEventListener('input', function(){ tempDepLinks[parseInt(inp.dataset.lidx)].TransitionWaitTime=parseInt(inp.value)||0; }); });
+      c.querySelectorAll('.dep-link-cost').forEach(function(inp){ inp.addEventListener('input', function(){ tempDepLinks[parseInt(inp.dataset.lidx)].Cost=parseInt(inp.value)||0; }); });
+      c.querySelectorAll('.dep-link-cur').forEach(function(s){ s.addEventListener('change', function(){ tempDepLinks[parseInt(s.dataset.lidx)].AcceptedCurrencyId=parseInt(s.value)||0; }); });
+    }
+
+    function arrivalOptions(sel) {
+      var h = '<option value="">Select arrival point...</option>';
+      getArrivalNames().forEach(function(n){ h += '<option value="'+escapeHtml(n)+'"'+(n===sel?' selected':'')+'>'+escapeHtml(n)+'</option>'; });
+      return h;
+    }
+
+    function addDepartureLink() {
+      tempDepLinks.push({ ArrivalPointName:'', Icon:'plane', TransitionWaitTime:10, Cost:0, AcceptedCurrencyId:0 });
+      renderDepartureLinks();
+    }
+    function removeDepartureLink(i) { tempDepLinks.splice(i, 1); renderDepartureLinks(); }
+
+    function saveDeparturePoint() {
+      clearErrors();
+      var idx = parseInt(document.getElementById('depEditIdx').value), editing = idx >= 0;
+      var displayName = document.getElementById('dep_display').value.trim();
+      var serverName = document.getElementById('dep_server').value;
+      var valid = true;
+      if (!displayName) { showFieldError('dep_display','dep_display_err'); valid = false; }
+      if (!serverName) { showFieldError('dep_server','dep_server_err'); valid = false; }
+      if (!valid) return;
+      var dp = {
+        DisplayName: displayName, ServerName: serverName,
+        SafeZoneRadius: parseInt(document.getElementById('dep_sz').value)||0,
+        SafeZoneCoolDown: parseInt(document.getElementById('dep_szcd').value)||0,
+        TerminalType: document.getElementById('dep_terminal').value.trim()||'Hive_Terminal',
+        Position: [ parseFloat(document.getElementById('dep_posX').value)||0, parseFloat(document.getElementById('dep_posY').value)||0, parseFloat(document.getElementById('dep_posZ').value)||0 ],
+        ArrivalPoints: JSON.parse(JSON.stringify(tempDepLinks))
+      };
+      if (editing) config.DepaturePoints[idx] = dp;
+      else config.DepaturePoints.push(dp);
+      closeModal('departureModal'); renderDeparturePoints(); updateBadgesAndStats(); markDirty();
+    }
+
+    function deleteDeparturePoint(idx) {
+      if (!confirm('Delete departure point "' + config.DepaturePoints[idx].DisplayName + '"?')) return;
+      config.DepaturePoints.splice(idx, 1);
+      renderDeparturePoints(); updateBadgesAndStats(); markDirty();
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  CURRENCIES                                 */
+    /* ═══════════════════════════════════════════ */
+    function renderCurrencies() {
+      var c = document.getElementById('currencyList'), empty = document.getElementById('currencyEmpty');
+      if (!config.Currencies || config.Currencies.length === 0) { c.innerHTML = ''; empty.classList.remove('hidden'); renderCurrencyPresets(); return; }
+      empty.classList.add('hidden');
+      var h = '';
+      config.Currencies.forEach(function(cur, idx){
+        var mvCount = (cur.MoneyValues||[]).length;
+        h += '<div class="item-row draggable" draggable="true" data-type="currency" data-idx="' + idx + '">' +
+          '<span class="drag-handle">\u2630</span>' +
+          '<div class="item-icon" style="background:#3a2e1b; color:#ff9800; font-size:20px;">' + getIconEmoji(cur.Icon||'dollar') + '</div>' +
+          '<div class="item-info"><div class="item-name">' + escapeHtml(cur.Name) + ' <span class="chip blue">ID: '+cur.ID+'</span></div>' +
+          '<div class="item-meta">' + mvCount + ' item(s) mapped' + (cur.CanUseRuinedBills ? ' \u00b7 Accepts ruined' : '') + '</div></div>' +
+          '<div class="item-actions"><button class="btn-ghost btn-sm" onclick="editCurrency('+idx+')">\u270f\ufe0f Edit</button><button class="btn-danger btn-sm" onclick="deleteCurrency('+idx+')">\ud83d\uddd1\ufe0f</button></div></div>';
+      });
+      c.innerHTML = h;
+      initDragDrop(c, 'currency');
+      renderCurrencyPresets();
+    }
+
+    function openCurrencyModal(idx) {
+      clearErrors();
+      var editing = typeof idx === 'number' && idx >= 0;
+      document.getElementById('curEditIdx').value = editing ? idx : -1;
+      document.getElementById('currencyModalTitle').textContent = editing ? 'Edit Currency' : 'Add Currency';
+      var iconGrid = document.getElementById('curIconGrid'), iconHtml = '';
+      MONEY_ICONS.forEach(function(ic){ iconHtml += '<div class="icon-option" data-icon="'+ic+'" onclick="selectCurrencyIcon(\''+ic+'\')"><div class="icon-preview">'+getIconEmoji(ic)+'</div><span>'+ic+'</span></div>'; });
+      iconGrid.innerHTML = iconHtml;
+      if (editing) {
+        var cur = config.Currencies[idx];
+        document.getElementById('cur_id').value = cur.ID;
+        document.getElementById('cur_name').value = cur.Name||'';
+        document.getElementById('cur_icon').value = cur.Icon||'dollar';
+        document.getElementById('cur_ruined').checked = !!cur.CanUseRuinedBills;
+        tempMoneyValues = JSON.parse(JSON.stringify(cur.MoneyValues||[]));
+      } else {
+        var maxId = -1; (config.Currencies||[]).forEach(function(c){if(c.ID>maxId) maxId=c.ID;});
+        document.getElementById('cur_id').value = maxId + 1;
+        document.getElementById('cur_name').value = '';
+        document.getElementById('cur_icon').value = 'dollar';
+        document.getElementById('cur_ruined').checked = false;
+        tempMoneyValues = [];
+      }
+      selectCurrencyIcon(document.getElementById('cur_icon').value);
+      renderMoneyValues();
+      openModal('currencyModal');
+    }
+    function editCurrency(idx) { openCurrencyModal(idx); }
+
+    function selectCurrencyIcon(icon) {
+      document.getElementById('cur_icon').value = icon;
+      document.querySelectorAll('#curIconGrid .icon-option').forEach(function(opt){ opt.classList.toggle('selected', opt.dataset.icon === icon); });
+    }
+
+    function renderMoneyValues() {
+      var c = document.getElementById('curMoneyValues');
+      if (tempMoneyValues.length === 0) { c.innerHTML = '<div style="color:#555; font-size:12px; padding:8px;">No items mapped. Click "+ Add Item" below.</div>'; return; }
+      var h = '';
+      tempMoneyValues.forEach(function(mv, idx){
+        h += '<div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">';
+        h += '<input type="text" class="mv-item" data-idx="'+idx+'" value="'+escapeHtml(mv.Item||'')+'" placeholder="Item class name (e.g. MoneyRuble100)" style="flex:2; margin-bottom:0;">';
+        h += '<input type="number" class="mv-value" data-idx="'+idx+'" value="'+(mv.Value||0)+'" min="0" placeholder="Value" style="flex:1; margin-bottom:0;">';
+        h += '<button class="btn-danger btn-icon btn-sm" onclick="removeMoneyValue('+idx+')">\ud83d\uddd1\ufe0f</button></div>';
+      });
+      c.innerHTML = h;
+      c.querySelectorAll('.mv-item').forEach(function(inp){ inp.addEventListener('input', function(){ tempMoneyValues[parseInt(inp.dataset.idx)].Item=inp.value; }); });
+      c.querySelectorAll('.mv-value').forEach(function(inp){ inp.addEventListener('input', function(){ tempMoneyValues[parseInt(inp.dataset.idx)].Value=parseInt(inp.value)||0; }); });
+    }
+
+    function addMoneyValue() { tempMoneyValues.push({Item:'', Value:1}); renderMoneyValues(); }
+    function removeMoneyValue(i) { tempMoneyValues.splice(i, 1); renderMoneyValues(); }
+
+    function saveCurrency() {
+      clearErrors();
+      var idx = parseInt(document.getElementById('curEditIdx').value), editing = idx >= 0;
+      var id = parseInt(document.getElementById('cur_id').value);
+      var name = document.getElementById('cur_name').value.trim();
+      var icon = document.getElementById('cur_icon').value||'dollar';
+      var ruined = document.getElementById('cur_ruined').checked ? 1 : 0;
+      var valid = true;
+      if (!name) { showFieldError('cur_name','cur_name_err'); valid = false; }
+      for (var i = 0; i < config.Currencies.length; i++) { if(config.Currencies[i].ID===id && i!==idx) { showFieldError('cur_id','cur_id_err'); valid = false; break; } }
+      if (!valid) return;
+      var cleanedMV = tempMoneyValues.filter(function(mv){return mv.Item&&mv.Item.trim();});
+      var cur = { ID:id, Name:name, Icon:icon, CanUseRuinedBills:ruined, MoneyValues:JSON.parse(JSON.stringify(cleanedMV)) };
+      if (editing) config.Currencies[idx] = cur;
+      else config.Currencies.push(cur);
+      closeModal('currencyModal'); renderCurrencies(); updateBadgesAndStats(); markDirty();
+    }
+
+    function deleteCurrency(idx) {
+      if (!confirm('Delete currency "' + config.Currencies[idx].Name + '"?')) return;
+      config.Currencies.splice(idx, 1);
+      renderCurrencies(); updateBadgesAndStats(); markDirty();
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  CURRENCY PRESETS (Quick-Add)                */
+    /* ═══════════════════════════════════════════ */
+    var CURRENCY_PRESETS = [
+      {
+        key: 'rubles', label: '\ud83d\udcb2 Rubles', desc: 'MoneyRuble 1-100 bills',
+        data: { Name:'Rubles', Icon:'dollar', CanUseRuinedBills:1, MoneyValues:[
+          {Item:'MoneyRuble100',Value:100},{Item:'MoneyRuble50',Value:50},{Item:'MoneyRuble25',Value:25},
+          {Item:'MoneyRuble10',Value:10},{Item:'MoneyRuble5',Value:5},{Item:'MoneyRuble1',Value:1}
+        ]}
+      },
+      {
+        key: 'tickets', label: '\ud83c\udf9f\ufe0f Tickets', desc: 'Map-specific travel tickets',
+        data: { Name:'Tickets', Icon:'ticket', CanUseRuinedBills:0, MoneyValues:[
+          {Item:'Chernarus_Ticket',Value:1},{Item:'Livonia_Ticket',Value:1},{Item:'Namalsk_Ticket',Value:1},
+          {Item:'Chiemsee_Ticket',Value:1},{Item:'DeerIsle_Ticket',Value:1},{Item:'Essker_Ticket',Value:1},
+          {Item:'Utes_Ticket',Value:1},{Item:'SwansIsland_Ticket',Value:1}
+        ]}
+      },
+      {
+        key: 'pmcoins', label: '\ud83e\ude99 PM Coins', desc: 'Gold, Silver & Copper coins',
+        data: { Name:'PM Coins', Icon:'coins', CanUseRuinedBills:0, MoneyValues:[
+          {Item:'PM_GoldCoin',Value:1000},{Item:'PM_SilverCoin',Value:100},{Item:'PM_CopperCoin',Value:1}
+        ]}
+      }
+    ];
+
+    function renderCurrencyPresets() {
+      var c = document.getElementById('currencyPresets');
+      var existing = {};
+      (config.Currencies||[]).forEach(function(cur){ existing[cur.Name.toLowerCase()] = true; });
+      var h = '';
+      var anyVisible = false;
+      CURRENCY_PRESETS.forEach(function(preset){
+        var alreadyAdded = existing[preset.data.Name.toLowerCase()];
+        if (alreadyAdded) {
+          h += '<div class="preset-card added"><h4>' + preset.label + ' \u2714</h4><p>' + escapeHtml(preset.desc) + '</p></div>';
+        } else {
+          h += '<div class="preset-card" onclick="quickAddCurrency(\'' + preset.key + '\')"><h4>' + preset.label + '</h4><p>' + escapeHtml(preset.desc) + '</p></div>';
+          anyVisible = true;
+        }
+      });
+      if (!anyVisible) h += '<p style="font-size:12px; color:#555; grid-column:1/-1; text-align:center;">All presets already added.</p>';
+      c.innerHTML = h;
+    }
+
+    function quickAddCurrency(key) {
+      var preset = null;
+      for (var i = 0; i < CURRENCY_PRESETS.length; i++) { if (CURRENCY_PRESETS[i].key === key) { preset = CURRENCY_PRESETS[i]; break; } }
+      if (!preset) return;
+      var maxId = -1;
+      (config.Currencies||[]).forEach(function(c){ if(c.ID > maxId) maxId = c.ID; });
+      var cur = JSON.parse(JSON.stringify(preset.data));
+      cur.ID = maxId + 1;
+      config.Currencies.push(cur);
+      renderCurrencies(); updateBadgesAndStats(); markDirty();
+      showStatus('success', preset.data.Name + ' currency added with ' + preset.data.MoneyValues.length + ' items!');
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  DRAG & DROP REORDERING                     */
+    /* ═══════════════════════════════════════════ */
+    function initDragDrop(container, type) {
+      var items = container.querySelectorAll('.item-row[draggable="true"]');
+      var dragSrc = null;
+      items.forEach(function(item) {
+        item.addEventListener('dragstart', function(e) {
+          dragSrc = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', item.dataset.idx);
+        });
+        item.addEventListener('dragend', function() {
+          item.classList.remove('dragging');
+          items.forEach(function(it){ it.classList.remove('drag-over'); });
+        });
+        item.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          item.classList.add('drag-over');
+        });
+        item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+        item.addEventListener('drop', function(e) {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (!dragSrc || dragSrc === item) return;
+          var fromIdx = parseInt(dragSrc.dataset.idx);
+          var toIdx = parseInt(item.dataset.idx);
+          var arr;
+          if (type === 'server') arr = config.Servers;
+          else if (type === 'arrival') arr = config.ArrivalPoints;
+          else if (type === 'departure') arr = config.DepaturePoints;
+          else if (type === 'currency') arr = config.Currencies;
+          if (!arr) return;
+          var moved = arr.splice(fromIdx, 1)[0];
+          arr.splice(toIdx, 0, moved);
+          if (type === 'server') renderServers();
+          else if (type === 'arrival') renderArrivalPoints();
+          else if (type === 'departure') renderDeparturePoints();
+          else if (type === 'currency') renderCurrencies();
+          markDirty();
+        });
+      });
+    }
+
+    /* ═══════════════════════════════════════════ */
+    /*  SETTINGS (Advanced)                        */
+    /* ═══════════════════════════════════════════ */
+    function populateSettings() {
+      document.getElementById('logFile').value = config.LogLevel_File != null ? config.LogLevel_File : 3;
+      document.getElementById('logAPI').value = config.LogLevel_API != null ? config.LogLevel_API : 2;
+    }
+    function readSettings() {
+      config.LogLevel_File = parseInt(document.getElementById('logFile').value);
+      config.LogLevel_API = parseInt(document.getElementById('logAPI').value);
+    }
+    document.getElementById('logFile').addEventListener('change', function(){ readSettings(); markDirty(); });
+    document.getElementById('logAPI').addEventListener('change', function(){ readSettings(); markDirty(); });
+
+    /* ═══════════════════════════════════════════ */
+    /*  RENDER ALL                                 */
+    /* ═══════════════════════════════════════════ */
+    function renderAll() { renderServers(); renderArrivalPoints(); renderDeparturePoints(); renderCurrencies(); renderCurrencyPresets(); populateSettings(); updateBadgesAndStats(); }
+
+    /* ═══════════════════════════════════════════ */
+    /*  SAVE / LOAD                                */
+    /* ═══════════════════════════════════════════ */
+    async function saveConfig() {
+      readSettings();
+      var btn = document.getElementById('saveBtn');
+      var sideBtn = document.getElementById('sidebarSaveBtn');
+      if (btn) btn.disabled = true;
+      if (sideBtn) sideBtn.disabled = true;
+      try { await UF.saveGlobal(GLOBAL_NAME, config); markClean(); showStatus('success','Configuration saved successfully!'); }
+      catch(err) { showStatus('error','Failed to save: ' + err.message); }
+      finally { if (btn) btn.disabled = false; if (sideBtn) sideBtn.disabled = false; }
+    }
+
+    async function reloadConfig() {
+      if (isDirty && !confirm('Discard unsaved changes and reload from database?')) return;
+      await loadConfig();
+    }
+
+    async function loadConfig() {
+      try {
+        var data = await UF.loadGlobal(GLOBAL_NAME);
+        if (data && typeof data === 'object') {
+          config = data;
+          if (!config.Servers) config.Servers = [];
+          if (!config.ArrivalPoints) config.ArrivalPoints = [];
+          if (!config.DepaturePoints) config.DepaturePoints = [];
+          if (!config.Currencies) config.Currencies = [];
+        } else {
+          config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+          showStatus('info','No saved configuration found. Starting with defaults.');
+        }
+      } catch(err) {
+        showStatus('error','Failed to load: ' + err.message);
+        config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+      }
+      renderAll(); markClean();
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('appShell').style.display = 'flex';
+    }
+
+    /* ─── Keyboard Shortcuts ─── */
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); if(isDirty) saveConfig(); }
+      if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(function(m){ m.classList.remove('open'); }); }
+    });
+
+    /* ─── Modal: click overlay to close ─── */
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.classList.remove('open'); });
+    });
+
+    /* ─── Collapsible sections ─── */
+    function toggleCollapse(header) {
+      header.classList.toggle('open');
+      var body = header.nextElementSibling;
+      if (body) body.classList.toggle('open');
+    }
+
+    /* ─── Map Dropdown: toggle custom input ─── */
+    document.getElementById('srv_map').addEventListener('change', function() {
+      var custom = document.getElementById('srv_map_custom');
+      if (this.value === '__custom__') { custom.style.display = ''; custom.focus(); }
+      else { custom.style.display = 'none'; custom.value = ''; }
+    });
+
+    /* ─── Init ─── */
+    loadConfig();
+  </script>
+</body>
+</html>
