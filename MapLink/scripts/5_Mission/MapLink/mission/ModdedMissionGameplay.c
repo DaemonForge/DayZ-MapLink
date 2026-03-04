@@ -3,22 +3,11 @@ modded class MissionGameplay
 	
 	void MissionGameplay()
     {   
-		GetRPCManager().AddRPC( "MapLink", "RPCRedirectedKicked", this, SingeplayerExecutionType.Both );
     }
 	
 	override void UFrameworkReadyTokenReceived(){
 		
 		super.UFrameworkReadyTokenReceived();
-	}
-
-	void RPCRedirectedKicked( CallType type, ParamsReadContext ctx, PlayerIdentity sender, Object target ) {
-		
-		Param1< UServerData > data; 
-		if ( !ctx.Read( data ) ) return;
-		MLLog.Info("Kicked from Game");
-		UServerData serverData = UServerData.Cast(data.param1);
-		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(g_Game.DisconnectSessionForce);
-		GetDayZGame().HiveSetReconnectTo(serverData);
 	}
 	
 	

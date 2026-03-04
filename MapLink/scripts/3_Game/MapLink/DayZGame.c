@@ -39,4 +39,21 @@ modded class DayZGame {
 		}
 		return false;
 	}
+	
+	override void OnRPC(PlayerIdentity sender, Object target, int rpc_type, ParamsReadContext ctx){
+		if (rpc_type == MAPLINK_REDIRECTKICKED && IsClient()){
+			UServerData serverData = UServerData.ReadFromRPC(ctx);
+			if (serverData){
+				MLLog.Info("Kicked from Game");
+				GetCallQueue(CALL_CATEGORY_SYSTEM).Call(DisconnectSessionForce);
+				GetDayZGame().HiveSetReconnectTo(serverData);
+				return;
+			}
+		}
+		if (rpc_type == MAPLINK_NOTIFICATION && IsClient()){
+			MLNotification.Receive(ctx);
+			return;
+		}
+		super.OnRPC(sender, target, rpc_type, ctx);
+	}
 };

@@ -314,12 +314,22 @@ modded class PlayerBase extends ManBase{
 			MLLog.Err("Manual Travel of user " + pid + " to " + arrivalPoint + " failed NULL Server Data");
 			return false;
 		}
+		// Check blacklist before allowing transfer
+		string blacklistedItem = serverData.FindFirstBlacklistedItem(PlayerBase.Cast(this));
+		if (blacklistedItem != ""){
+			string displayName = serverData.GetItemDisplayName(blacklistedItem);
+			MLLog.Info("Player " + pid + " denied transfer to " + serverData.Name + " - blacklisted item: " + blacklistedItem);
+			if (GetIdentity()){
+				MLNotification.Send(GetIdentity(), "MapLink - Transfer Blocked", "You cannot transfer to " + serverData.Name + " because '" + displayName + "' is not allowed on that server.", "set:maplink_icons image:status");
+			}
+			return false;
+		}
 		if (serverData && GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 			URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
 			this.UFSaveTransferPoint(arrivalPoint);
 			this.SavePlayerToU();
 			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
-			GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
+			UServerData.SendRedirectRPC(serverData, GetIdentity());
 			SetAllowDamage(false);
 			g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 			return true;
@@ -334,13 +344,27 @@ modded class PlayerBase extends ManBase{
 		int cost;
 		int id;
 		if (dpoint && serverData && dpoint.GetArrivalPointData(arrivalPoint, id, cost)) {
+			// Check blacklist before allowing transfer
+			string blacklistedItem = serverData.FindFirstBlacklistedItem(PlayerBase.Cast(this));
+			if (blacklistedItem != ""){
+				string displayName = serverData.GetItemDisplayName(blacklistedItem);
+				string pid_bl = "NULL";
+				if (GetIdentity()){
+					pid_bl = GetIdentity().GetId();
+				}
+				MLLog.Info("Player " + pid_bl + " denied transfer to " + serverName + " - blacklisted item: " + blacklistedItem);
+				if (GetIdentity()){
+					MLNotification.Send(GetIdentity(), "MapLink - Transfer Blocked", "You cannot transfer to " + serverName + " because '" + displayName + "' is not allowed on that server.", "set:maplink_icons image:status");
+				}
+				return false;
+			}
 			MLLog.Debug( "Working with Currency Key: " + GetMapLinkConfig().GetCurrencyKey(id) );
 			if ( GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 				URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
 				this.UFSaveTransferPoint(arrivalPoint);
 				this.SavePlayerToU();
 				MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
-				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, GetIdentity());
+				UServerData.SendRedirectRPC(serverData, GetIdentity());
 				SetAllowDamage(false);
 				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.UFKillAndDeletePlayer, 350, false);
 				return true;

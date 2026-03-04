@@ -85,8 +85,8 @@ modded class MissionServer extends MissionBase
 				if (CurServerData && CurServerData.RespawnServer && CurServerData.RespawnServer != "" && CurServerData.RespawnServer != UFConfig().ServerID){
 					serverData = UServerData.Cast(GetMapLinkConfig().GetServer(CurServerData.RespawnServer));
 					if (serverData){
-						NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Redirecting to the correct server - " + CurServerData.RespawnServer), "set:maplink_icons image:redirect", -16843010, 16, identity);
-						GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, identity);
+						MLNotification.Send(identity, "Map Link", "Redirecting to the correct server - " + CurServerData.RespawnServer, "set:maplink_icons image:redirect", 16);
+						UServerData.SendRedirectRPC(serverData, identity);
 					}
 				}
 				MLLog.Info("Player " + identity.GetId() +" IsAlive: " + playerdata.IsAlive() + " IsUnconscious: " + playerdata.IsUnconscious() + " IsRestrained: " + playerdata.IsRestrained()  + " on the API, spawning them fresh");
@@ -97,8 +97,8 @@ modded class MissionServer extends MissionBase
 			MLLog.Log("Spawning player " + identity.GetId() + " on: " + UFConfig().ServerID + " World: " + m_worldname + " at " + transferPoint);
 			if (FromServerName != UFConfig().ServerID && transferPoint == "") {
 				serverData = UServerData.Cast(GetMapLinkConfig().GetServer(playerdata.m_Server));
-				NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Redirecting to the correct server - " + FromServerName), "set:maplink_icons image:redirect", -16843010, 16, identity);
-				GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, identity);
+				MLNotification.Send(identity, "Map Link", "Redirecting to the correct server - " + FromServerName, "set:maplink_icons image:redirect", 16);
+				UServerData.SendRedirectRPC(serverData, identity);
 				MLLog.Info("Player " + identity.GetId() + " Redirected to correct server " +  FromServerName);
 				MLLog.Debug("Removing Player from Queue " + identity.GetId());
 				m_MLPlayerStoreCache.Remove(identity.GetId());
@@ -108,8 +108,8 @@ modded class MissionServer extends MissionBase
 				MapLinkSpawnPointPos pointPos;
 				if (!Class.CastTo(pointPos, GetMapLinkConfig().SpawnPointPos(transferPoint))){
 					serverData = UServerData.Cast(GetMapLinkConfig().GetServer(FromServerName));
-					NotificationSystem.Create(new StringLocaliser("Map Link"),new StringLocaliser(" Error On Connect This server isn't set up correctly sending you back to your orginal server - " + playerdata.m_Server), "set:maplink_icons image:redirect", -16843010, 16, identity);
-					GetRPCManager().SendRPC("MapLink", "RPCRedirectedKicked", new Param1<UServerData>(serverData), true, identity);
+					MLNotification.Send(identity, "Map Link", "Error On Connect - This server isn't set up correctly, sending you back to your original server - " + playerdata.m_Server, "set:maplink_icons image:redirect", 16);
+					UServerData.SendRedirectRPC(serverData, identity);
 					MLLog.Err("Server isn't set up to receive this arrival point(" + transferPoint + ") Player " + identity.GetId() + " Redirected back to previous server " +  playerdata.m_Server);
 					
 					MLLog.Debug("Removing Player from Queue " + identity.GetId());

@@ -362,7 +362,9 @@ class UPlayerZoneHealthData extends Managed {
 		m_Shock = shock;
 	}
 	
-	bool Is(string zone){ return (m_Zone == zone); }
+	bool Is(string zone){ 
+		return (m_Zone == zone); 
+	}
 	string Zone(){ return m_Zone; }
 	float Health(){ return m_Health; }
 	float Blood(){ return m_Blood; }
