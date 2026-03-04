@@ -8,6 +8,9 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	int 						m_LookupCid;
 	bool 						m_ServerOnline = true;
 	bool						m_HasEnoughMoney = true;
+	bool						m_HasBlacklistedItems = false;
+	string						m_BlacklistedItemName = "";
+	string						m_TargetServerName = "";
 	
 	Widget						m_Root;
 	
@@ -90,6 +93,19 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		
 		m_Map_Text.SetText(GetMapLinkConfig().GetNiceMapName(serverData.Map));
 		
+		// Check for blacklisted items on the target server
+		m_TargetServerName = spawnPoint.ServerName;
+		PlayerBase blPlayer = PlayerBase.Cast(g_Game.GetPlayer());
+		if (blPlayer && serverData){
+			string blacklistedType = serverData.FindFirstBlacklistedItem(blPlayer);
+			if (blacklistedType != ""){
+				m_HasBlacklistedItems = true;
+				m_BlacklistedItemName = serverData.GetItemDisplayName(blacklistedType);
+				m_Transfer.SetAlpha(0.3);
+				m_Name.SetColor(ARGB(255, 255, 61, 0));
+			}
+		}
+		
 		m_Root.SetHandler(this);
 		m_Root.Show(true);
 	}
@@ -100,10 +116,16 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	
 	override bool OnClick( Widget w, int x, int y, int button )
 	{		
-		if (w == m_Transfer && m_ServerOnline && m_HasEnoughMoney) {
-			U().RequestCallCancel(m_LookupCid);
-			m_Parent.InitTravel(m_ArrivalPoint.ArrivalPointName, m_ArrivalPoint.TransitionWaitTime, m_MapLinkSpawnPoint.ServerName);
-			return true;
+		if (w == m_Transfer) {
+			if (m_HasBlacklistedItems){
+				MLNotification.Show(6, "MapLink - Transfer Blocked", "You cannot transfer to " + m_TargetServerName + " because '" + m_BlacklistedItemName + "' is not allowed on that server.", "set:maplink_icons image:status");
+				return true;
+			}
+			if (m_ServerOnline && m_HasEnoughMoney) {
+				U().RequestCallCancel(m_LookupCid);
+				m_Parent.InitTravel(m_ArrivalPoint.ArrivalPointName, m_ArrivalPoint.TransitionWaitTime, m_MapLinkSpawnPoint.ServerName);
+				return true;
+			}
 		}
 		return super.OnClick(w, x, y, button);
 	}

@@ -1,12 +1,17 @@
+typedef array<autoptr MapLinkCurrency> TMapLinkCurrencyArray;
+typedef array<autoptr MapLinkDepaturePoint> TMapLinkDepaturePointArray;;
+typedef array<autoptr MapLinkArrivalPoint> TMapLinkArrivalPointArray;
+typedef array<autoptr UServerData> TMapLinkServerDataArray;
+
 class MapLinkConfig extends UFConfigBase {
 
 	string ConfigVersion = "0";
 	static string CurrentVersion = "0";
 	
-	autoptr array<autoptr UServerData> Servers = new array<autoptr UServerData>;
-	autoptr array<autoptr MapLinkArrivalPoint> ArrivalPoints = new array<autoptr MapLinkArrivalPoint>;
-	autoptr array<autoptr MapLinkDepaturePoint> DepaturePoints = new array<autoptr MapLinkDepaturePoint>;
-	autoptr array<autoptr MapLinkCurrency> Currencies = new array<autoptr MapLinkCurrency>;
+	autoptr TMapLinkServerDataArray Servers = new TMapLinkServerDataArray;
+	autoptr TMapLinkArrivalPointArray ArrivalPoints = new TMapLinkArrivalPointArray;
+	autoptr TMapLinkDepaturePointArray DepaturePoints = new TMapLinkDepaturePointArray;
+	autoptr TMapLinkCurrencyArray Currencies = new TMapLinkCurrencyArray;
 	
 	int LogLevel_File = 3;
 	int LogLevel_API = 2;

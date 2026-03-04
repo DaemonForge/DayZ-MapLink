@@ -1,3 +1,5 @@
+typedef array<autoptr MapLinkMoneyValue> TMapLinkMoneyValueArray;
+
 class MapLinkDepaturePoint extends Managed {
 	string DisplayName;
 	string ServerName;
@@ -206,7 +208,7 @@ class MapLinkCurrency extends Managed {
 	string Name;
 	string Icon;
 	bool CanUseRuinedBills = false;
-	autoptr array<autoptr MapLinkMoneyValue> MoneyValues = new array<autoptr MapLinkMoneyValue>;
+	autoptr TMapLinkMoneyValueArray MoneyValues = new TMapLinkMoneyValueArray;
 			
 	void MapLinkCurrency(int id = 1){
 		if (id == -1){
