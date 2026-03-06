@@ -1,0 +1,295 @@
+FrameWidgetClass rootFrame {
+ size 1 68
+ hexactsize 0
+ vexactsize 1
+ {
+  PanelWidgetClass rootFrame_hover {
+   ignorepointer 1
+   color 0.15 0.15 0.15 0
+   size 1 1
+   hexactsize 0
+   vexactsize 0
+  }
+  FrameWidgetClass ServerEntryContent {
+   ignorepointer 1
+   position 20 0
+   size 380 1
+   valign center_ref
+   hexactpos 1
+   vexactpos 0
+   hexactsize 1
+   vexactsize 0
+   {
+    TextWidgetClass Server_Name {
+     ignorepointer 1
+     position 0 4
+     size 380 28
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     text "SERVER NAME"
+     font "gui/fonts/metronbook"
+     "exact text" 0
+     text_proportion 0.7
+     "text valign" center
+    }
+    GridSpacerWidgetClass ServerInfo {
+     ignorepointer 1
+     position 0 34
+     size 380 26
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     Padding 0
+     "Size To Content H" 1
+     Columns 5
+     Rows 1
+     {
+      GridSpacerWidgetClass Map_Frame {
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       Padding 3
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Map_Image {
+         ignorepointer 1
+         size 20 20
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:map"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Map_Text {
+         ignorepointer 1
+         color 0.55 0.55 0.55 1
+         size 120 26
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "Chernarus"
+         font "gui/fonts/metronbook"
+         "exact text" 0
+         text_proportion 0.6
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass map_spacer {
+         ignorepointer 1
+         size 14 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass Status_Frame {
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       Padding 3
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Status_Image {
+         ignorepointer 1
+         color 0.55 0.55 0.55 1
+         size 20 20
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:status"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Status_Text {
+         ignorepointer 1
+         color 0.55 0.55 0.55 1
+         size 120 26
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "Querying..."
+         font "gui/fonts/metronbook"
+         "exact text" 0
+         text_proportion 0.6
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass status_spacer {
+         ignorepointer 1
+         size 14 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass PlayerCount_Frame {
+       visible 0
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       Padding 3
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass PlayerCount_Image {
+         ignorepointer 1
+         size 20 20
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:players"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass PlayerCount_Text {
+         ignorepointer 1
+         color 0.55 0.55 0.55 1
+         size 80 26
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "0/60"
+         font "gui/fonts/metronbook"
+         "exact text" 0
+         text_proportion 0.6
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass pc_spacer {
+         ignorepointer 1
+         size 14 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+      GridSpacerWidgetClass Queue_Frame {
+       visible 0
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       Padding 3
+       "Size To Content H" 1
+       Rows 1
+       {
+        ImageWidgetClass Queue_Image {
+         ignorepointer 1
+         size 20 20
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         image0 "set:maplink_icons image:queue"
+         mode blend
+         "src alpha" 1
+         stretch 1
+        }
+        TextWidgetClass Queue_Text {
+         ignorepointer 1
+         color 0.55 0.55 0.55 1
+         size 60 26
+         valign center_ref
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+         text "5"
+         font "gui/fonts/metronbook"
+         "exact text" 0
+         text_proportion 0.6
+         "size to text h" 1
+         "text halign" center
+         "text valign" center
+        }
+        WrapSpacerWidgetClass q_spacer {
+         ignorepointer 1
+         size 10 0
+         hexactpos 1
+         vexactpos 1
+         hexactsize 1
+         vexactsize 1
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  ButtonWidgetClass SelectServer {
+   position -20 0
+   size 110 32
+   halign right_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   {
+    PanelWidgetClass SelectServer_panel {
+     ignorepointer 1
+     color 0 0 0 0
+     size 1 1
+     hexactsize 0
+     vexactsize 0
+    }
+    TextWidgetClass SelectServer_label {
+     ignorepointer 1
+     size 110 32
+     hexactsize 1
+     vexactsize 1
+     text "SELECT"
+     font "gui/fonts/metronbook"
+     "exact text" 0
+     text_proportion 0.55
+     "text halign" center
+     "text valign" center
+    }
+   }
+  }
+  PanelWidgetClass entry_separator {
+   ignorepointer 1
+   color 0.22 0.22 0.22 0.5
+   size 1 1
+   valign bottom_ref
+   hexactpos 0
+   vexactpos 0
+   hexactsize 0
+   vexactsize 1
+  }
+ }
+}

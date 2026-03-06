@@ -1,0 +1,151 @@
+FrameWidgetClass rootFrame {
+ size 1 1
+ hexactsize 0
+ vexactsize 0
+ {
+  PanelWidgetClass RespawnMenuOverlay {
+   color 0 0 0 1
+   size 1 1
+   hexactsize 0
+   vexactsize 0
+  }
+  FrameWidgetClass RespawnMenuContainer {
+   position 0 -160
+   size 560 490
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   {
+    PanelWidgetClass RespawnMenuBG {
+     ignorepointer 1
+     color 0.1 0.1 0.1 1
+     size 1 1
+     hexactsize 0
+     vexactsize 0
+    }
+    PanelWidgetClass border_top {
+     ignorepointer 1
+     color 0.7 0 0 1
+     size 1 2
+     hexactsize 0
+     vexactsize 1
+    }
+    PanelWidgetClass border_left {
+     ignorepointer 1
+     color 0.22 0.22 0.22 1
+     size 1 1
+     hexactsize 1
+     vexactsize 0
+    }
+    PanelWidgetClass border_right {
+     ignorepointer 1
+     color 0.22 0.22 0.22 1
+     size 1 1
+     halign right_ref
+     hexactsize 1
+     vexactsize 0
+    }
+    PanelWidgetClass border_bottom {
+     ignorepointer 1
+     color 0.22 0.22 0.22 1
+     size 1 1
+     valign bottom_ref
+     hexactsize 0
+     vexactsize 1
+    }
+    TextWidgetClass Heading {
+     ignorepointer 1
+     position 0 10
+     size 1 40
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     text "SELECT SERVER"
+     font "gui/fonts/metronbook"
+     "exact text" 0
+     text_proportion 0.7
+     "text halign" center
+     "text valign" center
+    }
+    PanelWidgetClass separator_heading {
+     ignorepointer 1
+     color 0.7 0 0 0.7
+     position 20 54
+     size 520 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+    ScrollWidgetClass RespawnServers_Scroll {
+     position 10 62
+     size 540 300
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     style blank
+     "Scrollbar V" 1
+     {
+      GridSpacerWidgetClass RespawnServers_Grid {
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       Padding 0
+       "Size To Content V" 1
+       Columns 1
+       Rows 99
+      }
+     }
+    }
+    PanelWidgetClass separator_bottom {
+     ignorepointer 1
+     color 0.7 0 0 0.7
+     position 20 -52
+     size 520 1
+     valign bottom_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+    }
+    ButtonWidgetClass VanillaRespawn {
+     position 0 -10
+     size 1 38
+     halign center_ref
+     valign bottom_ref
+     hexactpos 0
+     vexactpos 1
+     hexactsize 0
+     vexactsize 1
+     {
+      PanelWidgetClass VanillaRespawn_panel {
+       ignorepointer 1
+       color 0 0 0 0
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+      }
+      TextWidgetClass VanillaRespawn_label {
+       ignorepointer 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       text "RESPAWN HERE"
+       font "gui/fonts/metronbook"
+       "exact text" 0
+       text_proportion 0.6
+       "text halign" center
+       "text valign" center
+      }
+     }
+    }
+   }
+  }
+ }
+}
