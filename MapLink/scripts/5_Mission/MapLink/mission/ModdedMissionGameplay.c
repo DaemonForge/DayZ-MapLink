@@ -24,6 +24,7 @@ modded class MissionMainMenu {
 		super.OnInit();
 	}
 	
+
 	
 	
 	override void OnMissionStart(){
@@ -33,8 +34,27 @@ modded class MissionMainMenu {
 
 	
 	
-	override void OnMissionFinish(){
+	override void OnMissionFinish()
+	{
+	#ifdef EXPANSIONMODCORE
+		ExpansionGlobalID.s_IsMissionLoaded = false;
+	#endif
+
+	#ifdef EXPANSIONUI
+		//Expansion_DestroyItemTooltip();
+		//Expansion_DestroyItemInspection();
+	#endif
+
 		super.OnMissionFinish();
+
+	#ifdef EXPANSIONMODAI
+		//! Clean up eAI command menu static reference
+		if (eAICommandMenu.instance)
+		{
+			eAICommandMenu.instance.Close();
+			eAICommandMenu.instance = null;
+		}
+	#endif
 	}
 	
 	

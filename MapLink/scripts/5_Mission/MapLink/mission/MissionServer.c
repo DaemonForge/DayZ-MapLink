@@ -156,4 +156,13 @@ modded class MissionServer extends MissionBase
 			player.Delete();	
 		}
 	}
+	
+#ifdef EXPANSIONMODCORE
+	override void OnMissionFinish()
+	{
+		ExpansionGlobalID.s_IsMissionLoaded = false;
+
+		super.OnMissionFinish();
+	}
+#endif
 }
