@@ -737,8 +737,9 @@
           <input type="password" id="srv_pass" placeholder="Leave empty if none">
         </div>
         <div class="full-width">
-          <label for="srv_respawn">Respawn Redirect Server <i class="info-icon" title="When a player dies on this server, they'll be sent to the selected server instead of respawning locally.">?</i></label>
+          <label for="srv_respawn">Respawn Redirect Server <i class="info-icon" title="When a player dies on this server, they'll be sent to the selected server. 'Any Without Respawn' sends them to a random eligible server that has no RespawnServer set.">?</i></label>
           <select id="srv_respawn"><option value="">None (stay on this server)</option></select>
+          <div class="field-error" id="srv_respawn_err">Respawn server reference is invalid. For a named server, it must exist. For ANYBLANK, at least one other server must have no RespawnServer set.</div>
         </div>
       </div>
       <h4 style="font-size:14px; margin: 16px 0 10px; color:#ccc;">&#x1f6ab; Item Blacklist</h4>
@@ -1060,7 +1061,7 @@
           '<span class="drag-handle" title="Drag to reorder">\u2630</span>' +
           '<div class="item-icon" style="background:#1a3050; color:#64b5f6;">\ud83d\udda5\ufe0f</div>' +
           '<div class="item-info"><div class="item-name">' + escapeHtml(srv.Name) + '</div>' +
-          '<div class="item-meta">' + escapeHtml(niceMapName(srv.Map)) + ' \u00b7 ' + escapeHtml(srv.IP||'\u2014') + ':' + (srv.Port||2302) + (srv.RespawnServer ? ' \u00b7 Respawn \u2192 ' + escapeHtml(srv.RespawnServer) : '') + blText + '</div></div>' +
+          '<div class="item-meta">' + escapeHtml(niceMapName(srv.Map)) + ' \u00b7 ' + escapeHtml(srv.IP||'\u2014') + ':' + (srv.Port||2302) + (srv.RespawnServer ? ' \u00b7 Respawn \u2192 ' + (srv.RespawnServer === 'ANYBLANK' ? 'Any Without Respawn' : escapeHtml(srv.RespawnServer)) : '') + blText + '</div></div>' +
           '<div class="item-actions"><button class="btn-ghost btn-sm" onclick="editServer(' + idx + ')">\u270f\ufe0f Edit</button><button class="btn-danger btn-sm" onclick="deleteServer(' + idx + ')">\ud83d\uddd1\ufe0f</button></div></div>';
       });
       list.innerHTML = h;
@@ -1073,7 +1074,7 @@
       document.getElementById('serverEditIdx').value = editing ? idx : -1;
       document.getElementById('serverModalTitle').textContent = editing ? 'Edit Server' : 'Add Server';
       var rSel = document.getElementById('srv_respawn');
-      rSel.innerHTML = '<option value="">None (stay on this server)</option>';
+      rSel.innerHTML = '<option value="">None (stay on this server)</option><option value="ANYBLANK">Any Without Respawn (ANYBLANK)</option>';
       getServerNames().forEach(function(name, i){ if(!editing||i!==idx) rSel.innerHTML += '<option value="'+escapeHtml(name)+'">'+escapeHtml(name)+'</option>'; });
       if (editing) {
         var s = config.Servers[idx];
@@ -1127,6 +1128,21 @@
       if (!name) { showFieldError('srv_name','srv_name_err'); valid = false; }
       for (var i = 0; i < config.Servers.length; i++) { if (config.Servers[i].Name === name && i !== idx) { showFieldError('srv_name','srv_name_err'); valid = false; break; } }
       if (!ip || !/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9][a-zA-Z0-9\-]*(\.[a-zA-Z0-9\-]+)+)$/.test(ip)) { showFieldError('srv_ip','srv_ip_err'); valid = false; }
+      if (respawn && respawn !== 'ANYBLANK') {
+        var respawnExists = false;
+        for (var ri = 0; ri < config.Servers.length; ri++) {
+          if (config.Servers[ri].Name === respawn && ri !== idx) { respawnExists = true; break; }
+        }
+        if (!respawnExists) { showFieldError('srv_respawn','srv_respawn_err'); valid = false; }
+      }
+      if (respawn === 'ANYBLANK') {
+        var blankCount = 0;
+        for (var bi = 0; bi < config.Servers.length; bi++) {
+          if (bi === idx) continue;
+          if (!config.Servers[bi].RespawnServer || config.Servers[bi].RespawnServer === '' || config.Servers[bi].RespawnServer === config.Servers[bi].Name) blankCount++;
+        }
+        if (blankCount === 0) { showFieldError('srv_respawn','srv_respawn_err'); valid = false; }
+      }
       if (!valid) return;
       var oldName = editing ? config.Servers[idx].Name : null;
       var cleanedBL = tempBlacklistItems.filter(function(item){ return item && item.trim(); }).map(function(item){ return item.trim(); });
