@@ -54,7 +54,7 @@ class MapLinkArrivalPointsRef extends Managed{
 		if (Icon.Contains(".paa") || Icon.Contains("set:") || Icon.Contains(".edds") ){
 			return Icon;
 		}
-		return "set:maplink_icons image:"+Icon;
+		return "set:maplink_icons image:" + Icon;
 	}
 }
 

@@ -143,15 +143,15 @@ modded class MissionServer extends MissionBase
 	
 	override void HandleBody(PlayerBase player)
 	{
-		if ( player && player.IsBeingTransfered() ){
-			MLLog.Debug("HandleBody IsBeingTransfered Killing Player"); //Fail Safe
+		if ( player && player.IsBeingTransferred() ){
+			MLLog.Debug("HandleBody IsBeingTransferred Killing Player"); //Fail Safe
 			player.SetAllowDamage(true);
 			player.SetHealth("", "Health", 0);
 			player.SetHealth("", "", 0);
 		}
 		super.HandleBody( player );
-		if (player && ( player.MapLinkShoudDelete() || player.IsBeingTransfered() ) ) {
-			MLLog.Debug("HandleBody IsBeingTransfered Removing body");
+		if (player && ( player.MapLinkShouldDelete() || player.IsBeingTransferred() ) ) {
+			MLLog.Debug("HandleBody IsBeingTransferred Removing body");
 			// remove the body
 			player.Delete();	
 		}

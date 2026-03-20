@@ -3,7 +3,7 @@ modded class ShelterKit extends ItemBase
 
 	override void DisassembleKit(ItemBase item) {
 		PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
-		if ( player && player.IsBeingTransfered() ){
+		if ( player && player.IsBeingTransferred() ){
 			return;
 			
 		}
@@ -17,7 +17,7 @@ modded class FenceKit extends ItemBase
 
 	override void DisassembleKit(ItemBase item) {
 		PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
-		if ( player && player.IsBeingTransfered() ){
+		if ( player && player.IsBeingTransferred() ){
 			return;
 			
 		}
@@ -31,7 +31,7 @@ modded class WatchtowerKit extends ItemBase
 
 	override void DisassembleKit(ItemBase item) {
 		PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
-		if ( player && player.IsBeingTransfered() ){
+		if ( player && player.IsBeingTransferred() ){
 			return;
 			
 		}
@@ -45,7 +45,7 @@ modded class TerritoryFlagKit extends ItemBase
 
 	override void DisassembleKit(ItemBase item) {
 		PlayerBase player = PlayerBase.Cast(GetHierarchyRootPlayer());
-		if ( player && player.IsBeingTransfered() ){
+		if ( player && player.IsBeingTransferred() ){
 			return;
 			
 		}

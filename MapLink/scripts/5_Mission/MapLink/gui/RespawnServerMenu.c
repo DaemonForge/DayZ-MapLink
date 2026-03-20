@@ -40,6 +40,13 @@ class RespawnServerMenu extends ScriptedWidgetEventHandler
 		if (m_Heading)
 			m_Heading.SetText("SELECT SERVER");
 		
+		// Hide "RESPAWN HERE" if current server has a respawn override (can't stay here)
+		if (m_VanillaRespawn && HasRespawnOverride())
+		{
+			m_VanillaRespawn.Show(false);
+			MLLog.Info("RespawnServerMenu: Hiding RESPAWN HERE - server has respawn override");
+		}
+		
 		PopulateServers();
 		
 		m_Root.Show(true);
@@ -96,41 +103,75 @@ class RespawnServerMenu extends ScriptedWidgetEventHandler
 		string currentServerName = UFConfig().ServerID;
 		UServerData currentServerData = FindServerByName(config.Servers, currentServerName);
 		
-		bool hasRespawnOverride = (currentServerData && currentServerData.RespawnServer != "" && currentServerData.RespawnServer != currentServerName);
+		string respawnOverride = "";
+		if (currentServerData)
+			respawnOverride = currentServerData.RespawnServer;
 		
-		if (hasRespawnOverride)
+		bool hasSpecificOverride = (respawnOverride != "" && respawnOverride != currentServerName && respawnOverride != "ANYBLANK");
+		bool hasAnyBlank = (respawnOverride == "ANYBLANK");
+		
+		if (hasSpecificOverride)
 		{
-			UServerData respawnServer = FindServerByName(config.Servers, currentServerData.RespawnServer);
+			// Specific RespawnServer: only that one server is eligible
+			UServerData respawnServer = FindServerByName(config.Servers, respawnOverride);
 			if (respawnServer)
-				entries.Insert(new RespawnServerEntry(respawnServer.Name, respawnServer.Map, respawnServer.IP, respawnServer.Port, respawnServer.Password, respawnServer.QueryPort, false));
+			{
+				if (respawnServer.RespawnServer == "" || respawnServer.RespawnServer == respawnServer.Name)
+					entries.Insert(new RespawnServerEntry(respawnServer.Name, respawnServer.Map, respawnServer.IP, respawnServer.Port, respawnServer.Password, respawnServer.QueryPort, false));
+				else
+					MLLog.Info("RespawnServerMenu: Override target '" + respawnServer.Name + "' has its own RespawnServer set, skipping");
+			}
 		}
-		else
+		else if (hasAnyBlank)
 		{
+			// ANYBLANK: only servers that have no RespawnServer set (blank) are eligible, exclude current server
 			for (int i = 0; i < config.Servers.Count(); i++)
 			{
 				UServerData srv = config.Servers.Get(i);
 				if (!srv || srv.IP == "") continue;
 				
-				bool isCurrent = (srv.Name == currentServerName);
+				if (srv.Name == currentServerName)
+					continue; // Can't respawn here - ANYBLANK forces a different server
 				
-				if (!isCurrent && srv.RespawnServer != "" && srv.RespawnServer != srv.Name)
+				// Only include servers with blank RespawnServer (or self-referencing)
+				if (srv.RespawnServer != "" && srv.RespawnServer != srv.Name)
 					continue;
 				
-				entries.Insert(new RespawnServerEntry(srv.Name, srv.Map, srv.IP, srv.Port, srv.Password, srv.QueryPort, isCurrent));
+				entries.Insert(new RespawnServerEntry(srv.Name, srv.Map, srv.IP, srv.Port, srv.Password, srv.QueryPort, false));
+			}
+		}
+		else
+		{
+			// No override: all servers without their own RespawnServer are eligible
+			for (int k = 0; k < config.Servers.Count(); k++)
+			{
+				UServerData srv2 = config.Servers.Get(k);
+				if (!srv2 || srv2.IP == "") continue;
+				
+				bool isCurrent2 = (srv2.Name == currentServerName);
+				
+				if (!isCurrent2 && srv2.RespawnServer != "" && srv2.RespawnServer != srv2.Name)
+					continue;
+				
+				entries.Insert(new RespawnServerEntry(srv2.Name, srv2.Map, srv2.IP, srv2.Port, srv2.Password, srv2.QueryPort, isCurrent2));
 			}
 		}
 		
-		bool hasCurrentServer = false;
-		for (int j = 0; j < entries.Count(); j++)
+		// Only add current server when there's no forced respawn override
+		if (!hasSpecificOverride && !hasAnyBlank)
 		{
-			if (entries.Get(j).IsCurrentServer)
+			bool hasCurrentServer = false;
+			for (int j = 0; j < entries.Count(); j++)
 			{
-				hasCurrentServer = true;
-				break;
+				if (entries.Get(j).IsCurrentServer)
+				{
+					hasCurrentServer = true;
+					break;
+				}
 			}
+			if (!hasCurrentServer && currentServerData)
+				entries.Insert(new RespawnServerEntry(currentServerData.Name, currentServerData.Map, currentServerData.IP, currentServerData.Port, currentServerData.Password, currentServerData.QueryPort, true));
 		}
-		if (!hasCurrentServer && currentServerData)
-			entries.Insert(new RespawnServerEntry(currentServerData.Name, currentServerData.Map, currentServerData.IP, currentServerData.Port, currentServerData.Password, currentServerData.QueryPort, true));
 		
 		return entries;
 	}
@@ -145,6 +186,62 @@ class RespawnServerMenu extends ScriptedWidgetEventHandler
 				otherCount++;
 		}
 		return otherCount > 0;
+	}
+	
+	// Returns true if the current server has any RespawnServer override (specific or ANYBLANK)
+	static bool HasRespawnOverride()
+	{
+		MapLinkConfig config = GetMapLinkConfig();
+		if (!config || !config.Servers || config.Servers.Count() == 0) return false;
+		
+		string currentServerName = UFConfig().ServerID;
+		UServerData currentServerData = FindServerByName(config.Servers, currentServerName);
+		if (!currentServerData) return false;
+		
+		return (currentServerData.RespawnServer != "" && currentServerData.RespawnServer != currentServerName);
+	}
+	
+	// Returns the direct RespawnServer entry if current server has a specific (non-ANYBLANK) override
+	static RespawnServerEntry GetDirectRespawnServer()
+	{
+		MapLinkConfig config = GetMapLinkConfig();
+		if (!config || !config.Servers || config.Servers.Count() == 0) return NULL;
+		
+		string currentServerName = UFConfig().ServerID;
+		UServerData currentServerData = FindServerByName(config.Servers, currentServerName);
+		if (!currentServerData) return NULL;
+		
+		string respawnOverride = currentServerData.RespawnServer;
+		if (respawnOverride == "" || respawnOverride == currentServerName || respawnOverride == "ANYBLANK")
+			return NULL;
+		
+		UServerData target = FindServerByName(config.Servers, respawnOverride);
+		if (!target) return NULL;
+		
+		// Make sure the target doesn't have its own RespawnServer pointing elsewhere
+		if (target.RespawnServer != "" && target.RespawnServer != target.Name)
+			return NULL;
+		
+		return new RespawnServerEntry(target.Name, target.Map, target.IP, target.Port, target.Password, target.QueryPort, false);
+	}
+	
+	// Returns the single non-current eligible server if exactly one exists, otherwise NULL
+	static RespawnServerEntry GetSingleEligibleServer()
+	{
+		autoptr array<ref RespawnServerEntry> entries = BuildEligibleServers();
+		RespawnServerEntry result = NULL;
+		int otherCount = 0;
+		for (int i = 0; i < entries.Count(); i++)
+		{
+			if (!entries.Get(i).IsCurrentServer)
+			{
+				otherCount++;
+				result = entries.Get(i);
+			}
+		}
+		if (otherCount == 1)
+			return result;
+		return NULL;
 	}
 	
 	// --- Click handling ---

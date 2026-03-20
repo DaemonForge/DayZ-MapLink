@@ -1,6 +1,24 @@
-modded class PlayerBase extends ManBase{
+modded class PlayerBase extends ManBase {
 	
 	protected autoptr Timer m_MapLink_UnderProtectionTimer;
+	
+	// --- Merged from _MapLinkBase ---
+	override void Init()
+	{
+		super.Init();
+		RegisterNetSyncVariableBool("m_MapLink_UnderProtection");
+	}
+	
+	override void OnPlayerLoaded()
+	{
+		super.OnPlayerLoaded();
+		if (GetIdentity()){
+			m_MapLinkGUIDCache = GetIdentity().GetId();
+			m_MapLinkNameCache = GetIdentity().GetName();
+		}
+	}
+	
+
 			
 	protected void UpdateMapLinkProtectionClient(int time){
 		MLLog.Debug("UpdateMapLinkProtectionClient" + time);
@@ -86,7 +104,7 @@ modded class PlayerBase extends ManBase{
     {
         super.OnStoreSave(ctx);
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
-		if (!g_Game.IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransfered() && !MapLinkShoudDelete()){
+		if (!g_Game.IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransferred() && !MapLinkShouldDelete()){
 			StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 			this.SavePlayerToU();
 			//Print("[UF] Would be saving player but not!");
@@ -112,8 +130,7 @@ modded class PlayerBase extends ManBase{
 	}
 	
 	
-	override void OnUFSave( PlayerDataStore data){
-		super.OnUFSave(data);
+	void OnUFSave( PlayerDataStore data){
 		int i = 0;
 		for(i = 0; i < m_ModifiersManager.m_ModifierList.Count(); i++){
             ModifierBase mdfr = ModifierBase.Cast(m_ModifiersManager.m_ModifierList.GetElement(i));
@@ -152,8 +169,7 @@ modded class PlayerBase extends ManBase{
 		data.m_Camera3rdPerson = m_Camera3rdPerson;
 	}
 	
-	override void OnUFLoad( PlayerDataStore data){
-		super.OnUFLoad(data);
+	void OnUFLoad( PlayerDataStore data){
 		int i = 0;
 		
 		for (i = 0; i < GetPlayerStats().GetPCO().Get().Count(); i++){
@@ -217,7 +233,7 @@ modded class PlayerBase extends ManBase{
 			SetHealth("","", 0); 
 		}
 		//If the player has played less than 1 minutes just kill them so their data doesn't save to the local database
-		if ( IsBeingTransfered()){ 
+		if ( IsBeingTransferred()){ 
 			if (GetIdentity()){
 				MLLog.Info("OnDisconnect Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Is Transfering");
 			} else {
@@ -235,12 +251,12 @@ modded class PlayerBase extends ManBase{
 		
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
-		if ( ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
+		if ( ( !IsBeingTransferred() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
 			this.SavePlayerToU();
 			m_MLPlayerStoreCache.Remove(GetIdentity().GetId());
 		}
 		//If they are transfering delete
-		if ( IsBeingTransfered()  && ( !killer || killer == this )){
+		if ( IsBeingTransferred()  && ( !killer || killer == this )){
 			if (GetIdentity()){
 				MLLog.Info("Marking Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") for delete cause of transfer" );
 			} else {
@@ -252,7 +268,7 @@ modded class PlayerBase extends ManBase{
 		}
 		
 		//Fresh spawn just delete the body since I have to spawn players in to send notifications about player transfers
-		if ( !IsBeingTransfered() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
+		if ( !IsBeingTransferred() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) <= MAPLINK_BODYCLEANUPTIME && ( !killer || killer == this )){
 			if (GetIdentity()){
 				MLLog.Info("Deleteing Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") cause they are fresh spawn PlayTime: " + StatGet(AnalyticsManagerServer.STAT_PLAYTIME));
 			} else {

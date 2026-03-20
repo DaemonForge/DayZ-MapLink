@@ -26,6 +26,30 @@ modded class InGameMenu
 		// Player is dead - check if we should show server selection
 		if (GetMapLinkConfig() && GetMapLinkConfig().Servers && GetMapLinkConfig().Servers.Count() > 0)
 		{
+			// If current server has a specific RespawnServer (not ANYBLANK), auto-redirect immediately
+			RespawnServerEntry directRedirect = RespawnServerMenu.GetDirectRespawnServer();
+			if (directRedirect)
+			{
+				MLLog.Info("InGameMenu.OnClick_Respawn: Direct RespawnServer override '" + directRedirect.Name + "' - auto-redirecting");
+				UServerData rData = new UServerData(directRedirect.IP, directRedirect.Port, directRedirect.Password);
+				rData.Name = directRedirect.Name;
+				GetDayZGame().HiveSetReconnectTo(rData);
+				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(g_Game.DisconnectSessionForce);
+				return;
+			}
+			
+			// Check if exactly one eligible server - auto-redirect without showing menu
+			RespawnServerEntry singleServer = RespawnServerMenu.GetSingleEligibleServer();
+			if (singleServer)
+			{
+				MLLog.Info("InGameMenu.OnClick_Respawn: Single eligible server '" + singleServer.Name + "' - auto-redirecting");
+				UServerData serverData = new UServerData(singleServer.IP, singleServer.Port, singleServer.Password);
+				serverData.Name = singleServer.Name;
+				GetDayZGame().HiveSetReconnectTo(serverData);
+				g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(g_Game.DisconnectSessionForce);
+				return;
+			}
+			
 			if (RespawnServerMenu.HasOtherServers())
 			{
 				MLLog.Info("InGameMenu.OnClick_Respawn: Showing server selection overlay");
