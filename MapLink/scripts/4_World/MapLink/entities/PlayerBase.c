@@ -106,12 +106,12 @@ modded class PlayerBase extends ManBase {
 		//Making sure not to save freshspawns or dead people, dead people logic is handled in EEKilled
 		if (!g_Game.IsClient() && GetHealth("","Health") > 0 && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) >= MAPLINK_BODYCLEANUPTIME && !IsBeingTransferred() && !MapLinkShouldDelete()){
 			StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
-			this.SavePlayerToUF();
+			this.SavePlayerToU();
 			//Print("[UF] Would be saving player but not!");
 		}
     }
 	
-	void SavePlayerToUF(){
+	void SavePlayerToU(){
 		if (m_MapLinkGUIDCache && m_MapLinkNameCache && g_Game.IsServer()){
 			MLLog.Debug("Saving Player to API " + m_MapLinkNameCache + "(" + m_MapLinkGUIDCache + ")" + " Health:  " + GetHealth("","Health") + " PlayTime: " +  StatGet(AnalyticsManagerServer.STAT_PLAYTIME) + " IsUnconscious: " + IsUnconscious() + " IsRestrained: " + IsRestrained() );
 			autoptr PlayerDataStore teststore = new PlayerDataStore(PlayerBase.Cast(this));
@@ -252,7 +252,7 @@ modded class PlayerBase extends ManBase {
 		//Only save dead people who've been on the server for more than 1 minutes and who arn't tranfering
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransferred() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
-			this.SavePlayerToUF();
+			this.SavePlayerToU();
 			m_MLPlayerStoreCache.Remove(GetIdentity().GetId());
 		}
 		//If they are transfering delete
@@ -285,13 +285,13 @@ modded class PlayerBase extends ManBase {
 	override void OnUnconsciousStart()
 	{
 		super.OnUnconsciousStart();
-		SavePlayerToUF();
+		SavePlayerToU();
 	}
 	
 	override void OnUnconsciousStop(int pCurrentCommandID)
 	{		
 		super.OnUnconsciousStop(pCurrentCommandID);
-		SavePlayerToUF();
+		SavePlayerToU();
 	}
 	
 	void MapLinkUpdateClientSettingsToServer(){
@@ -343,7 +343,7 @@ modded class PlayerBase extends ManBase {
 		if (serverData && GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 			URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
 			this.UFSaveTransferPoint(arrivalPoint);
-			this.SavePlayerToUF();
+			this.SavePlayerToU();
 			MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverData.Name + "(" + serverData.IP  + ":" + serverData.Port.ToString() + ") at ArrivalPoint: " + arrivalPoint );
 			UServerData.SendRedirectRPC(serverData, GetIdentity());
 			SetAllowDamage(false);
@@ -378,7 +378,7 @@ modded class PlayerBase extends ManBase {
 			if ( GetIdentity() && (cost <= 0 || UGetPlayerBalance(GetMapLinkConfig().GetCurrencyKey(id)) >= cost)){
 				URemoveMoney(GetMapLinkConfig().GetCurrencyKey(id),cost);
 				this.UFSaveTransferPoint(arrivalPoint);
-				this.SavePlayerToUF();
+				this.SavePlayerToU();
 				MLLog.Info("Player: " + GetIdentity().GetName() + " (" + GetIdentity().GetId() +  ") Sending to Server: " + serverName  + " at ArrivalPoint: " + arrivalPoint );
 				UServerData.SendRedirectRPC(serverData, GetIdentity());
 				SetAllowDamage(false);
