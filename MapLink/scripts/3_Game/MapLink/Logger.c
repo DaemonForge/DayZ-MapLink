@@ -157,7 +157,7 @@ class MLLogFileInstance extends Managed {
 			Print("[MapLink]" + GetTag(level) + " " + text);
 		}
 		if (m_LogToApiLevel >= level){
-			U().Rest().Log(GetJsonObject(text, level));
+			UF().Rest().Log(GetJsonObject(text, level));
 		}
 	}
 	

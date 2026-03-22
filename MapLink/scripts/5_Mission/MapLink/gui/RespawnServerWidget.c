@@ -50,7 +50,7 @@ class RespawnServerWidget extends ScriptedWidgetEventHandler
 		if (entry.QueryPort > 0)
 		{
 			m_Status_Frame.Show(true);
-			m_LookupCid = U().api().SteamQuery(entry.IP, entry.QueryPort.ToString(), this, "UpdateServerStatus");
+			m_LookupCid = UF().api().SteamQuery(entry.IP, entry.QueryPort.ToString(), this, "UpdateServerStatus");
 			m_ServerOnline = false;
 		}
 		else
@@ -64,7 +64,7 @@ class RespawnServerWidget extends ScriptedWidgetEventHandler
 	
 	void ~RespawnServerWidget()
 	{
-		U().RequestCallCancel(m_LookupCid);
+		UF().RequestCallCancel(m_LookupCid);
 	}
 	
 	override bool OnClick(Widget w, int x, int y, int button)
@@ -73,7 +73,7 @@ class RespawnServerWidget extends ScriptedWidgetEventHandler
 		{
 			if (m_ServerOnline)
 			{
-				U().RequestCallCancel(m_LookupCid);
+				UF().RequestCallCancel(m_LookupCid);
 				m_Parent.OnServerSelected(m_Entry);
 				return true;
 			}

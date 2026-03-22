@@ -61,7 +61,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		UServerData serverData = UServerData.Cast(GetMapLinkConfig().GetServer(spawnPoint.ServerName));
 		if (serverData.QueryPort > 0){
 			m_Status_Frame.Show(true);
-			m_LookupCid = U().api().SteamQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
+			m_LookupCid = UF().api().SteamQuery(serverData.IP, serverData.QueryPort.ToString(), this, "UpdateServerStatus");
 			
 			m_ServerOnline = false;
 		} else {
@@ -111,7 +111,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	}
 		
 	void ~DeparturePointWidget(){
-		U().RequestCallCancel(m_LookupCid);
+		UF().RequestCallCancel(m_LookupCid);
 	}
 	
 	override bool OnClick( Widget w, int x, int y, int button )
@@ -122,7 +122,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 				return true;
 			}
 			if (m_ServerOnline && m_HasEnoughMoney) {
-				U().RequestCallCancel(m_LookupCid);
+				UF().RequestCallCancel(m_LookupCid);
 				m_Parent.InitTravel(m_ArrivalPoint.ArrivalPointName, m_ArrivalPoint.TransitionWaitTime, m_MapLinkSpawnPoint.ServerName);
 				return true;
 			}

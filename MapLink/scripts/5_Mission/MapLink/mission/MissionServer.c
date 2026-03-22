@@ -45,7 +45,7 @@ modded class MissionServer extends MissionBase
 			GetMapLinkConfig().Load();
 		}
 		if (identity){
-			int cid = U().db(PLAYER_DB).Load("MapLink", identity.GetId(), this, "LoadPlayerFromUDB");	
+			int cid = UF().db(PLAYER_DB).Load("MapLink", identity.GetId(), this, "LoadPlayerFromUDB");	
 			MLLog.Info("Requesting Player Data from DataBase Call ID:" + cid + " - GUID: " + identity.GetId() );
 			//NotificationSystem.SimpleNoticiation(" Requesting you're login player Data From the API", "Notification","Notifications/gui/data/notifications.edds", -16843010, 10, identity);
 		} else {

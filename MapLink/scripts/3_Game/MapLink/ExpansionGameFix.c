@@ -13,7 +13,7 @@ modded class ExpansionGame
 		m_IsLoaded = false;
 
 	#ifdef EXPANSIONUI
-		if (m_ExUIManager)
+		if (!GetGame().IsDedicatedServer() && m_ExUIManager)
 			m_ExUIManager.CloseAll();
 	#endif
 

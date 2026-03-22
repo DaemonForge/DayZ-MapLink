@@ -23,7 +23,7 @@ modded class MissionBase
 		{
 			autoptr TStringArray globals = new TStringArray;
 			globals.Insert("MapLink");
-			U().Settings().Register("maplink", "MapLink", "DaemonForge", html, globals);
+			UF().Settings().Register("maplink", "MapLink", "DaemonForge", html, globals);
 		}
 	}
 

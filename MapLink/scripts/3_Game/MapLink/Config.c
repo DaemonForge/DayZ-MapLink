@@ -69,13 +69,13 @@ class MapLinkConfig extends UFConfigBase {
 		}
 		m_DataReceived = false;
 		//Set the Defaults so that way, when you load if this its the server Requesting the data it will create it based on the defaults
-		U().Rest().GlobalsLoad("MapLink", this, this.ToJson());
+		UF().Rest().GlobalsLoad("MapLink", this, this.ToJson());
 	}
 	
 	
 	override void Save(){
 		if (g_Game.IsServer()){
-			U().Rest().GlobalsSave("MapLink", this.ToJson());
+			UF().Rest().GlobalsSave("MapLink", this.ToJson());
 		}
 	}
 	
