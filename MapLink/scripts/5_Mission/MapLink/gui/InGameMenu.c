@@ -38,11 +38,11 @@ modded class InGameMenu
 				return;
 			}
 			
-			// Check if exactly one eligible server - auto-redirect without showing menu
+			// Check if exactly one eligible server AND player can't stay here - auto-redirect without showing menu
 			RespawnServerEntry singleServer = RespawnServerMenu.GetSingleEligibleServer();
-			if (singleServer)
+			if (singleServer && RespawnServerMenu.HasRespawnOverride())
 			{
-				MLLog.Info("InGameMenu.OnClick_Respawn: Single eligible server '" + singleServer.Name + "' - auto-redirecting");
+				MLLog.Info("InGameMenu.OnClick_Respawn: Single eligible server '" + singleServer.Name + "' - auto-redirecting (respawn override)");
 				UServerData serverData = new UServerData(singleServer.IP, singleServer.Port, singleServer.Password);
 				serverData.Name = singleServer.Name;
 				GetDayZGame().HiveSetReconnectTo(serverData);
