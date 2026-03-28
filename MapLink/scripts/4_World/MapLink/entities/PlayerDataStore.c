@@ -24,8 +24,9 @@ class PlayerDataStore extends Managed{
 	int	m_LastShavedSeconds;
 	int	m_BloodType;
 	bool m_HasBloodTypeVisible;
-	bool m_HasBloodyHandsVisible;
+	int m_HasBloodyHandsVisible;
 	bool m_Camera3rdPerson;
+	int m_PersistentFlags;
 	
 	int m_BrokenLegState;
 	autoptr array<autoptr UPlayerZoneHealthData> m_HealthZones;
@@ -39,6 +40,10 @@ class PlayerDataStore extends Managed{
 	autoptr array<autoptr UStomachItem> m_Stomach;
 	
 	autoptr array<autoptr UMetaData> m_MetaData;
+	
+	autoptr TIntArray m_Symptoms;
+	
+	autoptr array<autoptr UArrowData> m_ArrowsData;
 	
 	void PlayerDataStore(PlayerBase player = NULL){
 		if (!player){return;}
@@ -54,6 +59,8 @@ class PlayerDataStore extends Managed{
 		delete m_Attachments;
 		delete m_Stomach;
 		delete m_MetaData;
+		delete m_Symptoms;
+		delete m_ArrowsData;
 	}
 	
 	
@@ -70,9 +77,9 @@ class PlayerDataStore extends Managed{
 		if (!m_Agents){m_Agents = new array<autoptr UPlayerIdFloatData>;}
 		m_Agents.Insert(new UPlayerIdFloatData(key, value));
     }
-	void AddStomachItem(float amount, int foodstage, string className, int agents){
+	void AddStomachItem(float amount, int foodstage, string className, int agents, float temperature = 0){
 		if ( !m_Stomach ){ m_Stomach = new array<autoptr UStomachItem>; }
-		m_Stomach.Insert(new UStomachItem(amount, foodstage, className, agents));
+		m_Stomach.Insert(new UStomachItem(amount, foodstage, className, agents, temperature));
 	}
 	
 	bool AddStat(string label, float data){
@@ -82,6 +89,7 @@ class PlayerDataStore extends Managed{
 	}
 	
 	bool ReadStat(string label, out float data){
+		if (!m_Stats) return false;
 		for(int i = 0; i < m_Stats.Count(); i++){
 			if (m_Stats.Get(i) && m_Stats.Get(i).Is(label)){
 				data = m_Stats.Get(i).ReadFloat();
@@ -290,6 +298,7 @@ class PlayerDataStore extends Managed{
 		return true;
 	}
 	bool ReadZoneHealth(string zone, out float health, out float blood, out float shock){
+		if (!m_HealthZones) return false;
 		for (int i = 0; i < m_HealthZones.Count(); i++){
 			if (m_HealthZones.Get(i) && m_HealthZones.Get(i).Is(zone)){ 
 				health = m_HealthZones.Get(i).Health();
@@ -348,9 +357,10 @@ class PlayerDataStore extends Managed{
 		m_LastShavedSeconds = player.GetLastShavedSeconds();
 		m_BloodType = player.GetStatBloodType().Get();
 		m_HasBloodTypeVisible = player.HasBloodTypeVisible();
-		m_HasBloodyHandsVisible = player.HasBloodyHands();
+		m_HasBloodyHandsVisible = player.HasBloodyHandsEx();
 		m_IsUnconscious = player.IsUnconscious();
 		m_IsRestrained = player.IsRestrained();
+		m_PersistentFlags = player.m_PersistentFlags;
 		
 		// Damage System
 		DamageZoneMap zones = new DamageZoneMap;
@@ -444,7 +454,8 @@ class PlayerDataStore extends Managed{
 		player.StatUpdate(AnalyticsManagerServer.STAT_LONGEST_SURVIVOR_HIT, m_LongRangeShotValue );
 		player.SetLifeSpanStateVisible(m_LifeSpanState);
 		player.SetLastShavedSeconds(m_LastShavedSeconds);
-		player.SetBloodyHands(m_HasBloodyHandsVisible);
+		player.SetBloodyHandsEx(m_HasBloodyHandsVisible);
+		player.m_PersistentFlags = m_PersistentFlags;
 		
 		player.OnUFLoad(this);
 		

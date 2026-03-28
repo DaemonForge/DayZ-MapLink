@@ -2,6 +2,7 @@ modded class BleedingSourcesManagerServer extends BleedingSourcesManagerBase {
     
 	void OnUFLoad(PlayerDataStore data) {
 		//MLLog.Debug("Loading Bleeding Manager");	
+		if (!data.m_BleedingActiveTime) return;
 		int BleedActiveIndex = 0;
 		for (int i = 0; i < BIT_INT_SIZE; i++) {
 			int bit = 1 << i;

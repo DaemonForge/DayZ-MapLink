@@ -19,12 +19,30 @@ class UStomachItem extends Managed {
 	int m_FoodStage;
 	string m_ClassName;
 	int m_Agents;
+	float m_Temperature;
 	
-	void UStomachItem(float amount, int foodstage, string className, int agents){
+	void UStomachItem(float amount, int foodstage, string className, int agents, float temperature = 0){
 		m_Amount = amount;
 		m_FoodStage = foodstage;
 		m_ClassName = className;
 		m_Agents = agents;
+		m_Temperature = temperature;
+	}
+	
+}
+
+class UArrowData extends Managed {
+	
+	string m_Type;
+	vector m_Angle;
+	vector m_Pos;
+	int m_Pivot;
+	
+	void UArrowData(string type, vector angle, vector pos, int pivot){
+		m_Type = type;
+		m_Angle = angle;
+		m_Pos = pos;
+		m_Pivot = pivot;
 	}
 	
 }

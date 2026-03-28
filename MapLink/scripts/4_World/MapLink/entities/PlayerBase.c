@@ -143,6 +143,9 @@ modded class PlayerBase extends ManBase {
 		}
 		data.m_TransferPoint = m_TransferPoint;
 		data.m_BrokenLegState = m_BrokenLegState;
+		if (GetModifiersManager())
+			SetPersistentFlag(PersistentFlag.AREA_PRESENCE, GetModifiersManager().IsModifierActive(eModifiers.MDF_AREAEXPOSURE));
+		data.m_PersistentFlags = m_PersistentFlags;
 		
 		data.m_BleedingBits = GetBleedingBits();
 		if (GetBleedingManagerServer()){
@@ -154,7 +157,7 @@ modded class PlayerBase extends ManBase {
 			for (i = 0; i < m_PlayerStomach.m_StomachContents.Count(); i++){
 				StomachItem stomachItem;
 				if (Class.CastTo(stomachItem, m_PlayerStomach.m_StomachContents.Get(i))){
-					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents);
+					data.AddStomachItem(stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_ClassName, stomachItem.m_Agents, stomachItem.GetTemperature());
 				}
 			}
 		}
@@ -167,6 +170,43 @@ modded class PlayerBase extends ManBase {
 			}
 		}
 		data.m_Camera3rdPerson = m_Camera3rdPerson;
+		
+		if (GetSymptomManager()){
+			data.m_Symptoms = new TIntArray;
+			array<ref SymptomBase> primaryQueue = GetSymptomManager().m_SymptomQueuePrimary;
+			array<ref SymptomBase> secondaryQueue = GetSymptomManager().m_SymptomQueueSecondary;
+			if (primaryQueue){
+				for (int si = 0; si < primaryQueue.Count(); si++){
+					if (primaryQueue.Get(si) && primaryQueue.Get(si).IsPersistent()){
+						data.m_Symptoms.Insert(primaryQueue.Get(si).GetType());
+					}
+				}
+			}
+			if (secondaryQueue){
+				for (int sj = 0; sj < secondaryQueue.Count(); sj++){
+					if (secondaryQueue.Get(sj) && secondaryQueue.Get(sj).IsPersistent()){
+						data.m_Symptoms.Insert(secondaryQueue.Get(sj).GetType());
+					}
+				}
+			}
+			if (data.m_Symptoms.Count() == 0){
+				data.m_Symptoms = null;
+			}
+		}
+		
+		ArrowManagerPlayer arrowMgrSave = ArrowManagerPlayer.Cast(GetArrowManager());
+		if (arrowMgrSave && arrowMgrSave.GetArrowsCount() > 0){
+			data.m_ArrowsData = new array<autoptr UArrowData>;
+			for (int ai = 0; ai < arrowMgrSave.GetArrowsCount(); ai++){
+				EntityAI arrow = arrowMgrSave.GetArrow(ai);
+				if (arrow){
+					data.m_ArrowsData.Insert(new UArrowData(arrow.GetType(), arrow.GetLocalYawPitchRoll(), arrow.GetLocalPosition(), arrow.GetHierarchyPivot()));
+				}
+			}
+			if (data.m_ArrowsData.Count() == 0){
+				data.m_ArrowsData = null;
+			}
+		}
 	}
 	
 	void OnUFLoad( PlayerDataStore data){
@@ -182,21 +222,30 @@ modded class PlayerBase extends ManBase {
 			}
 		}
 		
-		for (i = 0; i < data.m_Modifiers.Count(); i++){
-			if (data.m_Modifiers.Get(i)){
-				ModifierBase mdfr = m_ModifiersManager.GetModifier(data.m_Modifiers.Get(i).ID());
-				if (mdfr.IsTrackAttachedTime() && data.m_Modifiers.Get(i).Value() >= 0){
-					mdfr.SetAttachedTime(data.m_Modifiers.Get(i).Value());
+		if (data.m_Modifiers){
+			for (i = 0; i < data.m_Modifiers.Count(); i++){
+				if (data.m_Modifiers.Get(i)){
+					ModifierBase mdfr = m_ModifiersManager.GetModifier(data.m_Modifiers.Get(i).ID());
+					if (mdfr){
+						if (mdfr.IsTrackAttachedTime() && data.m_Modifiers.Get(i).Value() >= 0){
+							mdfr.SetAttachedTime(data.m_Modifiers.Get(i).Value());
+						}
+						m_ModifiersManager.ActivateModifier(data.m_Modifiers.Get(i).ID(), EActivationType.TRIGGER_EVENT_ON_CONNECT);
+					} else {
+						MLLog.Err("Modifier ID " + data.m_Modifiers.Get(i).ID() + " not found, skipping");
+					}
 				}
-				m_ModifiersManager.ActivateModifier(data.m_Modifiers.Get(i).ID(), EActivationType.TRIGGER_EVENT_ON_CONNECT);
 			}
 		}
-		for(i = 0; i < data.m_Agents.Count();i++){
-			m_AgentPool.SetAgentCount(data.m_Agents.Get(i).ID(), data.m_Agents.Get(i).Value());
+		if (data.m_Agents){
+			for(i = 0; i < data.m_Agents.Count();i++){
+				m_AgentPool.SetAgentCount(data.m_Agents.Get(i).ID(), data.m_Agents.Get(i).Value());
+			}
 		}
 		data.m_TransferPoint = "";
 		m_TransferPoint = "";
 		m_BrokenLegState = data.m_BrokenLegState;
+		m_PersistentFlags = data.m_PersistentFlags;
 		//SetBleedingBits(data.m_BleedingBits);
 		if (GetBleedingManagerServer()){	
 			GetBleedingManagerServer().OnUFLoad(data);
@@ -207,13 +256,39 @@ modded class PlayerBase extends ManBase {
 			for (i = 0; i < data.m_Stomach.Count(); i++){
 				UStomachItem stomachItem;
 				if (Class.CastTo(stomachItem, data.m_Stomach.Get(i))){
-					m_PlayerStomach.AddToStomach(stomachItem.m_ClassName, stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_Agents );
+					m_PlayerStomach.AddToStomach(stomachItem.m_ClassName, stomachItem.m_Amount, stomachItem.m_FoodStage, stomachItem.m_Agents, stomachItem.m_Temperature);
 				}
 			}
 		}	
 		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).Call(this.SetSynchDirty);
 		g_Game.GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(this.SendUFAfterLoadClient, 200);
 		m_Camera3rdPerson = data.m_Camera3rdPerson && !g_Game.GetWorld().Is3rdPersonDisabled();
+		
+		if (data.m_Symptoms && GetSymptomManager()){
+			for (int si = 0; si < data.m_Symptoms.Count(); si++){
+				int symptomId = data.m_Symptoms.Get(si);
+				if (GetSymptomManager().IsSymptomPrimary(symptomId)){
+					GetSymptomManager().QueueUpPrimarySymptom(symptomId);
+				} else {
+					GetSymptomManager().QueueUpSecondarySymptom(symptomId);
+				}
+			}
+		}
+		
+		if (data.m_ArrowsData){
+			for (int ai = 0; ai < data.m_ArrowsData.Count(); ai++){
+				UArrowData arrowData = data.m_ArrowsData.Get(ai);
+				if (arrowData && arrowData.m_Type != ""){
+					int spawnFlags = ECE_KEEPHEIGHT | ECE_DYNAMIC_PERSISTENCY;
+					EntityAI arrowEnt = EntityAI.Cast(g_Game.CreateObjectEx(arrowData.m_Type, arrowData.m_Pos, spawnFlags));
+					if (arrowEnt){
+						arrowEnt.SetQuantityToMinimum();
+						arrowEnt.SetYawPitchRoll(arrowData.m_Angle);
+						AddChild(arrowEnt, arrowData.m_Pivot);
+					}
+				}
+			}
+		}
 	}
 	
 	void SendUFAfterLoadClient(){
@@ -253,7 +328,9 @@ modded class PlayerBase extends ManBase {
 		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		if ( ( !IsBeingTransferred() && StatGet(AnalyticsManagerServer.STAT_PLAYTIME) > MAPLINK_BODYCLEANUPTIME ) || ( killer && killer != this )){
 			this.SavePlayerToU();
-			m_MLPlayerStoreCache.Remove(GetIdentity().GetId());
+			if (GetIdentity()){
+				m_MLPlayerStoreCache.Remove(GetIdentity().GetId());
+			}
 		}
 		//If they are transfering delete
 		if ( IsBeingTransferred()  && ( !killer || killer == this )){
@@ -285,12 +362,14 @@ modded class PlayerBase extends ManBase {
 	override void OnUnconsciousStart()
 	{
 		super.OnUnconsciousStart();
+		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		SavePlayerToU();
 	}
 	
 	override void OnUnconsciousStop(int pCurrentCommandID)
 	{		
 		super.OnUnconsciousStop(pCurrentCommandID);
+		StatUpdateByTime( AnalyticsManagerServer.STAT_PLAYTIME );
 		SavePlayerToU();
 	}
 	
