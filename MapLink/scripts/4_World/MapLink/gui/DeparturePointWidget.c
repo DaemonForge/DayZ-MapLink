@@ -20,8 +20,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 	Widget						m_Cost_Frame;
 	ImageWidget 				m_Cost_Image
 	TextWidget 					m_Cost_Text
-	ImageWidget 				m_TransferImage
-	
+	ImageWidget 				m_TransferImage	TextWidget					m_Transfer_label	
 	Widget						m_Status_Frame;
 	ImageWidget 				m_Status_Image
 	TextWidget 					m_Status_Text
@@ -41,6 +40,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 		
 		m_Name 				= TextWidget.Cast(m_Root.FindAnyWidget("ArrivalPoint_Name"));
 		m_TransferImage 	= ImageWidget.Cast(m_Root.FindAnyWidget("TransferImage"));
+		m_Transfer_label	= TextWidget.Cast(m_Root.FindAnyWidget("Transfer_label"));
 		
 		m_Map_Text 			= TextWidget.Cast(m_Root.FindAnyWidget("Map_Text"));
 		
@@ -85,7 +85,7 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 			} else {
 				m_HasEnoughMoney = false;
 				m_Cost_Text.SetColor(ARGB(255, 255, 61, 0));
-				m_Transfer.SetAlpha(0.3);
+				m_Transfer.SetAlpha(0.5);
 			}
 		} else {
 			m_Cost_Frame.Show(false);
@@ -101,7 +101,9 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 			if (blacklistedType != ""){
 				m_HasBlacklistedItems = true;
 				m_BlacklistedItemName = serverData.GetItemDisplayName(blacklistedType);
-				m_Transfer.SetAlpha(0.3);
+				m_Transfer.SetAlpha(0.5);
+				m_Transfer_label.SetText("BLOCKED");
+				m_Transfer_label.SetColor(ARGB(255, 255, 61, 0));
 				m_Name.SetColor(ARGB(255, 255, 61, 0));
 			}
 		}
@@ -151,7 +153,9 @@ class DeparturePointWidget  extends ScriptedWidgetEventHandler {
 				m_Status_Text.SetText("Offline");
 				m_Status_Text.SetColor(ARGB(255, 255, 61, 0));
 				m_ServerOnline = false;
-				m_Transfer.SetAlpha(0.3);
+				m_Transfer.SetAlpha(0.5);
+				m_Transfer_label.SetText("OFFLINE");
+				m_Transfer_label.SetColor(ARGB(255, 255, 61, 0));
 			}
       	} else {
 			MLLog.Err("Error Returning Status: " + status );

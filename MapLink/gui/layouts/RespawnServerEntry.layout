@@ -1,33 +1,40 @@
 FrameWidgetClass rootFrame {
- size 1 68
+ size 1 70
  hexactsize 0
  vexactsize 1
+ scaled 1
+ clipchildren 1
  {
   PanelWidgetClass rootFrame_hover {
    ignorepointer 1
    color 0.15 0.15 0.15 0
-   size 1 1
+   size 1 70
    hexactsize 0
-   vexactsize 0
+   vexactsize 1
+   scaled 1
+   style rover_sim_colorable
   }
   FrameWidgetClass ServerEntryContent {
    ignorepointer 1
    position 20 0
-   size 380 1
+   size 340 70
    valign center_ref
    hexactpos 1
-   vexactpos 0
+   vexactpos 1
    hexactsize 1
-   vexactsize 0
+   vexactsize 1
+   scaled 1
+   clipchildren 1
    {
     TextWidgetClass Server_Name {
      ignorepointer 1
      position 0 4
-     size 380 28
+     size 340 30
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
+     scaled 1
      text "SERVER NAME"
      font "gui/fonts/metronbook"
      "exact text" 0
@@ -36,12 +43,13 @@ FrameWidgetClass rootFrame {
     }
     GridSpacerWidgetClass ServerInfo {
      ignorepointer 1
-     position 0 34
-     size 380 26
+     position 0 36
+     size 340 28
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
+     scaled 1
      Padding 0
      "Size To Content H" 1
      Columns 5
@@ -64,6 +72,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
          image0 "set:maplink_icons image:map"
          mode blend
          "src alpha" 1
@@ -72,12 +81,13 @@ FrameWidgetClass rootFrame {
         TextWidgetClass Map_Text {
          ignorepointer 1
          color 0.55 0.55 0.55 1
-         size 120 26
+         size 1 26
          valign center_ref
          hexactpos 1
          vexactpos 1
-         hexactsize 1
+         hexactsize 0
          vexactsize 1
+         scaled 1
          text "Chernarus"
          font "gui/fonts/metronbook"
          "exact text" 0
@@ -93,6 +103,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
         }
        }
       }
@@ -114,6 +125,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
          image0 "set:maplink_icons image:status"
          mode blend
          "src alpha" 1
@@ -122,12 +134,13 @@ FrameWidgetClass rootFrame {
         TextWidgetClass Status_Text {
          ignorepointer 1
          color 0.55 0.55 0.55 1
-         size 120 26
+         size 1 26
          valign center_ref
          hexactpos 1
          vexactpos 1
-         hexactsize 1
+         hexactsize 0
          vexactsize 1
+         scaled 1
          text "Querying..."
          font "gui/fonts/metronbook"
          "exact text" 0
@@ -143,6 +156,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
         }
        }
       }
@@ -164,6 +178,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
          image0 "set:maplink_icons image:players"
          mode blend
          "src alpha" 1
@@ -172,12 +187,13 @@ FrameWidgetClass rootFrame {
         TextWidgetClass PlayerCount_Text {
          ignorepointer 1
          color 0.55 0.55 0.55 1
-         size 80 26
+         size 1 26
          valign center_ref
          hexactpos 1
          vexactpos 1
-         hexactsize 1
+         hexactsize 0
          vexactsize 1
+         scaled 1
          text "0/60"
          font "gui/fonts/metronbook"
          "exact text" 0
@@ -193,6 +209,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
         }
        }
       }
@@ -214,6 +231,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
          image0 "set:maplink_icons image:queue"
          mode blend
          "src alpha" 1
@@ -222,12 +240,13 @@ FrameWidgetClass rootFrame {
         TextWidgetClass Queue_Text {
          ignorepointer 1
          color 0.55 0.55 0.55 1
-         size 60 26
+         size 1 26
          valign center_ref
          hexactpos 1
          vexactpos 1
-         hexactsize 1
+         hexactsize 0
          vexactsize 1
+         scaled 1
          text "5"
          font "gui/fonts/metronbook"
          "exact text" 0
@@ -243,6 +262,7 @@ FrameWidgetClass rootFrame {
          vexactpos 1
          hexactsize 1
          vexactsize 1
+         scaled 1
         }
        }
       }
@@ -251,7 +271,7 @@ FrameWidgetClass rootFrame {
    }
   }
   ButtonWidgetClass SelectServer {
-   position -20 0
+   position -16 0
    size 110 32
    halign right_ref
    valign center_ref
@@ -259,19 +279,22 @@ FrameWidgetClass rootFrame {
    vexactpos 1
    hexactsize 1
    vexactsize 1
+   scaled 1
    {
     PanelWidgetClass SelectServer_panel {
      ignorepointer 1
      color 0 0 0 0
-     size 1 1
-     hexactsize 0
-     vexactsize 0
-    }
-    TextWidgetClass SelectServer_label {
-     ignorepointer 1
      size 110 32
      hexactsize 1
      vexactsize 1
+     scaled 1
+     style rover_sim_colorable
+    }
+    TextWidgetClass SelectServer_label {
+     ignorepointer 1
+     size 1 1
+     hexactsize 0
+     vexactsize 0
      text "SELECT"
      font "gui/fonts/metronbook"
      "exact text" 0
@@ -290,6 +313,8 @@ FrameWidgetClass rootFrame {
    vexactpos 0
    hexactsize 0
    vexactsize 1
+   scaled 1
+   style rover_sim_colorable
   }
  }
 }

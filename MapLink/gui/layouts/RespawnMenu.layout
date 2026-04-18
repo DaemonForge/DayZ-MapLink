@@ -4,66 +4,90 @@ FrameWidgetClass rootFrame {
  vexactsize 0
  {
   PanelWidgetClass RespawnMenuOverlay {
-   color 0 0 0 1
+   ignorepointer 1
+   color 0 0 0 0.85
    size 1 1
    hexactsize 0
    vexactsize 0
+   style rover_sim_colorable
   }
   FrameWidgetClass RespawnMenuContainer {
-   position 0 -160
-   size 560 490
+   size 550 480
    halign center_ref
    valign center_ref
    hexactpos 1
    vexactpos 1
    hexactsize 1
    vexactsize 1
+   scaled 1
+   clipchildren 1
    {
     PanelWidgetClass RespawnMenuBG {
      ignorepointer 1
-     color 0.1 0.1 0.1 1
-     size 1 1
-     hexactsize 0
-     vexactsize 0
+     color 0.08 0.08 0.08 0.98
+     size 550 480
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     PanelWidgetClass border_top {
      ignorepointer 1
      color 0.7 0 0 1
-     size 1 2
-     hexactsize 0
+     size 550 2
+     halign center_ref
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
      vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     PanelWidgetClass border_left {
      ignorepointer 1
      color 0.22 0.22 0.22 1
-     size 1 1
+     size 1 480
+     hexactpos 1
+     vexactpos 1
      hexactsize 1
-     vexactsize 0
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     PanelWidgetClass border_right {
      ignorepointer 1
      color 0.22 0.22 0.22 1
-     size 1 1
+     size 1 480
      halign right_ref
+     hexactpos 1
+     vexactpos 1
      hexactsize 1
-     vexactsize 0
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     PanelWidgetClass border_bottom {
      ignorepointer 1
      color 0.22 0.22 0.22 1
-     size 1 1
+     size 550 1
      valign bottom_ref
-     hexactsize 0
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
      vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     TextWidgetClass Heading {
      ignorepointer 1
      position 0 10
-     size 1 40
-     hexactpos 0
+     size 550 40
+     halign center_ref
+     hexactpos 1
      vexactpos 1
-     hexactsize 0
+     hexactsize 1
      vexactsize 1
+     scaled 1
      text "SELECT SERVER"
      font "gui/fonts/metronbook"
      "exact text" 0
@@ -75,19 +99,22 @@ FrameWidgetClass rootFrame {
      ignorepointer 1
      color 0.7 0 0 0.7
      position 20 54
-     size 520 1
+     size 510 1
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
+     scaled 1
+     style rover_sim_colorable
     }
     ScrollWidgetClass RespawnServers_Scroll {
      position 10 62
-     size 540 300
+     size 530 330
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
+     scaled 1
      style blank
      "Scrollbar V" 1
      {
@@ -106,30 +133,34 @@ FrameWidgetClass rootFrame {
     PanelWidgetClass separator_bottom {
      ignorepointer 1
      color 0.7 0 0 0.7
-     position 20 -52
-     size 520 1
+     position 20 398
+     size 510 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
+    }
+    ButtonWidgetClass VanillaRespawn {
+     position 0 -10
+     size 550 38
+     halign center_ref
      valign bottom_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
      vexactsize 1
-    }
-    ButtonWidgetClass VanillaRespawn {
-     position 0 -10
-     size 1 38
-     halign center_ref
-     valign bottom_ref
-     hexactpos 0
-     vexactpos 1
-     hexactsize 0
-     vexactsize 1
+     scaled 1
      {
       PanelWidgetClass VanillaRespawn_panel {
        ignorepointer 1
        color 0 0 0 0
-       size 1 1
-       hexactsize 0
-       vexactsize 0
+       size 550 38
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       style rover_sim_colorable
       }
       TextWidgetClass VanillaRespawn_label {
        ignorepointer 1

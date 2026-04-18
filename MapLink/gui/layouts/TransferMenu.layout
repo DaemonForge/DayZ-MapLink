@@ -1,360 +1,234 @@
 FrameWidgetClass rootFrame {
- position 0 0
- size 0.5 0.48
- halign center_ref
- valign center_ref
- hexactpos 1
- vexactpos 1
+ size 1 1
  hexactsize 0
  vexactsize 0
- priority 1
  {
-  PanelWidgetClass TransferMenuBG {
-   visible 1
+  ImageWidgetClass TransferMenuOverlay {
    ignorepointer 1
-   color 0 0 0 0.8824
-   position 0 0
+   color 0 0 0 0.5
    size 1 1
-   halign center_ref
-   valign center_ref
-   hexactpos 0
-   vexactpos 0
    hexactsize 0
    vexactsize 0
-   priority 3
-   style rover_sim_colorable
+   image0 "set:rover_imageset image:WhitePixel"
+   mode blend
+   "src alpha" 1
+   stretch 1
+  }
+  FrameWidgetClass TransferMenuContainer {
+   size 700 440
+   halign center_ref
+   valign center_ref
+   hexactpos 1
+   vexactpos 1
+   hexactsize 1
+   vexactsize 1
+   scaled 1
+   clipchildren 1
    {
-    PanelWidgetClass TransferMenuFrame {
+    ImageWidgetClass TransferMenuBG {
      ignorepointer 1
-     color 0 0 0 0.549
-     position 0 0
-     size 1 1
+     color 0.04 0.04 0.06 0.85
+     size 700 440
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     image0 "set:rover_imageset image:WhitePixel"
+     mode blend
+     "src alpha" 1
+     stretch 1
+    }
+    PanelWidgetClass TransferMenuBorder {
+     ignorepointer 1
+     color 0.2902 0.4549 0.7529 1
+     size 700 440
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     style Outline
+    }
+    RichTextWidgetClass Heading {
+     ignorepointer 1
+     position 0 10
+     size 700 44
      halign center_ref
-     valign center_ref
-     hexactpos 0
-     vexactpos 0
-     hexactsize 0
-     vexactsize 0
-     priority 5
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     text "DEPARTURE POINT"
+     font "gui/fonts/metronbook"
+     "exact text" 0
+     text_proportion 0.65
+     "text halign" center
+     "text valign" center
+    }
+    PanelWidgetClass separator_heading {
+     ignorepointer 1
+     color 0.2902 0.4549 0.7529 0.5
+     position 30 58
+     size 640 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
+    }
+    ScrollWidgetClass ArrivalPoints_Scroll {
+     position 10 66
+     size 680 306
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
      style blank
+     "Scrollbar V" 1
      {
-      ContentWidgetClass TransferMenuContent {
+      GridSpacerWidgetClass ArrivalPoints_Grid {
        ignorepointer 1
-       position 0 0
        size 1 1
-       halign center_ref
-       valign center_ref
-       hexactpos 0
-       vexactpos 0
        hexactsize 0
        vexactsize 0
-       priority 10
-       {
-        ScrollWidgetClass ArrivalPoints_Scroll {
-         ignorepointer 0
-         size 0.9 0.6
-         halign center_ref
-         valign center_ref
-         hexactpos 0
-         vexactpos 0
-         hexactsize 0
-         vexactsize 0
-         style blank
-         "Scrollbar V" 1
-         {
-          GridSpacerWidgetClass ArrivalPoints_Grid {
-           clipchildren 0
-           ignorepointer 1
-           position 0 0
-           size 1 1
-           halign center_ref
-           hexactpos 1
-           vexactpos 1
-           hexactsize 0
-           vexactsize 0
-           priority 98
-           Padding 8
-           "Size To Content V" 1
-           Columns 1
-           Rows 99
-          }
-         }
-        }
-        RichTextWidgetClass Heading {
-         ignorepointer 1
-         position 0 0.02
-         size 1 80
-         halign center_ref
-         hexactpos 0
-         vexactpos 0
-         hexactsize 0
-         vexactsize 1
-         text "DEPARTURE POINT"
-         font "gui/fonts/metronbook"
-         "exact text" 1
-         "size to text h" 0
-         "size to text v" 0
-         "text halign" center
-        }
-        ButtonWidgetClass Cancel {
-         visible 1
-         color 0 0 0 0.8824
-         position 0 0.05
-         size 256 64
-         halign center_ref
-         valign bottom_ref
-         hexactpos 0
-         vexactpos 0
-         hexactsize 1
-         vexactsize 1
-         style Colorable
-         "no focus" 1
-         {
-          TextWidgetClass Cancel_label {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           position 0 0
-           size 0.9 0.85
-           halign center_ref
-           valign center_ref
-           hexactpos 0
-           vexactpos 0
-           hexactsize 0
-           vexactsize 0
-           text "#cancel"
-           font "gui/fonts/metronbook"
-           "exact text" 0
-           text_proportion 0.8
-           "text halign" center
-           "text valign" center
-          }
-          PanelWidgetClass right_0 {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           size 1 1
-           halign right_ref
-           valign center_ref
-           hexactpos 1
-           vexactpos 1
-           hexactsize 1
-           vexactsize 0
-           style rover_sim_colorable
-          }
-          PanelWidgetClass top_0 {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           size 1 1
-           halign center_ref
-           hexactpos 1
-           vexactpos 1
-           hexactsize 0
-           vexactsize 1
-           style rover_sim_colorable
-          }
-          PanelWidgetClass bottom_0 {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           size 1 1
-           halign center_ref
-           valign bottom_ref
-           hexactpos 1
-           vexactpos 1
-           hexactsize 0
-           vexactsize 1
-           style rover_sim_colorable
-          }
-          PanelWidgetClass left_0 {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           size 1 1
-           valign center_ref
-           hexactpos 1
-           vexactpos 1
-           hexactsize 1
-           vexactsize 0
-           style rover_sim_colorable
-          }
-         }
-        }
-        FrameWidgetClass TransferingTimeFrame {
-         visible 0
-         ignorepointer 1
-         position 0 0
-         size 364 156
-         halign center_ref
-         valign center_ref
-         hexactpos 0
-         vexactpos 0
-         hexactsize 1
-         vexactsize 1
-         scaled 1
-         priority 99
-         {
-          PanelWidgetClass TransferTimeFanel {
-           ignorepointer 1
-           color 0.2902 0.4549 0.7529 1
-           position 0 0
-           size 1 1
-           halign center_ref
-           valign center_ref
-           hexactpos 0
-           vexactpos 0
-           hexactsize 0
-           vexactsize 0
-           style rover_sim_colorable
-           {
-            PanelWidgetClass TransferTimeBorder {
-             visible 0
-             ignorepointer 1
-             position 0 0
-             size 1 1
-             halign center_ref
-             valign center_ref
-             hexactpos 0
-             vexactpos 0
-             hexactsize 0
-             vexactsize 0
-             style Outline
-            }
-            TextWidgetClass TranferingCountDown {
-             visible 1
-             ignorepointer 1
-             position 0 0.2
-             size 0.9 56
-             halign center_ref
-             valign bottom_ref
-             hexactpos 0
-             vexactpos 0
-             hexactsize 0
-             vexactsize 1
-             text "10"
-             font "gui/fonts/metronbook28"
-             "exact text" 1
-             "text halign" center
-             "text valign" center
-            }
-            TextWidgetClass Transfering_text {
-             ignorepointer 1
-             position 0 0.2
-             size 0.9 64
-             halign center_ref
-             hexactpos 0
-             vexactpos 0
-             hexactsize 0
-             vexactsize 1
-             style Normal
-             text " Transfering In"
-             font "gui/fonts/Metron"
-             "exact text" 0
-             text_proportion 0.9
-             "text halign" center
-             "text valign" center
-            }
-            PanelWidgetClass right_1 {
-             ignorepointer 1
-             color 1 1 1 0.8824
-             size 1 1
-             halign right_ref
-             valign center_ref
-             hexactpos 1
-             vexactpos 1
-             hexactsize 1
-             vexactsize 0
-             style rover_sim_colorable
-            }
-            PanelWidgetClass top_1 {
-             ignorepointer 1
-             color 1 1 1 0.8824
-             position 0 0
-             size 1 1
-             halign center_ref
-             hexactpos 1
-             vexactpos 1
-             hexactsize 0
-             vexactsize 1
-             style rover_sim_colorable
-            }
-            PanelWidgetClass bottom_1 {
-             ignorepointer 1
-             color 1 1 1 0.8824
-             position 0 0
-             size 1 1
-             halign center_ref
-             valign bottom_ref
-             hexactpos 1
-             vexactpos 1
-             hexactsize 0
-             vexactsize 1
-             style rover_sim_colorable
-            }
-            PanelWidgetClass left_1 {
-             ignorepointer 1
-             color 1 1 1 0.8824
-             size 1 1
-             valign center_ref
-             hexactpos 1
-             vexactpos 1
-             hexactsize 1
-             vexactsize 0
-             style rover_sim_colorable
-            }
-           }
-          }
-         }
-        }
-       }
+       Padding 4
+       "Size To Content V" 1
+       Columns 1
+       Rows 99
       }
      }
     }
-    PanelWidgetClass top_ {
+    PanelWidgetClass separator_bottom {
      ignorepointer 1
-     color 0.2902 0.4549 0.7529 1
-     position 0 0
-     size 1 1
+     color 0.2902 0.4549 0.7529 0.5
+     position 30 380
+     size 640 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 1
+     scaled 1
+     style rover_sim_colorable
+    }
+    ButtonWidgetClass Cancel {
+     position 0 392
+     size 260 42
      halign center_ref
      hexactpos 1
      vexactpos 1
-     hexactsize 0
+     hexactsize 1
      vexactsize 1
-     style rover_sim_colorable
+     scaled 1
+     style blank
+     "no focus" 1
+     {
+      ImageWidgetClass Cancel_panel {
+       ignorepointer 1
+       color 0.04 0.04 0.06 0.8
+       size 260 42
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       image0 "set:rover_imageset image:WhitePixel"
+       mode blend
+       "src alpha" 1
+       stretch 1
+      }
+      PanelWidgetClass Cancel_border {
+       ignorepointer 1
+       color 0.2902 0.4549 0.7529 1
+       size 260 42
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       style Outline
+      }
+      TextWidgetClass Cancel_label {
+       ignorepointer 1
+       color 0.2902 0.4549 0.7529 1
+       size 1 1
+       hexactsize 0
+       vexactsize 0
+       text "#cancel"
+       font "gui/fonts/metronbook"
+       "exact text" 0
+       text_proportion 0.6
+       "text halign" center
+       "text valign" center
+      }
+     }
     }
-    PanelWidgetClass right_ {
+    FrameWidgetClass TransferingTimeFrame {
+     visible 0
      ignorepointer 1
-     color 0.2902 0.4549 0.7529 1
-     position 0 0
-     size 1 1
-     halign right_ref
+     size 260 160
+     halign center_ref
      valign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 1
-     vexactsize 0
-     style rover_sim_colorable
-    }
-    PanelWidgetClass bottom_ {
-     ignorepointer 1
-     color 0.2902 0.4549 0.7529 1
-     position 0 0
-     size 1 1
-     halign center_ref
-     valign bottom_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 0
      vexactsize 1
-     style rover_sim_colorable
-    }
-    PanelWidgetClass left_ {
-     ignorepointer 1
-     color 0.2902 0.4549 0.7529 1
-     position 0 0
-     size 1 1
-     valign center_ref
-     hexactpos 1
-     vexactpos 1
-     hexactsize 1
-     vexactsize 0
-     style rover_sim_colorable
+     scaled 1
+     clipchildren 1
+     priority 99
+     {
+      PanelWidgetClass TransferTimeBorder {
+       ignorepointer 1
+       color 1 1 1 0.88
+       size 260 160
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       style rover_sim_colorable
+      }
+      PanelWidgetClass TransferTimeBG {
+       ignorepointer 1
+       color 0.2902 0.4549 0.7529 1
+       position 1 1
+       size 258 158
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       style rover_sim_colorable
+      }
+      TextWidgetClass Transfering_text {
+       ignorepointer 1
+       position 0 16
+       size 260 48
+       halign center_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       text "Transferring In"
+       font "gui/fonts/Metron"
+       "exact text" 0
+       text_proportion 0.6
+       "text halign" center
+       "text valign" center
+      }
+      TextWidgetClass TranferingCountDown {
+       ignorepointer 1
+       position 0 18
+       size 260 60
+       halign center_ref
+       valign bottom_ref
+       hexactpos 1
+       vexactpos 1
+       hexactsize 1
+       vexactsize 1
+       scaled 1
+       text "10"
+       font "gui/fonts/metronbook28"
+       "exact text" 0
+       text_proportion 0.7
+       "text halign" center
+       "text valign" center
+      }
+     }
     }
    }
   }
